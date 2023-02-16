@@ -1,0 +1,75 @@
+
+
+cloudOfGoods:
+  redis:
+    host: xenia.redis.cache.windows.net
+#    host: localhost
+    port: 6379
+    password: bmiAFSTWQXka8sFRti7d54Q5n8ynTH3aVAzCaClEDnc=
+    timeout:
+      organization: 600
+
+
+knowledge:
+  package:
+    name: com.cloudofgoods.xenia
+
+server:
+  port: 3000
+  servlet:
+    contextPath: /api/xenia
+#    CampaignTemplateController
+    templateSave: /single/template/save
+    getPagination: /get/pagination
+    deleteTemplate: /delete
+#    D6nController
+    generateVariant: /variant
+#    InitialPageController
+    getCampaignsForInitialPageWithPagination: /get/campaigns
+    saveTemplate: /single/save
+    getAllTemplateWithPagination: /get/pagination
+    getAllTemplates: /all/get
+    getTemplateByName: /get/name
+    getTemplateById: /get
+    deleteTemplateById: /delete
+#    RuleController
+    saveRule: /single/save
+    updateRule: /multiple/update
+    updateCampaignStatus: /status/update
+    deleteCampaignWithAllSegments: /delete
+    getCampaignById: /campaign/get
+    saveOrganization: /save
+    getOrganization: /get
+#    CustomerController
+    saveUser: /save
+#    AttributesController
+    saveAttributes: /save
+    getAttributes: /get/all
+    deleteAttribute: /delete
+#    ChannelsController
+    saveChannels: /save
+    getChannels: /get/all
+    deleteChannels: /delete
+#    CacheController
+    getAllValues: /get/all/cache
+    getOrganizationValues: /get/organization/cache
+    getOrganizationMaxValues: /get/organization/max/cache
+
+spring:
+#  redis:
+#    jedis:
+#      pool:
+#        max-active: 8
+  data:
+    mongodb:
+      uri: mongodb+srv://user1:user1234@xenia.jdzwovi.mongodb.net/phaseTwoDatabase2?retryWrites=true&w=majority&ssl=true
+#      uri: mongodb://localhost:27017/d6nrule?authSource=admin
+      auto-index-creation: true
+  application:
+    name: XENIA-SERVICE
+
+  # Cors Allow(White List)
+allow:
+  headers: ChannelContentObject-Type,Authorization,*
+  origin: https://qa-pay-cloudofgoods.incubatelabs.com,https://qa-cloudofgoods.incubatelabs.com,https://qa-v2-cloudofgoods.incubatelabs.com,https://www.cloudofgoods.com,https://qa-v4-cloudofgoods.incubatelabs.com,http://localhost:3000
+
