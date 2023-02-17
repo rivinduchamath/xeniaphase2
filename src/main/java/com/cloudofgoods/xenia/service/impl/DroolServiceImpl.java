@@ -201,19 +201,4 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
         DrlDumper dumper = new DrlDumper ();
         return dumper.dump (packageDescr);
     }
-
-
-    private void saveTemplate(String getSegmentationDescription, String segmentName, NodeObject fact) throws ExecutionException, InterruptedException {
-        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator ();
-        UUID firstUUID = timeBasedGenerator.generate ();
-        TemplateEntity templateEntity = new TemplateEntity ();
-        segmentName = segmentName + "##$$$##" + firstUUID.timestamp ();
-        templateEntity.setSegmentName (segmentName);
-        templateEntity.setSegmentationDescription (getSegmentationDescription);
-        templateEntity.setFact (fact);
-        TemplateEntity save = templateRepository.save (templateEntity);
-
-    }
-
-
 }

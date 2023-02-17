@@ -17,6 +17,7 @@ public class SegmentsObject {
     private double priority;
     @TextIndexed
     private String segmentRuleString;
+    private boolean template;
     @TextIndexed
     private String fullRuleString;
     private String channelId;

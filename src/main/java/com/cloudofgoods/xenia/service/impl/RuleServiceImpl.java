@@ -2,17 +2,12 @@ package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
-import com.cloudofgoods.xenia.entity.xenia.CampaignTemplateEntity;
-import com.cloudofgoods.xenia.entity.xenia.ChannelsObjects;
-import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
-import com.cloudofgoods.xenia.entity.xenia.RuleRequestRootEntity;
-import com.cloudofgoods.xenia.models.AudienceObject;
-import com.cloudofgoods.xenia.models.ChannelContentObject;
-import com.cloudofgoods.xenia.models.RuleChannelObject;
-import com.cloudofgoods.xenia.models.SegmentsObject;
+import com.cloudofgoods.xenia.entity.xenia.*;
+import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
+import com.cloudofgoods.xenia.repository.TemplateRepository;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.Utility;
 import com.fasterxml.uuid.Generators;
@@ -30,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -40,9 +36,10 @@ public class RuleServiceImpl implements RuleService {
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
     private final OrganizationRepository organizationRepository;
+    @Autowired
+    private TemplateRepository templateRepository;
     @Value("${knowledge.package.name}")
     private String packageName;
-
 
     @Override
     public ServiceResponseDTO updateRules(List<String> ruleRootModel) {
@@ -199,7 +196,6 @@ public class RuleServiceImpl implements RuleService {
         droolService.feedKnowledge(rootRules);
         return rootRuleRepository.save(rootRules);
     }
-
 
     //Find Root SegmentsObject With Multiple Child Rules From SegmentsObject ID
     public RuleRequestRootEntity findRootRuleById(String ruleId) {
@@ -379,9 +375,9 @@ public class RuleServiceImpl implements RuleService {
                     String drlFile = dumper.dump(packageDescr);
                     log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
                     drlFile = drlFile.replaceFirst("package ", "");
-//                if (template) {
-//                    saveTemplate (ruleEntity.getSegmentationDescription (), ruleEntity.getSegmentName (), ruleEntity.getFact ());
-//                }
+                if (ruleEntity.isTemplate()) {
+                    saveTemplate (ruleEntity.getSegmentDescription (), ruleEntity.getSegmentName (), ruleEntity.getRuleObject ());
+                }
                     return drlFile;
                 }
             }
@@ -391,5 +387,17 @@ public class RuleServiceImpl implements RuleService {
             return "...............Error Drool String Creation...............";
         }
         return null;
+    }
+
+    private void saveTemplate(String getSegmentationDescription, String segmentName, NodeObject fact) throws ExecutionException, InterruptedException {
+        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator ();
+        UUID firstUUID = timeBasedGenerator.generate ();
+        TemplateEntity templateEntity = new TemplateEntity ();
+        segmentName = segmentName + "##$$$##" + firstUUID.timestamp ();
+        templateEntity.setSegmentName (segmentName);
+        templateEntity.setSegmentationDescription (getSegmentationDescription);
+        templateEntity.setFact (fact);
+        TemplateEntity save = templateRepository.save (templateEntity);
+
     }
 }
