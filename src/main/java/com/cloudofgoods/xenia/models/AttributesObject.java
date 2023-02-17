@@ -11,27 +11,25 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class AttributesObject  {
-    @Indexed
+public class AttributesObject {
+    @Indexed(unique = true)
     private String attributeName;
     @Indexed
     private String displayName;
     @Indexed
     private String type;
     @Indexed
-    private List <Object> values;
+    private List<Object> values;
     @Indexed
     private String uuid;
 
 
-
-
-    public AttributesObject(String  attributeName, String displayName, String type, List <Object> values, String uuid) {
+    public AttributesObject(String attributeName, String displayName, String type, List<Object> values, String uuid) {
         this.attributeName = attributeName;
         this.displayName = displayName;
-        this.type        = type;
-        this.values      = values;
-        this.uuid        = uuid;
+        this.type = type;
+        this.values = values;
+        this.uuid = uuid;
     }
 }
 

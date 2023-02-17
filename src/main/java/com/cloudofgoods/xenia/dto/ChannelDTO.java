@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChannelDTO {
     private ChannelsIdDTO channelsIdDTO;
-    private String uuid;
+    private String channelUuid;
 }

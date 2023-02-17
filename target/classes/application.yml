@@ -1,5 +1,3 @@
-
-
 cloudOfGoods:
   redis:
     host: xenia.redis.cache.windows.net

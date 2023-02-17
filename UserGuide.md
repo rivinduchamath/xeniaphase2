@@ -262,7 +262,7 @@ Response body
             "updater": null,
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_Three\"\n    salience 4.6\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"Hindu\".equals(userData.get(\"religion\")) || \"USA\".equals(userData.get(\"country\"))) || (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(4.6,\"Slot1\",\"Varient_ID_ONE\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_Three\"\n    salience 4.6\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"Hindu\".equals(userData.get(\"religion\")) || \"USA\".equals(userData.get(\"country\"))) || (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(4.6,\"Slot1\",\"Varient_ID_ONE\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot1",
             "campaignDescription": "bla bla bla",
@@ -319,7 +319,7 @@ Response body
             "updater": null,
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_TWO\"\n    salience 1.2\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) || \"Mexico\".equals(userData.get(\"country\"))) || (\"55\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1.2,\"Slot1\",\"Varient_ID_ONE\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_TWO\"\n    salience 1.2\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) || \"Mexico\".equals(userData.get(\"country\"))) || (\"55\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1.2,\"Slot1\",\"Varient_ID_ONE\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot1",
             "campaignDescription": "bla bla bla",
@@ -376,7 +376,7 @@ Response body
             "updater": null,
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_ONE\"\n    salience 1.1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"Married\".equals(userData.get(\"maritalStatus\")) || \"Mexico\".equals(userData.get(\"country\"))) || (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot2\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1.1,\"Slot2\",\"Varient_ID_Two\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentID_ONE\"\n    salience 1.1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"Married\".equals(userData.get(\"maritalStatus\")) || \"Mexico\".equals(userData.get(\"country\"))) || (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot2\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1.1,\"Slot2\",\"Varient_ID_Two\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot2",
             "campaignDescription": "bla bla bla",
@@ -499,7 +499,7 @@ Response body
                 "updater": null,
                 "startDateTime": "2022-10-15T11:22:11.000+00:00",
                 "endDateTime": "2023-10-15T11:22:11.000+00:00",
-                "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmenteTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) && \"USA\".equals(userData.get(\"country\"))) && (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 11:22:11\" && endDate < \"15-Oct-2023 11:22:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientTwo\");\n\nend\n\n\n",
+                "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmenteTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) && \"USA\".equals(userData.get(\"country\"))) && (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 11:22:11\" && endDate < \"15-Oct-2023 11:22:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientTwo\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods",
                 "slotId": "Slot1",
                 "campaignDescription": "bla bla bla",
@@ -565,7 +565,7 @@ Response body
             "updater": null,
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) && \"USA\".equals(userData.get(\"country\"))) && (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( (\"New York\".equals(userData.get(\"city\")) && \"USA\".equals(userData.get(\"country\"))) && (\"22\".equals(userData.get(\"age\"))) )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot1",
             "campaignDescription": "bla bla bla",
@@ -666,7 +666,7 @@ Response body
             "updater": null,
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot1",
             "status": "ACTIVE",  
@@ -725,7 +725,7 @@ if Exists
             "updater": "string",
             "startDateTime": "2022-10-15T11:22:11.000+00:00",
             "endDateTime": "2023-10-15T11:22:11.000+00:00",
-            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+            "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
             "organizationEntity": "CloudOfGoods",
             "slotId": "Slot1",
             "status": "ACTIVE",  
@@ -783,7 +783,7 @@ Response
         [
             {
                 "name": "SegmentOne##$$$##138872606422300072",
-                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             }
         ]
@@ -804,17 +804,17 @@ Response
         [
             {
                 "name": "SegmentOne##$$$##138872606422300072",
-                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             },
             {
                 "name": "SegmentOne2##$$$##138872607701230073",
-                "drlString": " \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             },
             {
                 "name": "SegmentTwo##$$$##138872610018180074",
-                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             }
         ]
@@ -837,17 +837,17 @@ Response
         [
             {
                 "name": "SegmentOne##$$$##138872606422300072",
-                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentOne\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             },
             {
                 "name": "SegmentOne2##$$$##138872607701230073",
-                "drlString": " \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             },
             {
                 "name": "SegmentTwo##$$$##138872610018180074",
-                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             }
         ]
@@ -874,7 +874,7 @@ Response
         [
             {
                 "name": "SegmentTwo##$$$##138872610018180074",
-                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "drlString": " \n\nrule \"SegmentTwo\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods"
             }
         ]
@@ -949,7 +949,7 @@ Response
         {
             "id": "636b34d39171fd0f9f9ab3c5",
             "name": "SegmentTen##$$$##138872630594220247",
-            "drlString": " \n\nrule \"SegmentTen\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 77 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"22-Oct-2022 07:52:22\" && endDate < \"22-Oct-2023 07:52:22\" && contextId.contains(\"SlotTen\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"SlotTen\",\"VarientOne\");\n\nend\n\n\n",
+            "drlString": " \n\nrule \"SegmentTen\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Amal\".equals(userData.get(\"name\")) && 77 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"22-Oct-2022 07:52:22\" && endDate < \"22-Oct-2023 07:52:22\" && contextId.contains(\"SlotTen\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"SlotTen\",\"VarientOne\");\n\nend\n\n\n",
             "organizationEntity": null
         }
 
@@ -978,7 +978,7 @@ Response
                 "updater": "string",
                 "startDateTime": "2022-10-15T11:22:11.000+00:00",
                 "endDateTime": "2023-10-15T11:22:11.000+00:00",
-                "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsEntity.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
+                "fullDroolString": "package com.d6n.engine \n\nimport com.d6n.engine.model.User\nimport org.springframework.util.CollectionUtils\nimport com.d6n.engine.model.MetaData\n\nglobal com.d6n.engine.model.D6nResponse response\n\n \n\nrule \"SegmentOne2\"\n    salience 1\n    agenda-group \"CloudOfGoods\"\nwhen\n    $user : User( \"Rivindu\".equals(userData.get(\"name\")) && 12 > userData.get(\"age\") )  \n    $meta : MetaData( startDate > \"15-Oct-2022 16:52:11\" && endDate < \"15-Oct-2023 16:52:11\" && contextId.contains(\"Slot1\") && (channelsObjects.contains(\"WEB\")) )  \nthen\nresponse.addToResponse(1,\"Slot1\",\"VarientOne\");\n\nend\n\n\n",
                 "organizationEntity": "CloudOfGoods",
                 "status": "ACTIVE",  
                 "slotId": "Slot1",

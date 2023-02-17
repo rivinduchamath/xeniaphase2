@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ChannelsIdDTO {
-    private String organization;
+    private String organizationUuid;
     private String channelsName;
 }

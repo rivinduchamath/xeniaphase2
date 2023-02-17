@@ -20,6 +20,9 @@ public class OrganizationEntity implements SuperEntity {
     private String name;
     @TextIndexed
     private String uuid;
-    @Indexed
+    private String password;
+
+    private List<ChannelsObjects> channelsObjects;
+
     private List <AttributesObject> attributesObject;
 }

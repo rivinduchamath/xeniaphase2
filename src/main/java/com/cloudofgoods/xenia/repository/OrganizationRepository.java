@@ -1,11 +1,7 @@
 package com.cloudofgoods.xenia.repository;
 
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
-import com.cloudofgoods.xenia.models.AttributesObject;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +12,10 @@ public interface OrganizationRepository extends MongoRepository <OrganizationEnt
     OrganizationEntity findByAttributesObjectUuid(String uuid);
     OrganizationEntity findByUuid(String uuid);
     OrganizationEntity findByUuidEqualsAndAttributesObjectAttributeNameStartingWithOrAttributesObjectTypeIn(String organization, String attributeName, List<String> type);
+    OrganizationEntity findByUuidEqualsAndChannelsObjectsChannelsNameEquals(String organizationUuid, String attributeName);
     OrganizationEntity findOrganizationEntityByUuidEquals(String uuid);
+
+    OrganizationEntity findByChannelsObjectsUuid(String channelUuid);
 
 //    AttributesObject findByAttributesObject(String attributeUuid);
 

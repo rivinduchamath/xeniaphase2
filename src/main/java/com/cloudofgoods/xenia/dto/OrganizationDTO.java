@@ -16,5 +16,6 @@ public class OrganizationDTO implements SuperEntity {
     private String id;
     private String name;
     private String uuid;
+    private String password;
     private List <AttributesObject> attributesObject;
 }

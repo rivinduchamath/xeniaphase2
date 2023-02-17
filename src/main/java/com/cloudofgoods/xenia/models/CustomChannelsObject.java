@@ -1,12 +1,12 @@
 package com.cloudofgoods.xenia.models;
 
-import com.cloudofgoods.xenia.entity.xenia.ChannelsEntity;
+import com.cloudofgoods.xenia.entity.xenia.ChannelsObjects;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class CustomChannelsObject {
-    private List <ChannelsEntity> channels;
+    private List <ChannelsObjects> channels;
     private long size;
 }

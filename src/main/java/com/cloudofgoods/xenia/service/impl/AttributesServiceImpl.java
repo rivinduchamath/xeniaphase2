@@ -92,14 +92,14 @@ public class AttributesServiceImpl implements AttributesService {
                 existingAttributes.add (new AttributesObject (attributesDTO.getAttributeIdDTO ().getAttributeName (), attributesDTO.getDisplayName (), attributesDTO.getType (), attributesDTO.getValues (), firstUUID));
 
                 organization.setAttributesObject (existingAttributes);
-                OrganizationEntity save = organizationRepository.save (organization);// Update
+                organizationRepository.save (organization);// Update
 
                 attributeResponseDTO.setAttributeName (attributesDTO.getAttributeIdDTO ().getAttributeName ());
-                attributeResponseDTO.setUuid (attributesDTO.getUuid ());
+                attributeResponseDTO.setUuid (firstUUID);
                 attributeResponseDTO.setDisplayName (attributesDTO.getDisplayName ());
                 attributeResponseDTO.setType (attributesDTO.getType ());
                 attributeResponseDTO.setValues (attributesDTO.getValues ());
-                serviceResponseDTO.setData (save);
+                serviceResponseDTO.setData (attributeResponseDTO);
                 serviceResponseDTO.setDescription ("Save Attribute Success");
                 serviceResponseDTO.setMessage ("Success");
                 serviceResponseDTO.setCode ("2000");

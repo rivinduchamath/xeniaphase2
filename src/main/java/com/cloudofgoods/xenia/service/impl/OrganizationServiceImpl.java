@@ -29,6 +29,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationEntity = organizationRepository.findByUuid (organizationDTO.getUuid ());
                 log.info ("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
                 organizationEntity.setName (organizationDTO.getName ());
+                organizationEntity.setPassword (organizationDTO.getPassword ());
                 organizationEntity.setAttributesObject (organizationDTO.getAttributesObject ());
                 OrganizationEntity save = organizationRepository.save (organizationEntity);// Update
                 serviceResponseDTO.setData (save);
@@ -42,6 +43,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                 UUID firstUUID = timeBasedGenerator.generate();
                 organizationEntity.setUuid (firstUUID+"");
+                organizationEntity.setPassword (organizationDTO.getPassword ());
                 organizationEntity.setAttributesObject (organizationDTO.getAttributesObject ());
                 organizationRepository.save (organizationEntity); // Save
                 serviceResponseDTO.setData (organizationEntity);
