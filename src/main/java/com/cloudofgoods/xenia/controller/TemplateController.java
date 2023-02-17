@@ -22,7 +22,6 @@ public class TemplateController {
     @Description("If Send Id It Will Update Template, Otherwise Save as a new Template ")
     public ServiceResponseDTO saveTemplate(@RequestBody TemplateEntity ruleRootModel) {
         log.info (ruleRootModel + " LOG::Inside the TemplateController saveTemplate");
-        log.info ("LOG::Inside the TemplateController saveTemplate Inside try");
         return templateService.saveTemplate (ruleRootModel);
     }
 
