@@ -9,6 +9,7 @@ import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.repository.TemplateRepository;
 import com.cloudofgoods.xenia.service.RuleService;
+import com.cloudofgoods.xenia.util.RuleStatus;
 import com.cloudofgoods.xenia.util.Utility;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
@@ -46,22 +47,35 @@ public class RuleServiceImpl implements RuleService {
         log.info("LOG :: RuleServiceImpl saveOrUpdateRuleListRules ");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
+            List<RuleRequestRootEntity> ruleRequestRootEntities = new ArrayList<>();
             Collections.reverse(ruleRootModel);
             for (String ruleRequestRootEntity : ruleRootModel) {
                 Optional<RuleRequestRootEntity> ruleRequestRootEntity1 = rootRuleRepository.findById(ruleRequestRootEntity);
-                List<RuleRequestRootEntity> ruleRequestRootEntities = new ArrayList<>();
 
-//                        deleteSingleRuleFromMultiple (ruleRequestRootEntity1.get ());
-//                        ruleRequestRootEntities.add (saveOrUpdateSingleRuleFromMultipleRules (ruleRequestRootEntity1.get ()));
-
-                serviceResponseDTO.setData(ruleRequestRootEntities);
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setDescription("RuleServiceImpl saveOrUpdateRuleListRules() Success ");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
-
-                return serviceResponseDTO;
+                RuleRequestRootEntity ruleRequestRoot1 = null;
+                if (ruleRequestRootEntity1.isPresent()) {
+                    RuleRequestRootDTO ruleRequestRoot = new RuleRequestRootDTO();
+                    ruleRequestRoot.setId(ruleRequestRootEntity1.get().getId());
+                    ruleRequestRoot.setChannels(ruleRequestRootEntity1.get().getChannels());
+                    ruleRequestRoot.setTags(ruleRequestRootEntity1.get().getTags());
+                    ruleRequestRoot.setCampaignDescription(ruleRequestRootEntity1.get().getCampaignDescription());
+                    ruleRequestRoot.setCampaignName(ruleRequestRootEntity1.get().getCampaignName());
+                    ruleRequestRoot.setPriority(ruleRequestRootEntity1.get().getPriority());
+                    ruleRequestRoot.setEndDateTime(ruleRequestRootEntity1.get().getEndDateTime());
+                    ruleRequestRoot.setStartDateTime(ruleRequestRootEntity1.get().getStartDateTime());
+                    ruleRequestRoot.setOrganizationId(ruleRequestRootEntity1.get().getOrganizationId());
+                    ruleRequestRoot.setChannelIds(ruleRequestRootEntity1.get().getChannelIds());
+                    ruleRequestRoot.setStatus(ruleRequestRootEntity1.get().getStatusEnum());
+                    ruleRequestRoot1 = updateRootRuleRepository(ruleRequestRoot, ruleRequestRootEntity1.get());
+                }
+                ruleRequestRootEntities.add(ruleRequestRoot1);
             }
+            serviceResponseDTO.setData(ruleRequestRootEntities);
+            serviceResponseDTO.setMessage("Success");
+            serviceResponseDTO.setDescription("RuleServiceImpl saveOrUpdateRuleListRules() Success ");
+            serviceResponseDTO.setCode("2000");
+            serviceResponseDTO.setHttpStatus("OK");
+            return serviceResponseDTO;
         } catch (Exception exception) {
             log.info("LOG :: RuleServiceImpl saveOrUpdateRuleListRules() exception: " + Arrays.toString(exception.getStackTrace()));
             serviceResponseDTO.setError("RuleServiceImpl saveOrUpdateRuleListRules() exception " + exception.getMessage());
@@ -71,7 +85,6 @@ public class RuleServiceImpl implements RuleService {
             serviceResponseDTO.setHttpStatus("OK");
             return serviceResponseDTO;
         }
-        return null;
     }
 
 //    @Override
@@ -181,7 +194,6 @@ public class RuleServiceImpl implements RuleService {
                         String drlString = createDrlString(segments, ruleRequestRootModel);
 
                         segments.setFullRuleString(imports + "\n" + drlString);
-                        System.out.println(segments.getFullRuleString());
                         segmentsObjectsList.add(segments);// Add To List
                     });
                     audienceObject.setSegments(segmentsObjectsList);
@@ -231,34 +243,35 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public ServiceResponseDTO updateCampaignStatus(String campaignId, String status) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
-//        RuleRequestRootEntity ruleRequestRootEntity = findRootRuleById (campaignId);
-//        if ((RuleStatus.INACTIVE.toString ().equals (status)) && ruleRequestRootEntity.getStatus ().equals (RuleStatus.ACTIVE)) {
-//            log.info ("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + campaignId);
+        RuleRequestRootEntity ruleRequestRootEntity = findRootRuleById (campaignId);
+        if ((RuleStatus.INACTIVE.toString ().equals (status)) && ruleRequestRootEntity.getStatusEnum ().equals (RuleStatus.ACTIVE)) {
+            log.info ("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + campaignId);
 //            for (SegmentsObject ruleEntity : ruleRequestRootEntity.getSegments ()) {
 //                log.info ("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() ruleEntity Name " + ruleEntity.getSegmentName ());
 //                internalKnowledgeBase.removeRule (packageName, ruleEntity.getSegmentName ());
 //            }
-//            ruleRequestRootEntity.setStatus (RuleStatus.valueOf (status));
-//            RuleRequestRootEntity save = rootRuleRepository.save (ruleRequestRootEntity);
-//            serviceResponseDTO.setData (save);
-//            serviceResponseDTO.setDescription ("updateCampaignStatus Success");
-//            serviceResponseDTO.setMessage ("Success");
-//            serviceResponseDTO.setCode ("2000");
-//            serviceResponseDTO.setHttpStatus ("OK");
-//            return serviceResponseDTO;
-//        }else if ((RuleStatus.ACTIVE.toString ().equals (status)) && (ruleRequestRootEntity.getStatus ().equals (RuleStatus.INACTIVE))) {
-//            ruleRequestRootEntity.setStatus (RuleStatus.valueOf (status));
-//            droolService.feedKnowledge (ruleRequestRootEntity);
-//            RuleRequestRootEntity save = rootRuleRepository.save (ruleRequestRootEntity);
-//            serviceResponseDTO.setData (save);
-//            serviceResponseDTO.setDescription ("updateCampaignStatus Success");
-//            serviceResponseDTO.setMessage ("Success");
-//            serviceResponseDTO.setCode ("2000");
-//            serviceResponseDTO.setHttpStatus ("OK");
+            ruleRequestRootEntity.setStatusEnum (RuleStatus.valueOf (status));
+            RuleRequestRootEntity save = rootRuleRepository.save (ruleRequestRootEntity);
+            serviceResponseDTO.setData (save);
+            serviceResponseDTO.setDescription ("updateCampaignStatus Success");
+            serviceResponseDTO.setMessage ("Success");
+            serviceResponseDTO.setCode ("2000");
+            serviceResponseDTO.setHttpStatus ("OK");
+            return serviceResponseDTO;
+        }else if ((RuleStatus.ACTIVE.toString ().equals (status)) && (ruleRequestRootEntity.getStatusEnum ().equals (RuleStatus.INACTIVE))) {
+            ruleRequestRootEntity.setStatusEnum (RuleStatus.valueOf (status));
+            droolService.feedKnowledge (ruleRequestRootEntity);
+            RuleRequestRootEntity save = rootRuleRepository.save (ruleRequestRootEntity);
+            serviceResponseDTO.setData (save);
+            serviceResponseDTO.setDescription ("updateCampaignStatus Success");
+            serviceResponseDTO.setMessage ("Success");
+            serviceResponseDTO.setCode ("2000");
+            serviceResponseDTO.setHttpStatus ("OK");
         return serviceResponseDTO;
 //        }else {
 //            return null;
-//        }
+        }
+        return null;
     }
 
     private String saveSegmentNameGenerator(String name) {
@@ -375,9 +388,9 @@ public class RuleServiceImpl implements RuleService {
                     String drlFile = dumper.dump(packageDescr);
                     log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
                     drlFile = drlFile.replaceFirst("package ", "");
-                if (ruleEntity.isTemplate()) {
-                    saveTemplate (ruleEntity.getSegmentDescription (), ruleEntity.getSegmentName (), ruleEntity.getRuleObject ());
-                }
+                    if (ruleEntity.isTemplate()) {
+                        saveTemplate(ruleEntity.getSegmentDescription(), ruleEntity.getSegmentName(), ruleEntity.getRuleObject());
+                    }
                     return drlFile;
                 }
             }
@@ -390,14 +403,14 @@ public class RuleServiceImpl implements RuleService {
     }
 
     private void saveTemplate(String getSegmentationDescription, String segmentName, NodeObject fact) throws ExecutionException, InterruptedException {
-        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator ();
-        UUID firstUUID = timeBasedGenerator.generate ();
-        TemplateEntity templateEntity = new TemplateEntity ();
-        segmentName = segmentName + "##$$$##" + firstUUID.timestamp ();
-        templateEntity.setSegmentName (segmentName);
-        templateEntity.setSegmentationDescription (getSegmentationDescription);
-        templateEntity.setFact (fact);
-        TemplateEntity save = templateRepository.save (templateEntity);
+        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+        UUID firstUUID = timeBasedGenerator.generate();
+        TemplateEntity templateEntity = new TemplateEntity();
+        segmentName = segmentName + "##$$$##" + firstUUID.timestamp();
+        templateEntity.setSegmentName(segmentName);
+        templateEntity.setSegmentationDescription(getSegmentationDescription);
+        templateEntity.setFact(fact);
+        TemplateEntity save = templateRepository.save(templateEntity);
 
     }
 }

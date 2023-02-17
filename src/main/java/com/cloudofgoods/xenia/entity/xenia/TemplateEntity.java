@@ -19,5 +19,5 @@ public class TemplateEntity implements SuperEntity {
     @TextIndexed
     private String segmentationDescription;
     private NodeObject fact;
-    private String organizationId;
+    private String organizationUuid;
 }

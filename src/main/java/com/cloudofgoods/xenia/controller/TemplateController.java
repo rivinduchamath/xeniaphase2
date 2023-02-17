@@ -60,8 +60,8 @@ public class TemplateController {
         return templateService.getTemplateById (templateId);
     }
 
-    @DeleteMapping(value = "${server.servlet.deleteTemplateById}/{templateId}")
-    public ServiceResponseDTO deleteTemplateById(@PathVariable("templateId") String templateId) throws ExecutionException, InterruptedException {
+    @DeleteMapping(value = "${server.servlet.deleteTemplateById}")
+    public ServiceResponseDTO deleteTemplateById(@RequestParam("templateId") String templateId) throws ExecutionException, InterruptedException {
         log.info ("LOG:: TemplateController deleteTemplateById");
         return templateService.deleteTemplateById (templateId);
     }
