@@ -13,5 +13,6 @@ public class AttributeRequestDTO implements SuperEntity {
     private String type;
     private List <Object> values;
     private String uuid;
+    private String tableName;
 }
 

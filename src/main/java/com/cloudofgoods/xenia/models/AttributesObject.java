@@ -23,13 +23,16 @@ public class AttributesObject {
     @Indexed
     private String uuid;
 
+    private String tableName;
 
-    public AttributesObject(String attributeName, String displayName, String type, List<Object> values, String uuid) {
+
+    public AttributesObject(String attributeName, String displayName, String type, List<Object> values, String uuid, String tableName) {
         this.attributeName = attributeName;
         this.displayName = displayName;
         this.type = type;
         this.values = values;
         this.uuid = uuid;
+        this.tableName = tableName;
     }
 }
 

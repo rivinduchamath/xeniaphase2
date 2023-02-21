@@ -59,6 +59,7 @@ public class AttributesServiceImpl implements AttributesService {
                     attributesObject.setDisplayName (attributesDTO.getDisplayName ());
                     attributesObject.setType (attributesDTO.getType ());
                     attributesObject.setValues (attributesDTO.getValues ());
+                    attributesObject.setTableName(attributesDTO.getTableName());
                 });
                 organization.setAttributesObject (attributesObjectList);
                 organizationRepository.save (organization);// Update
@@ -67,6 +68,7 @@ public class AttributesServiceImpl implements AttributesService {
                 attributeResponseDTO.setDisplayName (attributesDTO.getDisplayName ());
                 attributeResponseDTO.setType (attributesDTO.getType ());
                 attributeResponseDTO.setValues (attributesDTO.getValues ());
+                attributeResponseDTO.setTableName(attributesDTO.getTableName());
                 serviceResponseDTO.setData (attributeResponseDTO);
                 serviceResponseDTO.setDescription ("Save or Update Attribute  Attribute Success");
                 serviceResponseDTO.setMessage ("Success");
@@ -92,7 +94,7 @@ public class AttributesServiceImpl implements AttributesService {
                     List<AttributesObject> existingAttributes = organization.get().getAttributesObject();
                     existingAttributes = Optional.ofNullable(existingAttributes).map(ArrayList::new).orElse(new ArrayList<>());
 
-                    existingAttributes.add(new AttributesObject(attributesDTO.getAttributeIdDTO().getAttributeName(), attributesDTO.getDisplayName(), attributesDTO.getType(), attributesDTO.getValues(), firstUUID));
+                    existingAttributes.add(new AttributesObject(attributesDTO.getAttributeIdDTO().getAttributeName(), attributesDTO.getDisplayName(), attributesDTO.getType(), attributesDTO.getValues(), firstUUID,attributesDTO.getTableName()));
 
                     organization.get().setAttributesObject(existingAttributes);
                     organizationRepository.save(organization.get());// Update
@@ -102,6 +104,7 @@ public class AttributesServiceImpl implements AttributesService {
                     attributeResponseDTO.setDisplayName(attributesDTO.getDisplayName());
                     attributeResponseDTO.setType(attributesDTO.getType());
                     attributeResponseDTO.setValues(attributesDTO.getValues());
+                    attributeResponseDTO.setTableName(attributesDTO.getTableName());
                     serviceResponseDTO.setData(attributeResponseDTO);
                     serviceResponseDTO.setDescription("Save Attribute Success");
                     serviceResponseDTO.setMessage("Success");

@@ -44,6 +44,9 @@ server:
     saveAttributes: /save
     getAttributes: /get/all
     deleteAttribute: /delete
+#    saveAttributesTable
+    saveOrUpdateAttributeTable: /save
+    getAttributesTable: /get/all
 #    ChannelsController
     saveChannels: /save
     getChannels: /get/all
