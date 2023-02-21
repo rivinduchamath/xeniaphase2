@@ -9,6 +9,7 @@ import com.cloudofgoods.xenia.repository.AttributeTableRepository;
 import com.cloudofgoods.xenia.service.AttributesTableService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -70,9 +71,17 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         log.info("LOG:: AttributesTableServiceImpl getAttributes()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
-            List<AttributeTableEntity> stream = attributeTableRepository.findAllByAttributeTableNameEquals(attributeTableDTO.getName(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-            long totalCount = attributeTableRepository.countByAttributeTableNameEquals(attributeTableDTO.getName());
-            attributeTableResponseDTO.setAttributeTableEntities(stream);
+            Page<AttributeTableEntity> stream = null;
+            long totalCount;
+            if (!attributeTableDTO.getName().equals("")) {
+                 stream = attributeTableRepository.findAllByAttributeTableNameStartingWith(attributeTableDTO.getName(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                totalCount = attributeTableRepository.countByAttributeTableNameStartingWith(attributeTableDTO.getName());
+
+            }else {
+                stream = attributeTableRepository.findAll( PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                totalCount = attributeTableRepository.count();
+            }
+              attributeTableResponseDTO.setAttributeTableEntities(stream.getContent());
             attributeTableResponseDTO.setCount(totalCount);
             serviceResponseDTO.setData(attributeTableResponseDTO);
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination Success");
