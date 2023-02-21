@@ -1,13 +1,11 @@
 package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.dto.ChannelDTO;
-import com.cloudofgoods.xenia.dto.channel.ChannelsResponseDTO;
+import com.cloudofgoods.xenia.dto.response.ChannelsResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.ChannelsObjects;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
-import com.cloudofgoods.xenia.models.AttributesObject;
-import com.cloudofgoods.xenia.models.composite.ChannelsId;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.ChannelService;
@@ -37,10 +35,11 @@ public class ChannelServiceImpl implements ChannelService {
         log.info("LOG:: ChannelServiceImpl saveChannel");
         try {
             ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
-            OrganizationEntity organization = new OrganizationEntity();
+
 
             if (channelDTO.getChannelUuid() != null) { // Update
                 log.info("LOG:: ChannelServiceImpl saveChannel Update");
+                OrganizationEntity organization = new OrganizationEntity();
                 try {
                     organization = organizationRepository.findByChannelsObjectsUuid(channelDTO.getChannelUuid());
                 } catch (Exception exception) {
@@ -68,6 +67,7 @@ public class ChannelServiceImpl implements ChannelService {
                 serviceResponseDTO.setHttpStatus("OK");
             } else {
                 log.info("LOG:: ChannelServiceImpl saveChannel Save");
+                Optional<OrganizationEntity> organization;
                 try {
                     organization = organizationRepository.findByUuid(channelDTO.getChannelsIdDTO().getOrganizationUuid());
                 } catch (Exception exception) {
@@ -77,25 +77,27 @@ public class ChannelServiceImpl implements ChannelService {
                     serviceResponseDTO.setHttpStatus("OK");
                     return serviceResponseDTO;
                 }
-                NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                String firstUUID = timeBasedGenerator.generate() + "";
-                List<ChannelsObjects> existingChannels = organization.getChannelsObjects();
-                existingChannels = Optional.ofNullable(existingChannels).map(ArrayList::new).orElse(new ArrayList<>());
+                if (organization.isPresent()) {
+                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                    String firstUUID = timeBasedGenerator.generate() + "";
+                    List<ChannelsObjects> existingChannels = organization.get().getChannelsObjects();
+                    existingChannels = Optional.ofNullable(existingChannels).map(ArrayList::new).orElse(new ArrayList<>());
 
-                existingChannels.add(new ChannelsObjects(channelDTO.getChannelsIdDTO().getChannelsName(), firstUUID));
+                    existingChannels.add(new ChannelsObjects(channelDTO.getChannelsIdDTO().getChannelsName(), firstUUID));
 
-                organization.setChannelsObjects(existingChannels);
-                organizationRepository.save(organization);// Update
+                    organization.get().setChannelsObjects(existingChannels);
+                    organizationRepository.save(organization.get());// Update
 
-                channelsResponseDTO.setChannelsName(channelDTO.getChannelsIdDTO().getChannelsName());
-                channelsResponseDTO.setUuid(firstUUID);
+                    channelsResponseDTO.setChannelsName(channelDTO.getChannelsIdDTO().getChannelsName());
+                    channelsResponseDTO.setUuid(firstUUID);
 
-                serviceResponseDTO.setData(channelsResponseDTO);
+                    serviceResponseDTO.setData(channelsResponseDTO);
 
-                serviceResponseDTO.setDescription("Save Channel Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
+                    serviceResponseDTO.setDescription("Save Channel Success");
+                    serviceResponseDTO.setMessage("Success");
+                    serviceResponseDTO.setCode("2000");
+                    serviceResponseDTO.setHttpStatus("OK");
+                }
             }
             return serviceResponseDTO;
         } catch (Exception exception) {

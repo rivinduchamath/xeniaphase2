@@ -347,55 +347,56 @@ public class RuleServiceImpl implements RuleService {
 
         double priority = ruleEntity.getPriority();
         try {
-            OrganizationEntity organization = organizationRepository.findByUuid(ruleRequestRootModel.getOrganizationId());
+            Optional<OrganizationEntity> organization = organizationRepository.findByUuid(ruleRequestRootModel.getOrganizationId());
+  if (organization.isPresent()) {
+      List<ChannelsObjects> channelsObjectsList = organization.get().getChannelsObjects();
+      ChannelsObjects channelObj = new ChannelsObjects();
+      for (ChannelsObjects channelsObject : channelsObjectsList) {
+          if (channelsObject.getUuid().equals(ruleEntity.getChannelId())) {
+              channelValidate = true;
+              channelObj = channelsObject;
+              break;
+          }
+      }
+      if (channelValidate) {
+          for (ChannelContentObject channelContentObject : ruleEntity.getEntryVariantMapping()) {
+              log.info("LOG:: DroolServiceImpl createDrlString() priority: " + priority);
+              String metadata =
+                      "startDate > \"" + Utility.formatter.format(ruleRequestRootModel.getStartDateTime()) +
+                              "\" && endDate < \"" + Utility.formatter.format(ruleRequestRootModel.getEndDateTime()) +
+                              "\" && contextId.contains(" + "\"" + channelContentObject.getEntryId().toUpperCase() +
+                              "\"" + ") && (<channel>)";
+              log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);
+              StringBuilder channel = new StringBuilder();
 
-            List<ChannelsObjects> channelsObjectsList = organization.getChannelsObjects();
-            ChannelsObjects channelObj = new ChannelsObjects();
-            for (ChannelsObjects channelsObject : channelsObjectsList) {
-                if (channelsObject.getUuid().equals(ruleEntity.getChannelId())) {
-                    channelValidate = true;
-                    channelObj = channelsObject;
-                    break;
-                }
-            }
-            if (channelValidate) {
-                for (ChannelContentObject channelContentObject : ruleEntity.getEntryVariantMapping()) {
-                    log.info("LOG:: DroolServiceImpl createDrlString() priority: " + priority);
-                    String metadata =
-                            "startDate > \"" + Utility.formatter.format(ruleRequestRootModel.getStartDateTime()) +
-                                    "\" && endDate < \"" + Utility.formatter.format(ruleRequestRootModel.getEndDateTime()) +
-                                    "\" && contextId.contains(" + "\"" + channelContentObject.getEntryId().toUpperCase() +
-                                    "\"" + ") && (<channel>)";
-                    log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);
-                    StringBuilder channel = new StringBuilder();
+              channel.append("channels.contains(").append("\"").append(channelObj.getUuid().toUpperCase()).append("\"").append(")").append(" || ");
 
-                    channel.append("channels.contains(").append("\"").append(channelObj.getUuid().toUpperCase()).append("\"").append(")").append(" || ");
+              String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
+              PackageDescrBuilder pkg = DescrFactory.newPackage();
+              PackageDescrBuilder pkgDescBuilder = pkg.end();
+              pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute(
+                      "salience", priority + "").attribute("agenda-group", "\"" +
+                      ruleRequestRootModel.getOrganizationId().toUpperCase() +
+                      "\"").lhs().pattern(
+                      "$user : User").constraint(fact + "").end().pattern(
+                      "$meta : MetaData").constraint(metaString).end().end().rhs(
+                      "response.addToResponse(" + ruleEntity.getPriority() +
+                              ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" +
+                              channelContentObject.getVariantId() + "\");").end();
 
-                    String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
-                    PackageDescrBuilder pkg = DescrFactory.newPackage();
-                    PackageDescrBuilder pkgDescBuilder = pkg.end();
-                    pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute(
-                            "salience", priority + "").attribute("agenda-group", "\"" +
-                            ruleRequestRootModel.getOrganizationId().toUpperCase() +
-                            "\"").lhs().pattern(
-                            "$user : User").constraint(fact + "").end().pattern(
-                            "$meta : MetaData").constraint(metaString).end().end().rhs(
-                            "response.addToResponse(" + ruleEntity.getPriority() +
-                                    ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" +
-                                    channelContentObject.getVariantId() + "\");").end();
+              PackageDescr packageDescr = pkgDescBuilder.getDescr();
+              DrlDumper dumper = new DrlDumper();
 
-                    PackageDescr packageDescr = pkgDescBuilder.getDescr();
-                    DrlDumper dumper = new DrlDumper();
-
-                    String drlFile = dumper.dump(packageDescr);
-                    log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
-                    drlFile = drlFile.replaceFirst("package ", "");
-                    if (ruleEntity.isTemplate()) {
-                        saveTemplate(ruleEntity.getSegmentDescription(), ruleEntity.getSegmentName(), ruleEntity.getRuleObject());
-                    }
-                    return drlFile;
-                }
-            }
+              String drlFile = dumper.dump(packageDescr);
+              log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
+              drlFile = drlFile.replaceFirst("package ", "");
+              if (ruleEntity.isTemplate()) {
+                  saveTemplate(ruleEntity.getSegmentDescription(), ruleEntity.getSegmentName(), ruleEntity.getRuleObject());
+              }
+              return drlFile;
+          }
+      }
+  }
 
         } catch (Exception e) {
             log.error("LOG:: DroolServiceImpl createDrlString() Exception :" + e.getMessage());

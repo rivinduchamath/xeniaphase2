@@ -129,8 +129,8 @@ public class TemplateServiceImpl implements TemplateService {
     public ServiceResponseDTO saveTemplate(TemplateEntity ruleRootModel) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: TemplateServiceImpl saveTemplate");
-        OrganizationEntity byUuid = organizationRepository.findByUuid(ruleRootModel.getOrganizationUuid());
-        if (byUuid != null) {
+        Optional<OrganizationEntity> byUuid = organizationRepository.findByUuid(ruleRootModel.getOrganizationUuid());
+        if (byUuid.isPresent()) {
                 try {
                     if (ruleRootModel.getId() != null) {
                         TemplateEntity save = templateRepository.save(ruleRootModel);

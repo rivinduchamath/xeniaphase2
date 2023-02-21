@@ -5,12 +5,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrganizationRepository extends MongoRepository <OrganizationEntity, String> {
 
     OrganizationEntity findByAttributesObjectUuid(String uuid);
-    OrganizationEntity findByUuid(String uuid);
+//    OrganizationEntity findByUuid(String uuid);
+    Optional<OrganizationEntity> findByUuid(String uuid);
     OrganizationEntity findByUuidEqualsAndAttributesObjectAttributeNameStartingWithOrAttributesObjectTypeIn(String organization, String attributeName, List<String> type);
     OrganizationEntity findByUuidEqualsAndChannelsObjectsChannelsNameEquals(String organizationUuid, String attributeName);
     OrganizationEntity findOrganizationEntityByUuidEquals(String uuid);

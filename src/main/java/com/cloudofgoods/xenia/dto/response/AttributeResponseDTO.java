@@ -1,14 +1,15 @@
-package com.cloudofgoods.xenia.dto.attribute;
+package com.cloudofgoods.xenia.dto.response;
 
-import com.cloudofgoods.xenia.dto.composite.AttributeIdDTO;
 import com.cloudofgoods.xenia.entity.SuperEntity;
 import lombok.Data;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 import java.util.List;
 
 @Data
-public class AttributeRequestDTO implements SuperEntity {
+public class AttributeResponseDTO implements SuperEntity {
 
-    private AttributeIdDTO attributeIdDTO;
+    private String attributeName;
     private String displayName;
     private String type;
     private List <Object> values;

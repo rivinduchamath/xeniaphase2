@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.dto.channel;
+package com.cloudofgoods.xenia.dto.request;
 
 import com.cloudofgoods.xenia.dto.composite.ChannelsIdDTO;
 import lombok.AllArgsConstructor;

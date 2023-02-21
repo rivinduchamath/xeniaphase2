@@ -1,7 +1,7 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.dto.attribute.AttributeRequestDTO;
-import com.cloudofgoods.xenia.dto.attribute.AttributeResponseDTO;
+import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
+import com.cloudofgoods.xenia.dto.response.AttributeResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
@@ -40,8 +40,9 @@ public class AttributesServiceImpl implements AttributesService {
         log.info ("LOG:: AttributesServiceImpl saveAttribute");
         try {
             AttributeResponseDTO attributeResponseDTO = new AttributeResponseDTO ();
-            OrganizationEntity organization = new OrganizationEntity ();
+
             if (attributesDTO.getUuid () != null) { // Update
+                OrganizationEntity organization = new OrganizationEntity ();
                 try {
                     organization = organizationRepository.findByAttributesObjectUuid (attributesDTO.getUuid ());
                 } catch (Exception exception) {
@@ -72,40 +73,43 @@ public class AttributesServiceImpl implements AttributesService {
                 serviceResponseDTO.setCode ("2000");
                 serviceResponseDTO.setHttpStatus ("OK");
             }else {  // Save
-                log.info ("LOG:: AttributesServiceImpl saveAttribute Save");
+                log.info("LOG:: AttributesServiceImpl saveAttribute Save");
+
+                Optional<OrganizationEntity> organization;
                 try {
-                    organization = organizationRepository.findByUuid (attributesDTO.getAttributeIdDTO ().getOrganizationUuid ());
+                    organization = organizationRepository.findByUuid(attributesDTO.getAttributeIdDTO().getOrganizationUuid());
                 } catch (Exception exception) {
-                    serviceResponseDTO.setDescription ("Find By Uuid Not Found");
-                    serviceResponseDTO.setMessage ("Success");
-                    serviceResponseDTO.setCode ("5000");
-                    serviceResponseDTO.setHttpStatus ("OK");
+                    serviceResponseDTO.setDescription("Find By Uuid Not Found");
+                    serviceResponseDTO.setMessage("Success");
+                    serviceResponseDTO.setCode("5000");
+                    serviceResponseDTO.setHttpStatus("OK");
                     return serviceResponseDTO;
                 }
-                log.info ("LOG:: AttributesServiceImpl saveAttribute Save");
+                log.info("LOG:: AttributesServiceImpl saveAttribute Save");
+                if (organization.isPresent()) {
+                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                    String firstUUID = timeBasedGenerator.generate() + "";
+                    List<AttributesObject> existingAttributes = organization.get().getAttributesObject();
+                    existingAttributes = Optional.ofNullable(existingAttributes).map(ArrayList::new).orElse(new ArrayList<>());
 
-                NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator ();
-                String firstUUID = timeBasedGenerator.generate () + "";
-                List <AttributesObject> existingAttributes = organization.getAttributesObject ();
-                existingAttributes = Optional.ofNullable (existingAttributes).map (ArrayList::new).orElse (new ArrayList <> ());
+                    existingAttributes.add(new AttributesObject(attributesDTO.getAttributeIdDTO().getAttributeName(), attributesDTO.getDisplayName(), attributesDTO.getType(), attributesDTO.getValues(), firstUUID));
 
-                existingAttributes.add (new AttributesObject (attributesDTO.getAttributeIdDTO ().getAttributeName (), attributesDTO.getDisplayName (), attributesDTO.getType (), attributesDTO.getValues (), firstUUID));
+                    organization.get().setAttributesObject(existingAttributes);
+                    organizationRepository.save(organization.get());// Update
 
-                organization.setAttributesObject (existingAttributes);
-                organizationRepository.save (organization);// Update
+                    attributeResponseDTO.setAttributeName(attributesDTO.getAttributeIdDTO().getAttributeName());
+                    attributeResponseDTO.setUuid(firstUUID);
+                    attributeResponseDTO.setDisplayName(attributesDTO.getDisplayName());
+                    attributeResponseDTO.setType(attributesDTO.getType());
+                    attributeResponseDTO.setValues(attributesDTO.getValues());
+                    serviceResponseDTO.setData(attributeResponseDTO);
+                    serviceResponseDTO.setDescription("Save Attribute Success");
+                    serviceResponseDTO.setMessage("Success");
+                    serviceResponseDTO.setCode("2000");
+                    serviceResponseDTO.setHttpStatus("OK");
 
-                attributeResponseDTO.setAttributeName (attributesDTO.getAttributeIdDTO ().getAttributeName ());
-                attributeResponseDTO.setUuid (firstUUID);
-                attributeResponseDTO.setDisplayName (attributesDTO.getDisplayName ());
-                attributeResponseDTO.setType (attributesDTO.getType ());
-                attributeResponseDTO.setValues (attributesDTO.getValues ());
-                serviceResponseDTO.setData (attributeResponseDTO);
-                serviceResponseDTO.setDescription ("Save Attribute Success");
-                serviceResponseDTO.setMessage ("Success");
-                serviceResponseDTO.setCode ("2000");
-                serviceResponseDTO.setHttpStatus ("OK");
-            }
-            return serviceResponseDTO;
+                return serviceResponseDTO;
+            }}
         } catch (Exception exception) {
             log.info ("LOG :: AttributesServiceImpl saveAttribute() exception: " + exception.getMessage ());
             serviceResponseDTO.setError (exception.getStackTrace ());
@@ -116,6 +120,7 @@ public class AttributesServiceImpl implements AttributesService {
             serviceResponseDTO.setHttpStatus ("OK");
             return serviceResponseDTO;
         }
+        return null;
     }
 
     @Override

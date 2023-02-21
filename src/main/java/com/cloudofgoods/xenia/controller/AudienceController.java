@@ -1,6 +1,7 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.AudienceDTO;
+import com.cloudofgoods.xenia.dto.request.AudienceRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.AudienceService;
 import jdk.jfr.Description;
@@ -33,12 +34,12 @@ public class AudienceController {
         return audienceService.getAudienceById (audienceId);
     }
 
-    @GetMapping(value = "${server.servlet.getAudienceWithPagination}")
-    public ServiceResponseDTO getAudienceWithPagination(@RequestParam String organizationId, @RequestParam int page, @RequestParam int size) {
+    @PostMapping(value = "${server.servlet.getAudienceWithPagination}")
+    public ServiceResponseDTO getAudienceWithPagination(@RequestBody AudienceRequestDTO audienceRequestDTO) {
         log.info ("LOG:: InitialPageController getCampaignForInitialPage ");
-        if (page >= 0 && size > 0) {
+        if (audienceRequestDTO.getPage() >= 0 && audienceRequestDTO.getSize() > 0) {
             log.info ("LOG:: InitialPageController getCampaignForInitialPage !(page < 0 && size <= 0)");
-            return audienceService.getAudienceWithPagination (organizationId, page, size);
+            return audienceService.getAudienceWithPagination (audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getPage(), audienceRequestDTO.getSize());
         }else {
             log.info ("LOG:: InitialPageController getCampaignForInitialPage Error With Request Param");
             ServiceResponseDTO responseDTO = new ServiceResponseDTO ();

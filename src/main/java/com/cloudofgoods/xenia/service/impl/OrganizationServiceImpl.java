@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,20 +25,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     public ServiceResponseDTO saveOrUpdateOrganization(OrganizationDTO organizationDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         try {
-            OrganizationEntity organizationEntity = new OrganizationEntity ();
+
             if (organizationDTO.getUuid () != null) {
-                organizationEntity = organizationRepository.findByUuid (organizationDTO.getUuid ());
-                log.info ("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
-                organizationEntity.setName (organizationDTO.getName ());
-                organizationEntity.setPassword (organizationDTO.getPassword ());
-                organizationEntity.setAttributesObject (organizationDTO.getAttributesObject ());
-                OrganizationEntity save = organizationRepository.save (organizationEntity);// Update
-                serviceResponseDTO.setData (save);
-                serviceResponseDTO.setDescription  ("Update Template Success");
-                serviceResponseDTO.setMessage ("Success");
-                serviceResponseDTO.setCode ("2000");
-                serviceResponseDTO.setHttpStatus ("OK");
+                Optional<OrganizationEntity> organizationEntity  = organizationRepository.findByUuid (organizationDTO.getUuid ());
+                if (organizationEntity.isPresent()) {
+                    log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
+                    organizationEntity.get().setName(organizationDTO.getName());
+                    organizationEntity.get().setPassword(organizationDTO.getPassword());
+                    organizationEntity.get().setAttributesObject(organizationDTO.getAttributesObject());
+                    OrganizationEntity save = organizationRepository.save(organizationEntity.get());// Update
+                    serviceResponseDTO.setData(save);
+                    serviceResponseDTO.setDescription("Update Template Success");
+                    serviceResponseDTO.setMessage("Success");
+                    serviceResponseDTO.setCode("2000");
+                    serviceResponseDTO.setHttpStatus("OK");
+                }
             }else {
+                OrganizationEntity organizationEntity = new OrganizationEntity();
                 log.info ("LOG:: CampaignTemplateServiceImpl saveTemplate Save");
                 organizationEntity.setName (organizationDTO.getName ());
                 NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
