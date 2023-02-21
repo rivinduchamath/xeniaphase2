@@ -26,10 +26,10 @@ public class D6nController {
 
     @Description("Create This API For makeDecision (Personalise)")
     @GetMapping(value = "${server.servlet.generateVariant}")
-    public ServiceResponseDTO generateVariant(@RequestParam String userId, @RequestParam List <String> channels, @RequestParam List <String> slot, @RequestParam String organization) throws ExecutionException, InterruptedException {
+    public ServiceResponseDTO generateVariant(@RequestParam String userEmail, @RequestParam List <String> channels, @RequestParam List <String> slot, @RequestParam String organization) throws ExecutionException, InterruptedException {
 
-        log.info ("LOG:: D6nController makeDecision calling " + " user " + userId + "OrganizationEntity" + organization + " channels " + channels.toString () + " slot " + slot.toString ());
-        AuthUser user = this.users.findByUsername (userId);
+        log.info ("LOG:: D6nController makeDecision calling " + " user " + userEmail + "OrganizationEntity" + organization + " channels " + channels.toString () + " slot " + slot.toString ());
+        AuthUser user = this.users.findByUsername (userEmail);
 
         LinkedHashMap <String, Object> linkedHashMap = new LinkedHashMap <String, Object> ();
         linkedHashMap.put ("age", user.getAge ());
@@ -40,7 +40,7 @@ public class D6nController {
         linkedHashMap.put ("maritalStatus", user.getMaritalStatus ());
         User userDTO = new User ();
         userDTO.setUserData (linkedHashMap);
-        return d6nService.makeDecision (userDTO, channels, slot, organization);
+        return d6nService.makeDecision (userEmail, userDTO, channels, slot, organization);
 
     }
 

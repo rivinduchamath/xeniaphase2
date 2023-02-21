@@ -4,12 +4,17 @@ import com.cloudofgoods.xenia.dto.D6nResponseModelDTO;
 import com.cloudofgoods.xenia.dto.caution.MetaData;
 import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
+import com.cloudofgoods.xenia.entity.xenia.UserAnalyticsEntity;
+import com.cloudofgoods.xenia.repository.redis.ResponseUserRepository;
 import com.cloudofgoods.xenia.service.D6nService;
 import com.cloudofgoods.xenia.util.Utility;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -17,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -24,8 +30,13 @@ public class D6nServiceImpl implements D6nService {
     @Autowired
     private DroolServiceImpl droolService;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private ResponseUserRepository responseUserRepository;
     @Override
-    public ServiceResponseDTO makeDecision(User user, List<String> channel, List<String> slot, String organization) {
+    public ServiceResponseDTO makeDecision(String userEmail, User user, List<String> channel, List<String> slot, String organization) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         log.info("LOG :: D6nServiceImpl makeDecision() Set Meta Data" );
         MetaData metaData = new MetaData ();
@@ -40,7 +51,8 @@ public class D6nServiceImpl implements D6nService {
             Date date = new Date();
             NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
             UUID firstUUID = timeBasedGenerator.generate();
-            D6nResponseModelDTO d6nResponseModelDTO = droolService.makeDecision (metaData, user, organization.toUpperCase (), (dateFormat.format (date) +"##$$##"+firstUUID));
+            D6nResponseModelDTO d6nResponseModelDTO = droolService.makeDecision (  metaData, user, organization.toUpperCase (), (dateFormat.format (date) +"##$$##"+firstUUID));
+            CompletableFuture.runAsync(() -> databaseAnalytics(d6nResponseModelDTO , userEmail, organization));
             serviceResponseDTO.setData (d6nResponseModelDTO);
             serviceResponseDTO.setDescription ("makeDecision Success");
             serviceResponseDTO.setMessage ("Success");
@@ -55,4 +67,17 @@ public class D6nServiceImpl implements D6nService {
         }
         return serviceResponseDTO;
     }
+
+    private void databaseAnalytics(D6nResponseModelDTO d6nResponseModelDTO, String userEmail, String organization) {
+        UserAnalyticsEntity userAnalyticsEntity = new UserAnalyticsEntity();
+        userAnalyticsEntity.setUserEmail(userEmail);
+        userAnalyticsEntity.setOrganizationName(organization);
+
+        userAnalyticsEntity.setMatchedRulesCount(d6nResponseModelDTO.getSatisfiedConditionsName().size());
+        userAnalyticsEntity.setSatisfiedConditionsName(d6nResponseModelDTO.getSatisfiedConditionsName());
+//        String createdAt = mongoTemplate.indexOps(UserAnalyticsEntity.class).ensureIndex(new Index().on("satisfiedConditionsName", Sort.Direction.ASC).expire(10));
+        UserAnalyticsEntity save = responseUserRepository.save(userAnalyticsEntity);
+
+    }
+
 }

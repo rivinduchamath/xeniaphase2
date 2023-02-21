@@ -1,11 +1,11 @@
-cloudOfGoods:
-  redis:
-    host: xenia.redis.cache.windows.net
-#    host: localhost
-    port: 6379
-    password: bmiAFSTWQXka8sFRti7d54Q5n8ynTH3aVAzCaClEDnc=
-    timeout:
-      organization: 600
+#cloudOfGoods:
+#  redis:
+#    host: xenia.redis.cache.windows.net
+##    host: localhost
+#    port: 6379
+#    password: bmiAFSTWQXka8sFRti7d54Q5n8ynTH3aVAzCaClEDnc=
+#    timeout:
+#      organization: 600
 
 
 knowledge:
@@ -52,6 +52,10 @@ server:
     getAllValues: /get/all/cache
     getOrganizationValues: /get/organization/cache
     getOrganizationMaxValues: /get/organization/max/cache
+#    Audience Controller
+    saveAudience: /save
+    getAudience: /get
+    getAudienceWithPagination: /get/all
 
 spring:
 #  redis:

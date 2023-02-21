@@ -3,21 +3,14 @@ package com.cloudofgoods.xenia.service.impl;
 import com.cloudofgoods.xenia.dto.D6nResponseModelDTO;
 import com.cloudofgoods.xenia.dto.caution.MetaData;
 import com.cloudofgoods.xenia.dto.caution.User;
-import com.cloudofgoods.xenia.entity.redis.ResponseRedisEntity;
 import com.cloudofgoods.xenia.entity.xenia.RuleRequestRootEntity;
-import com.cloudofgoods.xenia.entity.xenia.TemplateEntity;
 import com.cloudofgoods.xenia.models.AudienceObject;
-import com.cloudofgoods.xenia.models.NodeObject;
 import com.cloudofgoods.xenia.models.RuleChannelObject;
 import com.cloudofgoods.xenia.models.SegmentsObject;
-import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
-import com.cloudofgoods.xenia.repository.TemplateRepository;
-import com.cloudofgoods.xenia.repository.redis.ResponseRedisRepository;
+import com.cloudofgoods.xenia.repository.redis.ResponseUserRepository;
 import com.cloudofgoods.xenia.service.DroolService;
 import com.cloudofgoods.xenia.util.RuleStatus;
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.compiler.lang.api.DescrFactory;
@@ -39,13 +32,11 @@ import org.kie.internal.io.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -63,7 +54,7 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
     @Autowired
     private RootRuleRepository rootRuleRepository;
     @Autowired
-    private ResponseRedisRepository responseRedisRepository;
+    private ResponseUserRepository responseUserRepository;
 
     @Override
     public Collection<KiePackage> getAllRuleFromKnowledgeBase() {
@@ -147,8 +138,8 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 //    }
 
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
-    @Cacheable(key = "#organization.concat('##$$##'+#uuid + '$$##$$'  +#metaData.channels +'%%$$%%'  +#metaData.contextId)", value = "organization"/*, unless = "#result.variant == null"*/)
-    public D6nResponseModelDTO makeDecision(MetaData metaData, User user, String organization, String uuid) {
+//    @Cacheable(key = "#organization.concat('##$$##'+#uuid + '$$##$$'  +#metaData.channels +'%%$$%%'  +#metaData.contextId)", value = "organization"/*, unless = "#result.variant == null"*/)
+    public D6nResponseModelDTO makeDecision( MetaData metaData, User user, String organization, String uuid) {
         log.info("Log :: DroolServiceImpl makeDecision()");
         log.info("Log :: DroolServiceImpl makeDecision() metaData : " + metaData.toString());
         log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
@@ -162,27 +153,23 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
         kieSession.insert(user);
 
         kieSession.insert(metaData);
-        List<ResponseRedisEntity> satisfiedConditions;
-        satisfiedConditions = new ArrayList<>();
-
         // Add listener to retrieve satisfied conditions
+        List<String> satisfiedConditionsName =  new ArrayList<>();
         kieSession.addEventListener(new DefaultAgendaEventListener() {
             @Override
             public void afterMatchFired(AfterMatchFiredEvent event) {
-                ResponseRedisEntity ruleRequestRootEntity = new ResponseRedisEntity();
+
                 super.afterMatchFired(event);
-                String condition = event.getMatch().getRule().getName();
-                ruleRequestRootEntity.setVariant(condition);
-                satisfiedConditions.add(ruleRequestRootEntity);
+                 String name = event.getMatch().getRule().getName();
+                satisfiedConditionsName.add(name);
             }
         });
-
         kieSession.fireAllRules();
         kieSession.dispose();
-        CompletableFuture.runAsync(() -> responseRedisRepository.saveAll(satisfiedConditions));
-        log.info("LOG:: DroolServiceImpl makeDecision d6nResponse " + d6nResponse);
+        d6nResponse.setSatisfiedConditionsName(satisfiedConditionsName);
         return d6nResponse;
     }
+
 
     // Return Imports In Drool String
     public String createImports() {

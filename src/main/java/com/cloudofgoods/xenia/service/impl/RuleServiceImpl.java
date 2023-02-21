@@ -169,7 +169,6 @@ public class RuleServiceImpl implements RuleService {
         // Add Common Things to all Rules
         RuleRequestRootEntity rootRules = rootModelDataMethod(ruleRequestRootModel);
         if (ruleRequestRootModel.getChannels() != null) {
-
             // Call method to collect Imports and add  to string Buffer
             String imports = droolService.createImports();
             log.info("LOG:: RuleServiceImpl saveRootRuleRepository() Save SegmentsObject imports : " + imports);
@@ -179,18 +178,12 @@ public class RuleServiceImpl implements RuleService {
                 ruleChannelObject.getAudienceObjects().forEach(audienceObject -> {
                     List<SegmentsObject> segmentsObjectsList = new ArrayList<>();
                     audienceObject.getSegments().forEach(segments -> {
-                        if (segments.getPriority() == 0) {
-                            segments.setPriority(999999999);
-                        }
-                        if (segments.getPriority() != 0) {
-                            double priority = (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority();
-                            segments.setPriority(priority);
-                        }
-                        if (segments.getSegmentName() != null) {
-                            segments.setSegmentName(saveSegmentNameGenerator(segments.getSegmentName()));
-                        } else {
-                            return;
-                        }
+
+                        segments.setPriority(segments.getPriority() == 0 ? 999999999 : (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority());
+
+                        Optional.ofNullable(segments.getSegmentName())
+                                .ifPresent(name -> segments.setSegmentName(saveSegmentNameGenerator(name)));
+
                         String drlString = createDrlString(segments, ruleRequestRootModel);
 
                         segments.setFullRuleString(imports + "\n" + drlString);
@@ -289,6 +282,15 @@ public class RuleServiceImpl implements RuleService {
         } catch (Exception e) {
             name = name + "##$$$##" + firstUUID.timestamp();
         }
+
+
+        String separator = "##$$$##";
+        int sepPos = name.lastIndexOf(separator);
+        if (sepPos != -1) {
+            name = name.substring(0, sepPos);
+        }
+        name = name + separator + firstUUID.timestamp();
+
         log.info("LOG:: Segment String :" + name);
         templateEntity.setCampTemplateName(name);
         return name;
@@ -367,7 +369,7 @@ public class RuleServiceImpl implements RuleService {
                     log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);
                     StringBuilder channel = new StringBuilder();
 
-                    channel.append("channels.contains(").append("\"").append(channelObj.getChannelsName().toUpperCase()).append("\"").append(")").append(" || ");
+                    channel.append("channels.contains(").append("\"").append(channelObj.getUuid().toUpperCase()).append("\"").append(")").append(" || ");
 
                     String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
                     PackageDescrBuilder pkg = DescrFactory.newPackage();
@@ -402,7 +404,7 @@ public class RuleServiceImpl implements RuleService {
         return null;
     }
 
-    private void saveTemplate(String getSegmentationDescription, String segmentName, NodeObject fact) throws ExecutionException, InterruptedException {
+    private void saveTemplate(String getSegmentationDescription, String segmentName, NodeObject fact) {
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         UUID firstUUID = timeBasedGenerator.generate();
         TemplateEntity templateEntity = new TemplateEntity();
