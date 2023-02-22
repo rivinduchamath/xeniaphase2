@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface D6nService {
 
-    ServiceResponseDTO makeDecision(String userEmail, User user, List<String> channel, List<String> slot, String organization);
+    ServiceResponseDTO makeDecision(int numberOfResponseFrom , int numberOfResponse, String userEmail, User user, List<String> channel, List<String> slot, String organization);
 }

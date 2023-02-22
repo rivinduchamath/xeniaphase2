@@ -149,6 +149,10 @@ public class RuleServiceImpl implements RuleService {
             ruleChannelObject.getAudienceObjects().forEach(audienceObject -> {
                 List<SegmentsObject> segmentsObjects = new ArrayList<>();
                 audienceObject.getSegments().forEach(segments -> {
+                    segments.setSegmentRuleString(
+                            audienceObject.getAudienceRuleString() != null
+                                    ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString()
+                                    : segments.getSegmentRuleString());
                     String drlString = createDrlString(segments, ruleRequestRootModel);
                     segments.setSegmentRuleString(imports + " " + drlString);
                     segmentsObjects.add(segments);// Add To List
@@ -180,6 +184,10 @@ public class RuleServiceImpl implements RuleService {
                     audienceObject.getSegments().forEach(segments -> {
 
                         segments.setPriority(segments.getPriority() == 0 ? 999999999 : (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority());
+                        segments.setSegmentRuleString(
+                                audienceObject.getAudienceRuleString() != null
+                                        ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString()
+                                        : segments.getSegmentRuleString());
 
                         Optional.ofNullable(segments.getSegmentName())
                                 .ifPresent(name -> segments.setSegmentName(saveSegmentNameGenerator(name)));

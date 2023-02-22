@@ -8,7 +8,6 @@ import com.cloudofgoods.xenia.models.AudienceObject;
 import com.cloudofgoods.xenia.models.RuleChannelObject;
 import com.cloudofgoods.xenia.models.SegmentsObject;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
-import com.cloudofgoods.xenia.repository.redis.ResponseUserRepository;
 import com.cloudofgoods.xenia.service.DroolService;
 import com.cloudofgoods.xenia.util.RuleStatus;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ import org.drools.core.definitions.rule.impl.RuleImpl;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.mvel.DrlDumper;
 import org.kie.api.definition.KiePackage;
-import org.kie.api.event.rule.AfterMatchFiredEvent;
-import org.kie.api.event.rule.DefaultAgendaEventListener;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.Agenda;
@@ -53,8 +50,6 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 
     @Autowired
     private RootRuleRepository rootRuleRepository;
-    @Autowired
-    private ResponseUserRepository responseUserRepository;
 
     @Override
     public Collection<KiePackage> getAllRuleFromKnowledgeBase() {
@@ -138,8 +133,7 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 //    }
 
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
-//    @Cacheable(key = "#organization.concat('##$$##'+#uuid + '$$##$$'  +#metaData.channels +'%%$$%%'  +#metaData.contextId)", value = "organization"/*, unless = "#result.variant == null"*/)
-    public D6nResponseModelDTO makeDecision( MetaData metaData, User user, String organization, String uuid) {
+    public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization, String uuid) {
         log.info("Log :: DroolServiceImpl makeDecision()");
         log.info("Log :: DroolServiceImpl makeDecision() metaData : " + metaData.toString());
         log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
@@ -154,19 +148,25 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 
         kieSession.insert(metaData);
         // Add listener to retrieve satisfied conditions
-        List<String> satisfiedConditionsName =  new ArrayList<>();
-        kieSession.addEventListener(new DefaultAgendaEventListener() {
-            @Override
-            public void afterMatchFired(AfterMatchFiredEvent event) {
-
-                super.afterMatchFired(event);
-                 String name = event.getMatch().getRule().getName();
-                satisfiedConditionsName.add(name);
-            }
-        });
-        kieSession.fireAllRules();
+//        List<String> satisfiedConditionsName =  new ArrayList<>();
+//        kieSession.addEventListener(new DefaultAgendaEventListener() {
+//
+//            @Override
+//            public void afterMatchFired(AfterMatchFiredEvent event) {
+//
+//                super.afterMatchFired(event);
+//                List<Object> name = event.getMatch().getObjects();
+////                List<Object> namea = Collections.singletonList(event.getMatch().getFactHandles());
+//            }
+//        });
+        int ruleCount = kieSession.fireAllRules();
+        log.info("LOG:: DroolServiceImpl makeDecision Executed " + ruleCount + " rules.");
         kieSession.dispose();
-        d6nResponse.setSatisfiedConditionsName(satisfiedConditionsName);
+
+        List<String> subList = d6nResponse.getSatisfiedConditions();
+        Collections.reverse(subList);
+        d6nResponse.setSatisfiedConditions( subList.subList(numberOfResponseFrom, numberOfResponse));
+        d6nResponse.setTotalCount(ruleCount);
         return d6nResponse;
     }
 

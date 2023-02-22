@@ -12,9 +12,7 @@ import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -36,7 +34,7 @@ public class D6nServiceImpl implements D6nService {
     @Autowired
     private ResponseUserRepository responseUserRepository;
     @Override
-    public ServiceResponseDTO makeDecision(String userEmail, User user, List<String> channel, List<String> slot, String organization) {
+    public ServiceResponseDTO makeDecision(int numberOfResponseFrom ,int numberOfResponse, String userEmail, User user, List<String> channel, List<String> slot, String organization) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         log.info("LOG :: D6nServiceImpl makeDecision() Set Meta Data" );
         MetaData metaData = new MetaData ();
@@ -51,7 +49,7 @@ public class D6nServiceImpl implements D6nService {
             Date date = new Date();
             NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
             UUID firstUUID = timeBasedGenerator.generate();
-            D6nResponseModelDTO d6nResponseModelDTO = droolService.makeDecision (  metaData, user, organization.toUpperCase (), (dateFormat.format (date) +"##$$##"+firstUUID));
+            D6nResponseModelDTO d6nResponseModelDTO = droolService.makeDecision ( numberOfResponseFrom ,numberOfResponse, metaData, user, organization.toUpperCase (), (dateFormat.format (date) +"##$$##"+firstUUID));
             CompletableFuture.runAsync(() -> databaseAnalytics(d6nResponseModelDTO , userEmail, organization));
             serviceResponseDTO.setData (d6nResponseModelDTO);
             serviceResponseDTO.setDescription ("makeDecision Success");
@@ -73,8 +71,8 @@ public class D6nServiceImpl implements D6nService {
         userAnalyticsEntity.setUserEmail(userEmail);
         userAnalyticsEntity.setOrganizationName(organization);
 
-        userAnalyticsEntity.setMatchedRulesCount(d6nResponseModelDTO.getSatisfiedConditionsName().size());
-        userAnalyticsEntity.setSatisfiedConditionsName(d6nResponseModelDTO.getSatisfiedConditionsName());
+        userAnalyticsEntity.setMatchedRulesCount(d6nResponseModelDTO.getSatisfiedConditions().size());
+        userAnalyticsEntity.setSatisfiedConditionsName(d6nResponseModelDTO.getSatisfiedConditions());
 //        String createdAt = mongoTemplate.indexOps(UserAnalyticsEntity.class).ensureIndex(new Index().on("satisfiedConditionsName", Sort.Direction.ASC).expire(10));
         UserAnalyticsEntity save = responseUserRepository.save(userAnalyticsEntity);
 

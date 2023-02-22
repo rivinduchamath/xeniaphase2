@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
+import com.cloudofgoods.xenia.dto.D6nDTO;
 import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.AuthUser;
@@ -8,13 +9,11 @@ import com.cloudofgoods.xenia.service.D6nService;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -25,22 +24,27 @@ public class D6nController {
     private final UserRepository users;
 
     @Description("Create This API For makeDecision (Personalise)")
-    @GetMapping(value = "${server.servlet.generateVariant}")
-    public ServiceResponseDTO generateVariant(@RequestParam String userEmail, @RequestParam List <String> channels, @RequestParam List <String> slot, @RequestParam String organization) throws ExecutionException, InterruptedException {
-
-        log.info ("LOG:: D6nController makeDecision calling " + " user " + userEmail + "OrganizationEntity" + organization + " channels " + channels.toString () + " slot " + slot.toString ());
-        AuthUser user = this.users.findByUsername (userEmail);
-
-        LinkedHashMap <String, Object> linkedHashMap = new LinkedHashMap <String, Object> ();
-        linkedHashMap.put ("age", user.getAge ());
-        linkedHashMap.put ("hobby", user.getHobby ());
-        linkedHashMap.put ("roles", user.getRoles ());
-        linkedHashMap.put ("country", user.getCountry ());
-        linkedHashMap.put ("religion", user.getReligion ());
-        linkedHashMap.put ("maritalStatus", user.getMaritalStatus ());
+    @PostMapping(value = "${server.servlet.generateVariant}")
+    public ServiceResponseDTO generateVariant(@RequestBody D6nDTO d6nDTO) {
+        log.info ("LOG:: D6nController makeDecision calling " + " user " + d6nDTO.getUserEmail() + "OrganizationEntity" + d6nDTO.getOrganization() + " channels " + d6nDTO.getChannels().toString () + " slot " + d6nDTO.getSlot().toString ());
+        AuthUser user = null;
         User userDTO = new User ();
-        userDTO.setUserData (linkedHashMap);
-        return d6nService.makeDecision (userEmail, userDTO, channels, slot, organization);
+
+        if(d6nDTO.getUserEmail() != null) {
+             user = this.users.findByUsername(d6nDTO.getUserEmail());
+            LinkedHashMap <String, Object> linkedHashMap = new LinkedHashMap <String, Object> ();
+            linkedHashMap.put ("age", user.getAge ());
+            linkedHashMap.put ("hobby", user.getHobby ());
+            linkedHashMap.put ("roles", user.getRoles ());
+            linkedHashMap.put ("country", user.getCountry ());
+            linkedHashMap.put ("religion", user.getReligion ());
+            linkedHashMap.put ("maritalStatus", user.getMaritalStatus ());
+            userDTO.setUserData (linkedHashMap);
+        }else {
+
+        }
+        return d6nService.makeDecision (d6nDTO.getNumberOfResponseFrom() ,d6nDTO.getNumberOfResponse(), d6nDTO.getUserEmail(), userDTO, d6nDTO.getChannels().stream()
+                .map(String::toUpperCase).collect(Collectors.toList()), d6nDTO.getSlot(), d6nDTO.getOrganization().toUpperCase());
 
     }
 

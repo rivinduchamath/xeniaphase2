@@ -14,5 +14,7 @@ public class AudienceObject implements Serializable {
     private String audienceName;
     @TextIndexed
     private String audienceDescription;
+    @TextIndexed
+    private String audienceRuleString;
     private List <SegmentsObject> segments;
 }
