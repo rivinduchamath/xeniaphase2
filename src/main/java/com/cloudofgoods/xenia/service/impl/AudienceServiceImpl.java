@@ -25,8 +25,6 @@ import java.util.UUID;
 @Slf4j
 public class AudienceServiceImpl implements AudienceService {
     @Autowired
-    private RootRuleRepository rootRuleRepository;
-    @Autowired
     private AudienceRepository audienceRepository;
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -48,21 +46,19 @@ public class AudienceServiceImpl implements AudienceService {
                 serviceResponseDTO.setHttpStatus("OK");
             } else {
                 log.info("LOG:: AudienceServiceImpl saveAudience Save");
-                rootRuleRepository.findById(audienceDTO.getCampaignUuid()).ifPresent(ruleRequestRoot -> {
-                    Optional<OrganizationEntity> byUuid = organizationRepository.findByUuid(audienceDTO.getOrganizationUuid());
-                    byUuid.flatMap(organizationEntity -> organizationEntity.getChannelsObjects().stream().filter(channelsObjects -> Objects.equals(channelsObjects.getUuid(), audienceDTO.getChannelUuid())).findFirst()).ifPresent(channelsObject -> {
-                        AudienceEntity audienceEntity = new AudienceEntity();
-                        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                        UUID firstUUID = timeBasedGenerator.generate();
-                        audienceEntity.setAudienceUuid(firstUUID.toString());
-                        audienceEntity = setAudienceValues(audienceDTO, audienceEntity);
-                        AudienceEntity save = audienceRepository.save(audienceEntity);
-                        serviceResponseDTO.setData(save);
-                        serviceResponseDTO.setDescription("Save Audience Success");
-                        serviceResponseDTO.setMessage("Success");
-                        serviceResponseDTO.setCode("2000");
-                        serviceResponseDTO.setHttpStatus("OK");
-                    });
+                Optional<OrganizationEntity> byUuid = organizationRepository.findByUuid(audienceDTO.getOrganizationUuid());
+                byUuid.flatMap(organizationEntity -> organizationEntity.getChannelsObjects().stream().filter(channelsObjects -> Objects.equals(channelsObjects.getUuid(), audienceDTO.getChannelUuid())).findFirst()).ifPresent(channelsObject -> {
+                    AudienceEntity audienceEntity = new AudienceEntity();
+                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                    UUID firstUUID = timeBasedGenerator.generate();
+                    audienceEntity.setAudienceUuid(firstUUID.toString());
+                    audienceEntity = setAudienceValues(audienceDTO, audienceEntity);
+                    AudienceEntity save = audienceRepository.save(audienceEntity);
+                    serviceResponseDTO.setData(save);
+                    serviceResponseDTO.setDescription("Save Audience Success");
+                    serviceResponseDTO.setMessage("Success");
+                    serviceResponseDTO.setCode("2000");
+                    serviceResponseDTO.setHttpStatus("OK");
                 });
                 if (serviceResponseDTO.getData() == null) {
                     serviceResponseDTO.setDescription("Save Audience Fail Maybe Uuid Issue");
@@ -91,10 +87,8 @@ public class AudienceServiceImpl implements AudienceService {
         if (audienceDTO.getAudienceJson() != null) newAudience.setAudienceJson(audienceDTO.getAudienceJson());
         if (audienceDTO.getAudienceRuleString() != null)
             newAudience.setAudienceRuleString(audienceDTO.getAudienceRuleString());
-        if (audienceDTO.getChannelUuid() != null) newAudience.setChannelUuid(audienceDTO.getChannelUuid());
         if (audienceDTO.getOrganizationUuid() != null)
             newAudience.setOrganizationUuid(audienceDTO.getOrganizationUuid());
-        if (audienceDTO.getCampaignUuid() != null) newAudience.setCampaignUuid(audienceDTO.getCampaignUuid());
         return newAudience;
     }
 

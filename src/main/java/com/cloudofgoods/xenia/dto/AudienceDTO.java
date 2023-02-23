@@ -20,6 +20,6 @@ public class AudienceDTO {
     private String audienceRuleString;
     private String channelUuid;
     private String organizationUuid;
-    private String campaignUuid;
+
 }
 

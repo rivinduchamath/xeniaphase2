@@ -19,5 +19,4 @@ public class AudienceEntity {
     private String audienceRuleString;
     private String channelUuid;
     private String organizationUuid;
-    private String campaignUuid;
-}
+   }
