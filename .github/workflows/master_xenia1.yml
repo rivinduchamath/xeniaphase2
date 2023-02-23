@@ -49,5 +49,5 @@ jobs:
         with:
           app-name: 'xenia1'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_58FA2EFB83414F289F5C22EF800FFADF }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2123BA5C1CD94ACB96CA15BEAAE3575E }}
           package: '*.jar'
