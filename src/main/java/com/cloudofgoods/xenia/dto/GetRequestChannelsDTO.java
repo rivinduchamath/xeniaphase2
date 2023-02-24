@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class GetRequestChannelsDTO {
     private int page;
     private int size;
-    private String organization;
+    private String organizationUuid;
     private String channelName;
 
 }

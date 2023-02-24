@@ -9,5 +9,4 @@ import java.util.List;
 
 @Repository
 public interface CampaignTemplateRepository extends MongoRepository <CampaignTemplateEntity, String> {
-    List <CampaignTemplateEntity> findAllByCampTemplateNameNotNull(String s);
 }

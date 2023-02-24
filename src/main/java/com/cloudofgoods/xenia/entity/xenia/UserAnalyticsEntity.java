@@ -1,7 +1,9 @@
 package com.cloudofgoods.xenia.entity.xenia;
 
 import com.cloudofgoods.xenia.entity.SuperEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Document(collection = "user_analytics")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserAnalyticsEntity implements SuperEntity {
     @Id
     @Indexed

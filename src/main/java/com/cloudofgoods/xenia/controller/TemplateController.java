@@ -1,7 +1,7 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
-import com.cloudofgoods.xenia.entity.xenia.TemplateEntity;
+import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
 import com.cloudofgoods.xenia.service.TemplateService;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class TemplateController {
 
     @PostMapping(value = "${server.servlet.saveTemplate}")
     @Description("If Send Id It Will Update Template, Otherwise Save as a new Template ")
-    public ServiceResponseDTO saveTemplate(@RequestBody TemplateEntity ruleRootModel) {
+    public ServiceResponseDTO saveTemplate(@RequestBody SegmentTemplateEntity ruleRootModel) {
         log.info (ruleRootModel + " LOG::Inside the TemplateController saveTemplate");
         return templateService.saveTemplate (ruleRootModel);
     }

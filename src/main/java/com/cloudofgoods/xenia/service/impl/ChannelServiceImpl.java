@@ -1,11 +1,12 @@
 package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.dto.ChannelDTO;
+import com.cloudofgoods.xenia.dto.GetRequestChannelsDTO;
 import com.cloudofgoods.xenia.dto.response.ChannelsResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
-import com.cloudofgoods.xenia.entity.xenia.ChannelsObjects;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
+import com.cloudofgoods.xenia.entity.xenia.ChannelEntity;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.ChannelService;
@@ -13,14 +14,12 @@ import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -30,151 +29,116 @@ public class ChannelServiceImpl implements ChannelService {
     private final OrganizationRepository organizationRepository;
 
     @Override
-    public ServiceResponseDTO saveChannel(ChannelDTO channelDTO) {
+    public ServiceResponseDTO saveOrUpdateChannel(ChannelDTO channelDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
-        log.info("LOG:: ChannelServiceImpl saveChannel");
+        log.info("LOG:: ChannelServiceImpl saveChannel Service Layer");
         try {
             ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
-
-
-            if (channelDTO.getChannelUuid() != null) { // Update
-                log.info("LOG:: ChannelServiceImpl saveChannel Update");
-                OrganizationEntity organization = new OrganizationEntity();
-                try {
-                    organization = organizationRepository.findByChannelsObjectsUuid(channelDTO.getChannelUuid());
-                } catch (Exception exception) {
-                    serviceResponseDTO.setDescription("ChannelServiceImpl saveChannel Find By Uuid Not Found");
-                    serviceResponseDTO.setMessage("Success");
-                    serviceResponseDTO.setCode("5000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                }
-                List<ChannelsObjects> channelsObjectsList = organization.getChannelsObjects();
-                channelsObjectsList.stream().filter(channelsObjects -> channelsObjects.getUuid().equals(channelDTO.getChannelUuid())).forEach(channelsObjects -> {
-                    channelsObjects.setChannelsName(channelDTO.getChannelsIdDTO().getChannelsName());
-                    channelsObjects.setUuid(channelDTO.getChannelUuid());
-
-                });
-
-                organization.setChannelsObjects(channelsObjectsList);
-                organizationRepository.save(organization);
-
-
-                channelsResponseDTO.setUuid(channelDTO.getChannelUuid());
-                serviceResponseDTO.setData(channelsResponseDTO);
-                serviceResponseDTO.setDescription("Update Channel Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
-            } else {
-                log.info("LOG:: ChannelServiceImpl saveChannel Save");
-                Optional<OrganizationEntity> organization;
-                try {
-                    organization = organizationRepository.findByUuid(channelDTO.getChannelsIdDTO().getOrganizationUuid());
-                } catch (Exception exception) {
-                    serviceResponseDTO.setDescription("Find By Uuid Not Found");
-                    serviceResponseDTO.setMessage("Success");
-                    serviceResponseDTO.setCode("5000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                    return serviceResponseDTO;
-                }
+            if (channelDTO.getOrganizationUuid() != null) {
+                Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(channelDTO.getOrganizationUuid());
                 if (organization.isPresent()) {
-                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                    String firstUUID = timeBasedGenerator.generate() + "";
-                    List<ChannelsObjects> existingChannels = organization.get().getChannelsObjects();
-                    existingChannels = Optional.ofNullable(existingChannels).map(ArrayList::new).orElse(new ArrayList<>());
+                    if (channelDTO.getChannelUuid() != null) {
+                        Optional<ChannelEntity> channelEntity = channelRepository.findByChannelUuidEquals(channelDTO.getChannelUuid());
+                        if (channelEntity.isPresent()) { // Update
+                            log.info("LOG:: ChannelServiceImpl saveOrUpdateChannel Update");
 
-                    existingChannels.add(new ChannelsObjects(channelDTO.getChannelsIdDTO().getChannelsName(), firstUUID));
+                            channelEntity.get().getChannelsId().setChannelsName(channelDTO.getChannelName().toUpperCase());
+                            channelEntity.get().setType(channelDTO.getType().toUpperCase());
+                            ChannelEntity channel = channelRepository.save(channelEntity.get());
 
-                    organization.get().setChannelsObjects(existingChannels);
-                    organizationRepository.save(organization.get());// Update
+                            channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName().toUpperCase());
+                            channelsResponseDTO.setType(channel.getType().toUpperCase());
+                            channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
+                            serviceResponseDTO.setData(channelsResponseDTO);
+                            serviceResponseDTO.setDescription("Update Channel Success");
+                            serviceResponseDTO.setMessage("Success");
+                        } else {
+                            serviceResponseDTO.setDescription("Update Fail Channel Not Found");
+                            serviceResponseDTO.setMessage("Fail");
+                        }
+                    } else { //Save
+                        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
 
-                    channelsResponseDTO.setChannelsName(channelDTO.getChannelsIdDTO().getChannelsName());
-                    channelsResponseDTO.setUuid(firstUUID);
-
-                    serviceResponseDTO.setData(channelsResponseDTO);
-
-                    serviceResponseDTO.setDescription("Save Channel Success");
-                    serviceResponseDTO.setMessage("Success");
-                    serviceResponseDTO.setCode("2000");
-                    serviceResponseDTO.setHttpStatus("OK");
+                        ChannelEntity channel = channelRepository.save(new ChannelEntity(channelDTO.getOrganizationUuid(), channelDTO.getChannelName().toUpperCase(), timeBasedGenerator.generate() + "", channelDTO.getType().toUpperCase()));
+                        channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
+                        channelsResponseDTO.setType(channel.getType());
+                        channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
+                        serviceResponseDTO.setData(channelsResponseDTO);
+                        serviceResponseDTO.setDescription("Save Channel Success");
+                        serviceResponseDTO.setMessage("Success");
+                    }
                 }
+            } else {
+                serviceResponseDTO.setDescription("Organization Uuid Cannot Be Empty");
+                serviceResponseDTO.setMessage("Fail");
             }
-            return serviceResponseDTO;
+            serviceResponseDTO.setCode("2000");
         } catch (Exception exception) {
             log.info("LOG :: ChannelServiceImpl saveChannel() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
+            exception.printStackTrace();
             serviceResponseDTO.setDescription("ChannelServiceImpl saveChannel() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
         }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
     }
 
     @Override
-    public ServiceGetResponseDTO getChannels(int start, int end, String channelName, String organization) {
+    public ServiceGetResponseDTO getChannels(GetRequestChannelsDTO requestChannelsDTO) {
         log.info("LOG:: ChannelServiceImpl getChannels");
         ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
-            OrganizationEntity organizationEntities = organizationRepository.findByUuidEqualsAndChannelsObjectsChannelsNameEquals (organization, channelName);
-            if (organizationEntities != null) {
-                List <ChannelsObjects> content = new ArrayList <> (organizationEntities.getChannelsObjects ());
-                List<ChannelsObjects> filteredChannels = content.stream()
-                        .filter(channel -> channel.getChannelsName().toLowerCase().startsWith(channelName.toLowerCase()))
-                        .collect(Collectors.toList());
+            List<ChannelsResponseDTO> channelsResponseDTOS = new ArrayList<>();
+            for (ChannelEntity channel : channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(), PageRequest.of(requestChannelsDTO.getPage(), requestChannelsDTO.getSize()))) {
 
-                int count = filteredChannels.size ();
-                int pageStart = Math.min (start, count);
-                int pageEnd = Math.min (end, count);
-
-                List <ChannelsObjects> pageContent = filteredChannels.subList (pageStart, pageEnd);
-                Pageable pageable = PageRequest.of (pageStart, pageContent.size ());
-                Page <ChannelsObjects> page2 = new PageImpl<>(pageContent, pageable, count);
-                serviceResponseDTO.setData (page2.getContent ());
-                serviceResponseDTO.setCount (count);
+                ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
+                channelsResponseDTO.setType(channel.getType());
+                channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
+                channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
+                channelsResponseDTO.setType(channel.getType());
+                channelsResponseDTOS.add(channelsResponseDTO);
             }
+            serviceResponseDTO.setCount(channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase()));
+            serviceResponseDTO.setData(channelsResponseDTOS);
             serviceResponseDTO.setDescription("Get Channel Success");
             serviceResponseDTO.setMessage("Success");
             serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+
         } catch (Exception exception) {
             log.info("LOG :: ChannelServiceImpl getChannels() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setMessage("ChannelServiceImpl getChannels() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
         }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
     }
 
     @Override
     public ServiceResponseDTO deleteChannels(String channelUuId) {
-        log.info("LOG:: ChannelServiceImpl deleteChannels");
+        log.info("LOG:: ChannelServiceImpl deleteChannels Service Layer");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            ChannelsObjects channelsObjects;
-            channelsObjects = channelRepository.findByUuid(channelUuId);
-            if (channelsObjects == null) {
-                serviceResponseDTO.setDescription("Delete Uuid is Not Found");
-            } else {
-                channelRepository.deleteByUuid(channelUuId);
+            Optional<ChannelEntity> channelEntity = channelRepository.deleteByChannelUuidEquals(channelUuId);
+            if (channelEntity.isPresent()) {
+                serviceResponseDTO.setData(channelEntity.get());
                 serviceResponseDTO.setDescription("Delete Channel Success");
+            } else {
+                serviceResponseDTO.setDescription("Delete Uuid is Not Found");
             }
-            serviceResponseDTO.setData(channelUuId);
             serviceResponseDTO.setMessage("Success");
             serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
         } catch (Exception exception) {
             log.info("LOG :: ChannelServiceImpl deleteChannels() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setMessage("ChannelServiceImpl deleteChannels() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
         }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
     }
 }

@@ -51,14 +51,16 @@ server:
     saveChannels: /save
     getChannels: /get/all
     deleteChannels: /delete
-#    CacheController
-    getAllValues: /get/all/cache
-    getOrganizationValues: /get/organization/cache
-    getOrganizationMaxValues: /get/organization/max/cache
 #    Audience Controller
     saveAudience: /save
     getAudience: /get
     getAudienceWithPagination: /get/all
+#   LoginController
+    authorizeUser: /authorize
+#    DashboardController
+    organizationDataDashboard: /organization/get
+    campaignPerformance: /campaign/get
+
 
 spring:
 #  redis:

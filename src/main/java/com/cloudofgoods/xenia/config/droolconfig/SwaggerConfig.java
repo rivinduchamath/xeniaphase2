@@ -2,7 +2,6 @@ package com.cloudofgoods.xenia.config.droolconfig;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -25,13 +24,14 @@ public class SwaggerConfig {
                 .build()
                 .apiInfo(apiInfo());
     }
+
     private ApiInfo apiInfo() {
         return new ApiInfo(
                 "Xenia Spring Boot REST APIs",
                 "Xenia REST API Documentation",
                 "1.0",
                 "Terms of service",
-                new Contact ("Xenia", "www.cloudofgoods.com", "rivindu@incubatelabs.com"),
+                new Contact("Xenia", "www.cloudofgoods.com", "rivindu@incubatelabs.com"),
                 "License of API",
                 "API license URL",
                 Collections.emptyList()

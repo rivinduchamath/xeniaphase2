@@ -18,7 +18,6 @@ public class AudienceController {
 
     private final AudienceService audienceService;
 
-
     @PostMapping(value = "${server.servlet.saveAudience}")
     @Description("Add Audience")
     @Transactional
@@ -27,7 +26,7 @@ public class AudienceController {
         return audienceService.saveAudience(audienceDTO);
     }
     @GetMapping(value = "${server.servlet.getAudience}")
-    @Description("Get OrganizationEntity ")
+    @Description("Get OrganizationEntity")
     @Transactional
     public ServiceResponseDTO getAudience(@RequestParam String audienceId) {
         log.info ("LOG::Inside the AudienceController getAudience ");

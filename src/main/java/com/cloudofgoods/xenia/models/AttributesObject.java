@@ -1,6 +1,5 @@
 package com.cloudofgoods.xenia.models;
 
-import com.cloudofgoods.xenia.entity.SuperEntity;
 import com.cloudofgoods.xenia.models.composite.AttributesId;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,8 +11,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class AttributesObject {
-    @Indexed(unique = true)
-    private String attributeName;
+
+
+    private AttributesId attributesId;
     @Indexed
     private String displayName;
     @Indexed
@@ -21,18 +21,21 @@ public class AttributesObject {
     @Indexed
     private List<Object> values;
     @Indexed
-    private String uuid;
+    private String attributeUuid;
 
     private String tableName;
 
 
-    public AttributesObject(String attributeName, String displayName, String type, List<Object> values, String uuid, String tableName) {
-        this.attributeName = attributeName;
+    public AttributesObject(String organization, String attributesId, String displayName, String type, List<Object> values, String attributeUuid, String tableName) {
+        this.attributesId = new AttributesId(organization ,attributesId);
         this.displayName = displayName;
         this.type = type;
         this.values = values;
-        this.uuid = uuid;
+        this.attributeUuid = attributeUuid;
         this.tableName = tableName;
     }
+
+
+
 }
 

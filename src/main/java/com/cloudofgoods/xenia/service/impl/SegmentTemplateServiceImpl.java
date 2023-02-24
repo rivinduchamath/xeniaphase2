@@ -3,9 +3,9 @@ package com.cloudofgoods.xenia.service.impl;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.TemplateCustomObject;
-import com.cloudofgoods.xenia.entity.xenia.TemplateEntity;
+import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
-import com.cloudofgoods.xenia.repository.TemplateRepository;
+import com.cloudofgoods.xenia.repository.SegmentTemplateRepository;
 import com.cloudofgoods.xenia.service.TemplateService;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
@@ -22,16 +22,16 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TemplateServiceImpl implements TemplateService {
+public class SegmentTemplateServiceImpl implements TemplateService {
     private final OrganizationRepository organizationRepository;
-    @Autowired
-    private TemplateRepository templateRepository;
+
+    private final SegmentTemplateRepository segmentTemplateRepository;
 
     @Override
     public ServiceResponseDTO getAllTemplate() {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            List<TemplateEntity> all = templateRepository.findAll();
+            List<SegmentTemplateEntity> all = segmentTemplateRepository.findAll();
             serviceResponseDTO.setData(all);
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplate Success");
             serviceResponseDTO.setMessage("Success");
@@ -54,7 +54,7 @@ public class TemplateServiceImpl implements TemplateService {
     public ServiceResponseDTO getTemplateByName(String name) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<TemplateEntity> template = templateRepository.findAllBySegmentNameStartsWith(name);
+            Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findAllBySegmentNameStartsWith(name);
             serviceResponseDTO.setData(template);
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success");
@@ -85,7 +85,7 @@ public class TemplateServiceImpl implements TemplateService {
     public ServiceResponseDTO getTemplateById(String templateId) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<TemplateEntity> template = templateRepository.findById(templateId);
+            Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findById(templateId);
             serviceResponseDTO.setData(template);
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateById Success");
@@ -111,7 +111,7 @@ public class TemplateServiceImpl implements TemplateService {
     public ServiceResponseDTO deleteTemplateById(String templateId) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            templateRepository.deleteById(templateId);
+            segmentTemplateRepository.deleteById(templateId);
             serviceResponseDTO.setDescription("TemplateServiceImpl deleteTemplateById Success");
             return serviceResponseDTO;
         } catch (Exception exception) {
@@ -126,14 +126,14 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public ServiceResponseDTO saveTemplate(TemplateEntity ruleRootModel) {
+    public ServiceResponseDTO saveTemplate(SegmentTemplateEntity ruleRootModel) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: TemplateServiceImpl saveTemplate");
-        Optional<OrganizationEntity> byUuid = organizationRepository.findByUuid(ruleRootModel.getOrganizationUuid());
+        Optional<OrganizationEntity> byUuid = organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid());
         if (byUuid.isPresent()) {
                 try {
                     if (ruleRootModel.getId() != null) {
-                        TemplateEntity save = templateRepository.save(ruleRootModel);
+                        SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
                         serviceResponseDTO.setDescription("Update Template Success");
                         serviceResponseDTO.setMessage("Success");
                         serviceResponseDTO.setCode("2000");
@@ -141,7 +141,7 @@ public class TemplateServiceImpl implements TemplateService {
                         serviceResponseDTO.setData(save);
                     } else {
                         ruleRootModel.setSegmentName(saveTemplateNameGenerator(ruleRootModel.getSegmentName()));
-                        TemplateEntity save = templateRepository.save(ruleRootModel);
+                        SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
                         serviceResponseDTO.setDescription("Save Template Success");
                         serviceResponseDTO.setMessage("Success");
                         serviceResponseDTO.setCode("2000");
@@ -169,9 +169,9 @@ public class TemplateServiceImpl implements TemplateService {
     private String saveTemplateNameGenerator(String templateName) {
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         UUID firstUUID = timeBasedGenerator.generate();
-        TemplateEntity templateEntity = new TemplateEntity();
+        SegmentTemplateEntity segmentTemplateEntity = new SegmentTemplateEntity();
         templateName = templateName + "##$$$##" + firstUUID.timestamp();
-        templateEntity.setSegmentName(templateName);
+        segmentTemplateEntity.setSegmentName(templateName);
         return templateName;
     }
 
@@ -181,8 +181,8 @@ public class TemplateServiceImpl implements TemplateService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             log.info("LOG:: TemplateServiceImpl getAllTemplatePagination()");
-            List<TemplateEntity> templateEntities = templateRepository.findAllBySegmentNameNotNull(PageRequest.of(page, size));
-            long count = templateRepository.count();
+            List<SegmentTemplateEntity> templateEntities = segmentTemplateRepository.findAllBySegmentNameNotNull(PageRequest.of(page, size));
+            long count = segmentTemplateRepository.count();
             TemplateCustomObject templateCustomDTO = new TemplateCustomObject();
             templateCustomDTO.setTemplateEntities(templateEntities);
             templateCustomDTO.setTotal(count);

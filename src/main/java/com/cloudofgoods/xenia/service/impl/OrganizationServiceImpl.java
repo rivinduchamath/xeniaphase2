@@ -26,16 +26,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         try {
 
-            if (organizationDTO.getUuid () != null) {
-                Optional<OrganizationEntity> organizationEntity  = organizationRepository.findByUuid (organizationDTO.getUuid ());
+            if (organizationDTO.getOrganizationUuid() != null) {
+                Optional<OrganizationEntity> organizationEntity  = organizationRepository.findByUuidEquals (organizationDTO.getOrganizationUuid());
                 if (organizationEntity.isPresent()) {
                     log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
                     organizationEntity.get().setName(organizationDTO.getName());
                     organizationEntity.get().setPassword(organizationDTO.getPassword());
-                    organizationEntity.get().setAttributesObject(organizationDTO.getAttributesObject());
                     OrganizationEntity save = organizationRepository.save(organizationEntity.get());// Update
                     serviceResponseDTO.setData(save);
-                    serviceResponseDTO.setDescription("Update Template Success");
+                    serviceResponseDTO.setDescription("Update Organization Success");
                     serviceResponseDTO.setMessage("Success");
                     serviceResponseDTO.setCode("2000");
                     serviceResponseDTO.setHttpStatus("OK");
@@ -48,7 +47,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 UUID firstUUID = timeBasedGenerator.generate();
                 organizationEntity.setUuid (firstUUID+"");
                 organizationEntity.setPassword (organizationDTO.getPassword ());
-                organizationEntity.setAttributesObject (organizationDTO.getAttributesObject ());
                 organizationRepository.save (organizationEntity); // Save
                 serviceResponseDTO.setData (organizationEntity);
                 serviceResponseDTO.setDescription  ("Save Template Success");
@@ -69,10 +67,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ServiceResponseDTO getOrganization(String organizationId) {
+    public ServiceResponseDTO getOrganization() {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         try {
-
+            serviceResponseDTO.setData(organizationRepository.findAll());
+            serviceResponseDTO.setDescription  ("Get Organization Success");
+            serviceResponseDTO.setMessage ("Success");
+            serviceResponseDTO.setCode ("2000");
+            serviceResponseDTO.setHttpStatus ("OK");
         } catch (Exception exception) {
             log.info ("LOG :: OrganizationServiceImpl getOrganization() exception: " + exception.getMessage ());
             serviceResponseDTO.setError (exception.getStackTrace ());
@@ -80,9 +82,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             serviceResponseDTO.setMessage ("Fail");
             serviceResponseDTO.setCode ("5000");
             serviceResponseDTO.setHttpStatus ("OK");
-
             return serviceResponseDTO;
         }
-        return null;
+        return serviceResponseDTO;
     }
 }

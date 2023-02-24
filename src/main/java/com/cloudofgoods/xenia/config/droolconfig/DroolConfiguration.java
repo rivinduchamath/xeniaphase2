@@ -15,10 +15,12 @@ public class DroolConfiguration {
     public KnowledgeBuilderConfiguration knowledgeBuilderConfiguration() {
         return KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
     }
+
     @Bean
     public KnowledgeBuilder knowledgeBuilder() {
         return KnowledgeBuilderFactory.newKnowledgeBuilder();
     }
+
     @Bean
     public InternalKnowledgeBase internalKnowledgeBase() {
         return KnowledgeBaseFactory.newKnowledgeBase();

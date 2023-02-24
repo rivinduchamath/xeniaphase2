@@ -10,12 +10,20 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "channels")
+@Document(collection = "channel_entity")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChannelsObjects implements SuperEntity {
+public class ChannelEntity implements SuperEntity {
 
-    @Indexed(unique = true)
-    private String channelsName;
-    private String uuid;
+    @Id
+    private ChannelsId channelsId;
+    @Indexed
+    private String channelUuid;
+    private String type;
+
+    public ChannelEntity(String organizationUuid, String channelName, String channelUuid, String type) {
+        this.channelsId = new ChannelsId(organizationUuid, channelName);
+        this.channelUuid = channelUuid;
+        this.type = type;
+    }
 }

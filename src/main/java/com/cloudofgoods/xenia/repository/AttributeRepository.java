@@ -1,30 +1,22 @@
 package com.cloudofgoods.xenia.repository;
 
-import com.cloudofgoods.xenia.models.AttributesObject;
+import com.cloudofgoods.xenia.entity.xenia.AttributeEntity;
 import com.cloudofgoods.xenia.models.composite.AttributesId;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface AttributeRepository extends MongoRepository <AttributesObject, String> {
-    void deleteAttributeByUuid(String attributeId);
+public interface AttributeRepository extends MongoRepository <AttributeEntity, AttributesId> {
+    Optional<AttributeEntity>  deleteAttributeByAttributeUuid(String attributeId);
 
-    AttributesObject findByUuid(String uuid);
+    Optional<AttributeEntity> findByAttributeUuidEquals(String uuid);
 
-//    Page<AttributesObject> findAllByUuidEqualsAndAttributeNameStartingWithOrTypeIn(String organization, String attributeName, List<String> type, PageRequest of);
+    List<AttributeEntity> findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(String organization, String attributeName, String organization2, List<String> type, PageRequest of);
 
-//    @Query(value = "{ select * from AttributesObject ar  }", fields = "{ 'name' : 1 }")
-//    Page <AttributesObject> findAllByUuidEqualsAndAttributeNameStartingWithOrTypeIn(String organization, String attributeName, List<String> type, PageRequest of);
-//    Page <AttributesObject> findAllByAttributeNameStartingWithAndAttributeIdOrganizationOrTypeInAndOrganization(String attributeName, String organizations, List <String> types, String organization, PageRequest pageRequest);
-
-
-//    @Query(value = "select * from AttributeObject ao ")
-//    Page<AttributesObject> findAllByUuidEqualsAndAttributeNameStartingWithOrTypeIn(String organization, String attributeName, List<String> type, Pageable pageable);
+    long countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(String organizationUuid, String attributeName, List<String> type);
 
 }

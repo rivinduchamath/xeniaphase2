@@ -2,20 +2,20 @@ package com.cloudofgoods.xenia.dto;
 
 import com.cloudofgoods.xenia.entity.SuperEntity;
 import com.cloudofgoods.xenia.models.AttributesObject;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.index.TextIndexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganizationDTO implements SuperEntity {
 
     private String id;
     private String name;
-    private String uuid;
+    private String organizationUserName;
+    private String organizationUuid;
     private String password;
-    private List <AttributesObject> attributesObject;
 }

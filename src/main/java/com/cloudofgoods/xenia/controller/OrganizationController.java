@@ -26,8 +26,8 @@ public class OrganizationController {
     @GetMapping(value = "${server.servlet.getOrganization}")
     @Description("Get OrganizationEntity ")
     @Transactional
-    public ServiceResponseDTO getOrganization(@RequestParam String organizationId) {
+    public ServiceResponseDTO getOrganizations() {
         log.info ("LOG::Inside the OrganizationController saveOrganization ");
-        return organizationService.getOrganization (organizationId);
+        return organizationService.getOrganization ();
     }
 }

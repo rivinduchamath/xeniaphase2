@@ -32,7 +32,7 @@ public class AttributesController {
     @Description("Get AttributesObject")
     public ServiceGetResponseDTO getAttributes(@RequestBody GetRequestAttributeDTO paginationDTO) {
         log.info ("LOG::Inside the AttributesController getAttributes");
-        return attributesService.getAttribute (paginationDTO.getPage (), paginationDTO.getSize (), paginationDTO.getOrganization (), paginationDTO.getAttributeName (), paginationDTO.getType ());
+        return attributesService.getAttribute (paginationDTO);
     }
 
     @DeleteMapping(value = "${server.servlet.deleteAttribute}")

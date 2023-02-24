@@ -4,17 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class D6nDTO {
 
-
-   private int numberOfResponseFrom;
+    private int numberOfResponseFrom;
     private int numberOfResponse;
     private String userEmail;
     private List<String> channels;
-    private  List<String> slot;
+    private List<String> slot;
     private String organization;
+    private LinkedHashMap<String, Object> userData; // @TODO ADd
 }

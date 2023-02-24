@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class TemplateCustomDTO {
 
-private List<TemplateDTO> templateDTO;
-private long total;
+    private List<TemplateDTO> templateDTO;
+    private long total;
 
 }

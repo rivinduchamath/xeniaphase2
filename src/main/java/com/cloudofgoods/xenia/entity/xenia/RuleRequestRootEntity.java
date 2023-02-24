@@ -4,7 +4,9 @@ import com.cloudofgoods.xenia.entity.SuperEntity;
 import com.cloudofgoods.xenia.models.RuleChannelObject;
 import com.cloudofgoods.xenia.util.RuleStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "rule_request_root_model")
 public class RuleRequestRootEntity implements SuperEntity {
     @Id

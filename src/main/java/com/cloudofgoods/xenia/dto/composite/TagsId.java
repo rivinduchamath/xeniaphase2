@@ -1,9 +1,13 @@
 package com.cloudofgoods.xenia.dto.composite;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class ChannelsIdDTO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class TagsId {
     private String organizationUuid;
-    private String channelsName;
+    private String tagsName;
 }

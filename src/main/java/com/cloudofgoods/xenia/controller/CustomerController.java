@@ -45,9 +45,7 @@ public class CustomerController {
     @Transactional
     @Description("Delete Customer")
     public ServiceResponseDTO deleteCustomer(@RequestParam String customerId) {
-        log.info ("LOG::Inside the  CustomerController deleteCustomer ");
-        return userService.deleteCustomer (customerId);
+        log.info("LOG::Inside the  CustomerController deleteCustomer ");
+        return userService.deleteCustomer(customerId);
     }
-
-
 }

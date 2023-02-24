@@ -1,6 +1,8 @@
 package com.cloudofgoods.xenia.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 
@@ -8,6 +10,8 @@ import java.util.List;
 
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SegmentsObject {
 
     @Indexed(unique = true)

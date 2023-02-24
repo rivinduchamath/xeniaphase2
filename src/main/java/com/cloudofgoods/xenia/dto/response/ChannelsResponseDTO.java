@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChannelsResponseDTO {
-    private String channelsName;
-    private String uuid;
+    private String channelName;
+    private String channelUuid;
+    private String type;
 }

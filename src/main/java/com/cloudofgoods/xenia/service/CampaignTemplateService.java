@@ -6,7 +6,7 @@ import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 
 
 public interface CampaignTemplateService {
-    ServiceResponseDTO saveTemplate(CampaignTemplateDTO ruleRootModel);
+    ServiceResponseDTO saveOrUpdateTemplate(CampaignTemplateDTO ruleRootModel);
 
     ServiceResponseDTO getAllCampTemplatePagination(int page, int size);
 

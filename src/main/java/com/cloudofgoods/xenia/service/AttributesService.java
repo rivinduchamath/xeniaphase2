@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service;
 
+import com.cloudofgoods.xenia.dto.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
@@ -12,5 +13,5 @@ public interface AttributesService {
 
     ServiceResponseDTO deleteAttribute(String attributeId, String organizationUuid);
 
-    ServiceGetResponseDTO getAttribute(int page, int size, String organization, String attributeName, List<String> type);
+    ServiceGetResponseDTO getAttribute(GetRequestAttributeDTO getRequestAttributeDTO);
 }

@@ -21,7 +21,7 @@ public class CampaignTemplateController {
     public ServiceResponseDTO saveTemplate(@RequestBody CampaignTemplateDTO ruleRootModelDTO) {
         log.info (ruleRootModelDTO + " LOG::Inside the CampaignTemplateController saveTemplate ");
         log.info ("LOG::Inside the CampaignTemplateController saveTemplate Inside try");
-        return templateService.saveTemplate (ruleRootModelDTO);
+        return templateService.saveOrUpdateTemplate(ruleRootModelDTO);
     }
     @GetMapping(value = "${server.servlet.getPagination}")
     public ServiceResponseDTO getAllTemplateWithPagination(@RequestParam int page, @RequestParam int size) {

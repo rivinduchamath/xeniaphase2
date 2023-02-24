@@ -7,7 +7,6 @@ import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.responces.AudienceResponseObject;
 import com.cloudofgoods.xenia.repository.AudienceRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
-import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.service.AudienceService;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,21 +31,17 @@ public class AudienceServiceImpl implements AudienceService {
     public ServiceResponseDTO saveAudience(AudienceDTO audienceDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            if (audienceDTO.getAudienceUuid() != null) {
-                AudienceEntity audienceEntity;
-                audienceEntity = audienceRepository.findByAudienceUuid(audienceDTO.getAudienceUuid());
-                log.info("LOG:: AudienceServiceImpl saveAudience Update");
-                audienceEntity = setAudienceValues(audienceDTO, audienceEntity);
-                AudienceEntity save = audienceRepository.save(audienceEntity);// Update
-                serviceResponseDTO.setData(save);
-                serviceResponseDTO.setDescription("Update Audience Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
-            } else {
-                log.info("LOG:: AudienceServiceImpl saveAudience Save");
-                Optional<OrganizationEntity> byUuid = organizationRepository.findByUuid(audienceDTO.getOrganizationUuid());
-                byUuid.flatMap(organizationEntity -> organizationEntity.getChannelsObjects().stream().filter(channelsObjects -> Objects.equals(channelsObjects.getUuid(), audienceDTO.getChannelUuid())).findFirst()).ifPresent(channelsObject -> {
+            if (!audienceDTO.getOrganizationUuid().equals("")) {
+                Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(audienceDTO.getOrganizationUuid());
+                if (organization.isPresent() && audienceDTO.getAudienceUuid() != null) {
+                    AudienceEntity audienceEntity = audienceRepository.findByAudienceUuid(audienceDTO.getAudienceUuid());
+                    log.info("LOG:: AudienceServiceImpl saveAudience Update");
+                    audienceEntity = setAudienceValues(audienceDTO, audienceEntity);
+                    AudienceEntity save = audienceRepository.save(audienceEntity);// Update
+                    serviceResponseDTO.setData(save);
+                    serviceResponseDTO.setDescription("Update Audience Success");
+                } else {
+                    log.info("LOG:: AudienceServiceImpl saveAudience Save");
                     AudienceEntity audienceEntity = new AudienceEntity();
                     NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                     UUID firstUUID = timeBasedGenerator.generate();
@@ -56,39 +50,36 @@ public class AudienceServiceImpl implements AudienceService {
                     AudienceEntity save = audienceRepository.save(audienceEntity);
                     serviceResponseDTO.setData(save);
                     serviceResponseDTO.setDescription("Save Audience Success");
-                    serviceResponseDTO.setMessage("Success");
-                    serviceResponseDTO.setCode("2000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                });
-                if (serviceResponseDTO.getData() == null) {
-                    serviceResponseDTO.setDescription("Save Audience Fail Maybe Uuid Issue");
-                    serviceResponseDTO.setMessage("Fail");
-                    serviceResponseDTO.setCode("2000");
-                    serviceResponseDTO.setHttpStatus("OK");
                 }
-                return serviceResponseDTO;
+            } else {
+                serviceResponseDTO.setDescription("OrganizationUuid Cannot Be Null");
             }
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage("Success");
+            serviceResponseDTO.setCode("2000");
+
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl saveAudience() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("AudienceServiceImpl saveAudience() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
         }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
     }
 
     AudienceEntity setAudienceValues(AudienceDTO audienceDTO, AudienceEntity newAudience) {
         if (audienceDTO.getAudienceName() != null) newAudience.setAudienceName(audienceDTO.getAudienceName());
         if (audienceDTO.getAudienceDescription() != null)
             newAudience.setAudienceDescription(audienceDTO.getAudienceDescription());
-        if (audienceDTO.getAudienceJson() != null) newAudience.setAudienceJson(audienceDTO.getAudienceJson());
         if (audienceDTO.getAudienceRuleString() != null)
             newAudience.setAudienceRuleString(audienceDTO.getAudienceRuleString());
         if (audienceDTO.getOrganizationUuid() != null)
             newAudience.setOrganizationUuid(audienceDTO.getOrganizationUuid());
+        if (audienceDTO.getAudienceObject() != null)
+            newAudience.setAudienceObject(audienceDTO.getAudienceObject());
+        if (audienceDTO.getAudienceObject() != null)
+            newAudience.setAudienceObject(audienceDTO.getAudienceObject());
         return newAudience;
     }
 
@@ -111,8 +102,6 @@ public class AudienceServiceImpl implements AudienceService {
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
             serviceResponseDTO.setHttpStatus("OK");
-
-            return serviceResponseDTO;
         }
         return serviceResponseDTO;
     }

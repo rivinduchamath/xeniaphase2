@@ -1,13 +1,22 @@
 package com.cloudofgoods.xenia.dto;
 
+import com.cloudofgoods.xenia.models.RuleChannelObject;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CampaignTemplateDTO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class CampaignTemplateDTO implements Serializable {
 
     private String id;
     public String campaignDescription;
@@ -15,10 +24,12 @@ public class CampaignTemplateDTO {
     public String createdDate;
     public String creator;
     public String endDateTime;
-    public String organization;
-    public String slotId;
-    public int priority;
+    public String organizationUuid;
     public String startDateTime;
-    public String updater;
     public String campTemplateName;
+    public String updater;
+    private List <String> channelIds;
+    private List <String> tags;
+    private List <RuleChannelObject> channels;
+
 }

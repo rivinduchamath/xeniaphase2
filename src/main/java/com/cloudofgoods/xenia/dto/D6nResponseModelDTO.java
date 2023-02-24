@@ -20,13 +20,10 @@ public class D6nResponseModelDTO implements Serializable {
     private double totalCount;
 
     public void addToResponse(double priority, String slotId, String variant) {
-//        System.out.println("priority : " + priority + " Slot :" + slotId + " ChannelContentObject : " + variant);
         this.variant = variant;
         this.slotId = slotId;
         this.priority = priority;
-        String val = "{ \"priority\" : \"" + priority + "\" ,\"Slot\" :\"" + slotId + "\", \"ChannelContentObject\" : \"" + variant+"\"}";
-        this.satisfiedConditions.add(val);
-
+        this.satisfiedConditions.add("{ \"priority\" : \"" + priority + "\" ,\"Slot\" :\"" + slotId + "\", \"ChannelContentObject\" : \"" + variant+"\"}");
     }
 
 }

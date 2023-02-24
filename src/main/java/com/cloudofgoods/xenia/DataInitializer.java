@@ -4,14 +4,21 @@ import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Country;
 import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Marital;
 import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Religion;
 import com.cloudofgoods.xenia.entity.AuthUser;
+import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
+import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.repository.UserRepository;
+import com.fasterxml.uuid.Generators;
+import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -20,9 +27,12 @@ public class DataInitializer {
 
     private final UserRepository users;
 
+    @Autowired
+    private OrganizationRepository organizationRepository;
+
     @EventListener(value = ApplicationReadyEvent.class)
     public void init() {
-        users.deleteAll ();
+        users.deleteAll();
 
         List<String> strings = new ArrayList<>();
         AuthUser user = AuthUser.builder()
@@ -94,5 +104,17 @@ public class DataInitializer {
                 .email("nimal@gmail.com")
                 .build();
         this.users.save(user5);
+
+        long count = organizationRepository.count();
+        if (count == 0) {
+            OrganizationEntity organizationEntity = new OrganizationEntity();
+            log.info("LOG:: CampaignTemplateServiceImpl saveTemplate Save");
+            organizationEntity.setName("COG");
+            NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+            UUID firstUUID = timeBasedGenerator.generate();
+            organizationEntity.setUuid("COG" + "");
+            organizationEntity.setPassword("1234");
+            organizationRepository.save(organizationEntity); // Save
+        }
     }
 }
