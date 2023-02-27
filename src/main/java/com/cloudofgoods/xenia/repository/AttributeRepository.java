@@ -19,4 +19,7 @@ public interface AttributeRepository extends MongoRepository <AttributeEntity, A
 
     long countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(String organizationUuid, String attributeName, List<String> type);
 
+    List<AttributeEntity> findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(String organizationUuid, String attributeName, String organizationUuid1, List<String> type);
+
+   Optional<AttributeEntity> findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(String organizationUuid, String attributeUuid);
 }

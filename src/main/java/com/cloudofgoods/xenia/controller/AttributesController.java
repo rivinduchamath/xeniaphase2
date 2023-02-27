@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
+import com.cloudofgoods.xenia.dto.request.AttributeGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
 import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
@@ -40,11 +41,18 @@ public class AttributesController {
         return attributesService.getAttribute(paginationDTO);
     }
 
-    @DeleteMapping(value = "${server.servlet.deleteAttribute}")
+    @DeleteMapping(value = "${server.servlet.activeInactiveAttribute}")
     @Transactional
-    @Description("Delete AttributesObject")
-    public ServiceResponseDTO deleteAttribute(@RequestParam @NonNull String attributeUuid, @RequestParam @NonNull String organizationUuid) {
-        log.info("LOG::Inside the AttributesController deleteAttribute ");
-        return attributesService.deleteAttribute(attributeUuid, organizationUuid);
+    @Description("activeInactiveAttribute")
+    public ServiceResponseDTO activeInactiveAttribute(@RequestParam @NonNull String attributeUuid, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
+        log.info("LOG::Inside the AttributesController activeInactiveAttribute ");
+        return attributesService.activeInactiveAttribute(attributeUuid, organizationUuid,status);
+    }
+    @PostMapping(value = "${server.servlet.getSingleAttribute}")
+    @Transactional
+    @Description("Get Single Attributes")
+    public ServiceGetResponseDTO getSingleAttribute(@RequestBody @Valid AttributeGetSingleDTO attributeRequestDTO) {
+        log.info("LOG::Inside the AttributesController getSingleAttribute");
+        return attributesService.getSingleAttribute(attributeRequestDTO);
     }
 }

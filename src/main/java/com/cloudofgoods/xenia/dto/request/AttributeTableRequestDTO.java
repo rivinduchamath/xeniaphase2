@@ -17,5 +17,7 @@ public class AttributeTableRequestDTO {
     private int page;
     @NonNegative
     private int size;
+    private boolean pagination;
+    private boolean status;
 }
 

@@ -33,7 +33,6 @@ public class CampaignTemplateDTO implements Serializable {
     public String updater;
     private List <String> channelIds;
     private List <String> tags;
-    @NotEmptyOrNull(message = "Channels Objects Must Not Be Empty")
     private List <RuleChannelObject> channels;
 
 }

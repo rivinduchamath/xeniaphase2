@@ -10,12 +10,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 @Data
-@Document(collection = "audience_entity")
+@Document(collection = "attribute_entity")
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttributeEntity {
     @Id
-//    @Indexed(unique = true , name = "attribute_id")
     private AttributesId attributesId;
     @Indexed(name = "display_name")
     private String displayName;
@@ -27,4 +26,5 @@ public class AttributeEntity {
     private String attributeUuid;
     @Indexed(name = "table_name")
     private String tableName;
+    private boolean status;
 }

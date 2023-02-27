@@ -18,5 +18,6 @@ public class AttributeResponseDTO implements SuperEntity {
     private List <Object> values;
     private String attributeUuid;
     private String tableName;
+    private boolean status;
 }
 

@@ -41,7 +41,7 @@ public class CustomerController {
             return responseDTO;
         }
     }
-    @DeleteMapping(value = "${server.servlet.deleteAttribute}")
+    @DeleteMapping(value = "${server.servlet.activeInactiveAttribute}")
     @Transactional
     @Description("Delete Customer")
     public ServiceResponseDTO deleteCustomer(@RequestParam String customerId) {

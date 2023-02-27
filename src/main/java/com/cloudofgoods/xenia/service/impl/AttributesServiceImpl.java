@@ -1,6 +1,7 @@
 package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
+import com.cloudofgoods.xenia.dto.request.AttributeGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
 import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeResponseDTO;
@@ -43,8 +44,10 @@ public class AttributesServiceImpl implements AttributesService {
                 if (attributeEntity.isPresent()) {
                     attributeEntity.get().setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
                     attributeEntity.get().setAttributeUuid(attributesDTO.getAttributeUuid());
-                    if(NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) attributeEntity.get().setDisplayName(attributesDTO.getDisplayName());
-                    if(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues())) attributeEntity.get().setValues(attributesDTO.getValues());
+                    if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName()))
+                        attributeEntity.get().setDisplayName(attributesDTO.getDisplayName());
+                    if (NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()))
+                        attributeEntity.get().setValues(attributesDTO.getValues());
                     attributeEntity.get().setType(attributesDTO.getType());
                     attributeEntity.get().setTableName(attributesDTO.getTableName());
 
@@ -61,13 +64,12 @@ public class AttributesServiceImpl implements AttributesService {
                     NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                     AttributeEntity attributeEntity = new AttributeEntity();
                     attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
-                    if (NotEmptyOrNullValidator.isNullOrEmpty( attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) {
-                        attributeEntity.setAttributesId(new AttributesId(
-                                attributesDTO.getOrganizationUuid(),
-                                attributesDTO.getAttributeName()));
+                    if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) {
+                        attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
                     }
                     attributeEntity.setDisplayName(attributesDTO.getDisplayName());
                     attributeEntity.setType(attributesDTO.getType());
+                    attributeEntity.setStatus(attributesDTO.isStatus());
                     attributeEntity.setValues(attributesDTO.getValues());
                     attributeEntity.setTableName(attributesDTO.getTableName());
                     serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
@@ -95,6 +97,7 @@ public class AttributesServiceImpl implements AttributesService {
         attributeResponseDTO.setAttributeUuid(save.getAttributeUuid());
         attributeResponseDTO.setDisplayName(save.getDisplayName());
         attributeResponseDTO.setType(save.getType());
+        attributeResponseDTO.setStatus(save.isStatus());
         attributeResponseDTO.setValues(save.getValues());
         attributeResponseDTO.setTableName(save.getTableName());
         return attributeResponseDTO;
@@ -105,17 +108,23 @@ public class AttributesServiceImpl implements AttributesService {
         log.info("LOG:: AttributesServiceImpl getAttribute Service Layer");
         ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
-            List<AttributeEntity> attributeEntities = attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn
-                    (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),
-                            PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()));
+            List<AttributeEntity> attributeEntities;
+            if (requestAttributeDTO.isPagination()) {
+                attributeEntities = attributeRepository.
+                        findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn
+                                (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),
+                                        requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(), PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()));
+            } else {
+                attributeEntities = attributeRepository.
+                        findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn
+                                (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),
+                                        requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());
+            }
             List<AttributeResponseDTO> attributeResponseDTOS = new ArrayList<>();
             for (AttributeEntity attribute : attributeEntities) {
                 attributeResponseDTOS.add(responseAttribute(attribute));
             }
-
-            serviceResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn
-                    (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType()));
-
+            serviceResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType()));
             serviceResponseDTO.setData(attributeResponseDTOS);
             serviceResponseDTO.setDescription("Get Attribute Success");
             serviceResponseDTO.setMessage("Success");
@@ -132,15 +141,41 @@ public class AttributesServiceImpl implements AttributesService {
     }
 
     @Override
-    public ServiceResponseDTO deleteAttribute(String attributeUuid, String organizationUuid) {
+    public ServiceGetResponseDTO getSingleAttribute(AttributeGetSingleDTO attributeRequestDTO) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
+        try {
+            Optional<AttributeEntity> attributeEntities = attributeRepository.
+                    findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeUuid());
+            if (attributeEntities.isPresent()) {
+                serviceResponseDTO.setData(attributeEntities.get());
+                serviceResponseDTO.setDescription("Get Attribute Success");
+            } else {
+                serviceResponseDTO.setDescription("Cannot Find Attribute");
+            }
+            serviceResponseDTO.setMessage("Success");
+            serviceResponseDTO.setCode("2000");
+        }catch (Exception exception){
+            log.info("LOG :: AttributesServiceImpl getSingleAttribute() exception: " + exception.getMessage());
+            serviceResponseDTO.setError(exception.getStackTrace());
+            serviceResponseDTO.setDescription("AttributesServiceImpl getSingleAttribute() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("Fail");
+            serviceResponseDTO.setCode("5000");
+        }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
+    }
+
+    @Override
+    public ServiceResponseDTO activeInactiveAttribute(String attributeUuid, String organizationUuid, boolean status) {
         log.info("LOG:: AttributesServiceImpl deleteAttribute");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
             if (organizationEntity.isPresent()) {
-                Optional<AttributeEntity> attributeEntity = attributeRepository.deleteAttributeByAttributeUuid(attributeUuid);
+                Optional<AttributeEntity> attributeEntity = attributeRepository.findByAttributeUuidEquals(attributeUuid);
                 if (attributeEntity.isPresent()) {
-                    serviceResponseDTO.setData(attributeEntity);
+                    attributeEntity.get().setStatus(status);
+                    serviceResponseDTO.setData(attributeRepository.save(attributeEntity.get()));
                     serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Success");
                     serviceResponseDTO.setMessage("Success");
                 } else {

@@ -8,4 +8,6 @@ public interface AttributesTableService {
     ServiceResponseDTO saveOrUpdateAttributeTable(AttributeTableDTO attributeTableDTO);
 
     ServiceResponseDTO getAttributes(AttributeTableRequestDTO attributeTableDTO);
+
+    ServiceResponseDTO activeInactiveAttributeTable(String attributeTableName, String organizationUuid, boolean status);
 }

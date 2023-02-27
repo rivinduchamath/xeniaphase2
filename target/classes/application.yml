@@ -43,10 +43,12 @@ server:
 #    AttributesController
     saveAttributes: /save
     getAttributes: /get/all
-    deleteAttribute: /delete
+    activeInactiveAttribute: /status
+    getSingleAttribute: /get/single
 #    saveAttributesTable
     saveOrUpdateAttributeTable: /save
     getAttributesTable: /get/all
+    activeInactiveAttributeTable: /status
 #    ChannelsController
     saveChannels: /save
     getChannels: /get/all

@@ -1,11 +1,13 @@
 package com.cloudofgoods.xenia.service.impl;
 
+import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.AttributeTableDTO;
 import com.cloudofgoods.xenia.dto.composite.AttributeTableId;
 import com.cloudofgoods.xenia.dto.request.AttributeTableRequestDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeTableResponseDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeTableSaveUpdateResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
+import com.cloudofgoods.xenia.entity.xenia.AttributeEntity;
 import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.repository.AttributeTableRepository;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             if (attributeTableDTO.getOrganizationUuid() != null) {
-               Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid());
+                Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid());
                 if (organizationEntity.isPresent()) {
                     if (attributeTableDTO.getId() != null) {
                         Optional<AttributeTableEntity> save = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getId(), attributeTableDTO.getOrganizationUuid());
@@ -67,7 +70,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                         serviceResponseDTO.setHttpStatus("OK");
                         return serviceResponseDTO;
                     }
-                }else {
+                } else {
                     serviceResponseDTO.setDescription("Organization Not Found");
                 }
             } else {
@@ -80,7 +83,6 @@ public class AttributesTableServiceImpl implements AttributesTableService {
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
             serviceResponseDTO.setHttpStatus("OK");
-
         }
         return serviceResponseDTO;
     }
@@ -91,36 +93,79 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         log.info("LOG:: AttributesTableServiceImpl getAttributes()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
-            Page<AttributeTableEntity> stream = null;
+            List<AttributeTableEntity> stream;
             long totalCount;
-            if (attributeTableDTO.getName() != null && !attributeTableDTO.getName().equals("")) {
-                stream = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(
-                        attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(),PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-                totalCount = attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(
-                        attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
-
+            if (NotEmptyOrNullValidator.isNullOrEmpty(attributeTableDTO.getName())) {
+                if (attributeTableDTO.isPagination()) {
+                    // With Pagination
+                    stream = attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(attributeTableDTO.getOrganizationUuid(),attributeTableDTO.getName().toLowerCase(),  PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                } else {
+                    // Without Pagination
+                    stream = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
+                }
+                totalCount = attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
             } else {
-                stream = attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEquals(
-                          attributeTableDTO.getOrganizationUuid(),PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-                totalCount = attributeTableRepository.countByAttributeTableId_OrganizationUuidEquals( attributeTableDTO.getOrganizationUuid());
+                if (attributeTableDTO.isPagination()) {
+                    // With Pagination
+                    stream = attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getOrganizationUuid(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                } else {
+                    // Without Pagination
+                    stream = attributeTableRepository.findAllByAttributeTableIdOrganizationUuidEquals(attributeTableDTO.getOrganizationUuid());
+                }
+                totalCount = attributeTableRepository.countByAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getOrganizationUuid());
             }
-            attributeTableResponseDTO.setAttributeTableEntities(stream.getContent());
+            attributeTableResponseDTO.setAttributeTableEntities(stream);
             attributeTableResponseDTO.setCount(totalCount);
             serviceResponseDTO.setData(attributeTableResponseDTO);
-            serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination Success");
+            serviceResponseDTO.setMessage("AttributesTableServiceImpl getAttributes Success");
             serviceResponseDTO.setMessage("Success");
             serviceResponseDTO.setCode("2000");
             serviceResponseDTO.setHttpStatus("OK");
             return serviceResponseDTO;
         } catch (Exception exception) {
-            log.info("LOG :: AudienceServiceImpl getAudienceWithPagination() exception: " + exception.getMessage());
+            log.info("LOG :: AttributesTableServiceImpl getAttributes() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             exception.printStackTrace();
-            serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("AttributesTableServiceImpl getAttributes() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
             serviceResponseDTO.setHttpStatus("OK");
             return serviceResponseDTO;
         }
+    }
+
+    @Override
+    public ServiceResponseDTO activeInactiveAttributeTable(String attributeTableName, String organizationUuid, boolean status) {
+        log.info("LOG:: AttributesTableServiceImpl activeInactiveAttributeTable");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+        try {
+            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
+            if (organizationEntity.isPresent()) {
+                Optional<AttributeTableEntity> attributeTableEntity = attributeTableRepository.findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableName, organizationUuid);
+                if (attributeTableEntity.isPresent()) {
+                    attributeTableEntity.get().setStatus(status);
+                    serviceResponseDTO.setData(attributeTableRepository.save(attributeTableEntity.get()));
+                    serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() Success");
+                    serviceResponseDTO.setMessage("Success");
+                } else {
+                    serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() attribute Not Found");
+                    serviceResponseDTO.setMessage("Success");
+                }
+            } else {
+                serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() Organization Not Found");
+                serviceResponseDTO.setMessage("Fail");
+            }
+            serviceResponseDTO.setCode("2000");
+            serviceResponseDTO.setHttpStatus("OK");
+        } catch (Exception exception) {
+            log.info("LOG :: AttributesTableServiceImpl activeInactiveAttributeTable() exception: " + exception.getMessage());
+            serviceResponseDTO.setError(exception.getStackTrace());
+            exception.printStackTrace();
+            serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("Fail");
+            serviceResponseDTO.setCode("5000");
+            serviceResponseDTO.setHttpStatus("OK");
+        }
+        return serviceResponseDTO;
     }
 }

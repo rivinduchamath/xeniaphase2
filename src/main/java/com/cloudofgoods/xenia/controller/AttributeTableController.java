@@ -5,14 +5,12 @@ import com.cloudofgoods.xenia.dto.request.AttributeTableRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.AttributesTableService;
 import jdk.jfr.Description;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -39,5 +37,12 @@ public class AttributeTableController {
     public ServiceResponseDTO getAttributesTable(@Valid @RequestBody AttributeTableRequestDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController getAttributesTable ");
         return attributesTableService.getAttributes(attributeTableDTO);
+    }
+    @DeleteMapping(value = "${server.servlet.activeInactiveAttributeTable}")
+    @Transactional
+    @Description("activeInactiveAttribute")
+    public ServiceResponseDTO activeInactiveAttributeTable(@RequestParam @NonNull String attributeTableName, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
+        log.info("LOG::Inside the AttributesController activeInactiveAttribute ");
+        return attributesTableService.activeInactiveAttributeTable(attributeTableName, organizationUuid,status);
     }
 }

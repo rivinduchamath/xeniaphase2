@@ -18,5 +18,6 @@ public class AttributeTableEntity {
     private AttributeTableId attributeTableId;
     @Indexed(name = "display_name")
     private String displayName;
+    private boolean status;
 
 }

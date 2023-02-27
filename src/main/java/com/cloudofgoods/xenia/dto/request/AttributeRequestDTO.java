@@ -24,5 +24,6 @@ public class AttributeRequestDTO {
     private String attributeUuid;
     @NotEmptyOrNull(message = "Table Name Must Not Be Empty")
     private String tableName;
+    private boolean status;
 }
 
