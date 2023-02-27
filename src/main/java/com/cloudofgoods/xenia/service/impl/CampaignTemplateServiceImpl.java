@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
+import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.CampaignTemplateDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
@@ -30,10 +31,9 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
         log.info ("LOG:: CampaignTemplateServiceImpl saveTemplate");
         try {
             CampaignTemplateEntity campaignTemplateEntity = new CampaignTemplateEntity ();
-            if(ruleRootModel.getOrganizationUuid() != null) {
                 Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(
                         ruleRootModel.getOrganizationUuid());
-                if (organization.isPresent() && ruleRootModel.getId() != null) {
+                if (organization.isPresent() &&  NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getId())) {
                     log.info("LOG:: CampaignTemplateServiceImpl saveTemplate Update");
                     campaignTemplateEntity.setId(ruleRootModel.getId());
                     campaignTemplateEntity.setCreatedDate (ruleRootModel.getCreatedDate ());
@@ -57,7 +57,6 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
                     serviceResponseDTO.setCode("2000");
                     serviceResponseDTO.setHttpStatus("OK");
                 }
-            }
             return serviceResponseDTO;
         } catch (Exception exception) {
             log.info ("LOG :: CampaignTemplateServiceImpl saveTemplate() exception: " + exception.getMessage ());
@@ -120,18 +119,17 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
     }
 
     CampaignTemplateEntity campaignTemplateEntitySetValues(CampaignTemplateEntity campaignTemplateEntity, CampaignTemplateDTO ruleRootModel) {
-        campaignTemplateEntity.setCampaignDescription (ruleRootModel.getCampaignDescription ());
+        if(NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getCampaignDescription ())) campaignTemplateEntity.setCampaignDescription (ruleRootModel.getCampaignDescription ());
         campaignTemplateEntity.setCampaignName (ruleRootModel.getCampaignName ());
         campaignTemplateEntity.setOrganization (ruleRootModel.getOrganizationUuid());
-        campaignTemplateEntity.setUpdater (ruleRootModel.getUpdater ());
-        campaignTemplateEntity.setStartDateTime (ruleRootModel.getStartDateTime ());
-        campaignTemplateEntity.setEndDateTime (ruleRootModel.getEndDateTime ());
+        if(NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getUpdater ())) campaignTemplateEntity.setUpdater (ruleRootModel.getUpdater ());
+        if(NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getStartDateTime ())) campaignTemplateEntity.setStartDateTime (ruleRootModel.getStartDateTime ());
+        if(NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getEndDateTime ())) campaignTemplateEntity.setEndDateTime (ruleRootModel.getEndDateTime ());
         campaignTemplateEntity.setChannels(ruleRootModel.getChannels());
-        campaignTemplateEntity.setTags(ruleRootModel.getTags());
-        campaignTemplateEntity.setChannels(ruleRootModel.getChannels());
-        campaignTemplateEntity.setChannelIds(ruleRootModel.getChannelIds());
+        if(NotEmptyOrNullValidator.isNullOrEmptyList(ruleRootModel.getTags ())) campaignTemplateEntity.setTags(ruleRootModel.getTags());
+        if(NotEmptyOrNullValidator.isNullOrEmptyList(ruleRootModel.getChannels ())) campaignTemplateEntity.setChannels(ruleRootModel.getChannels());
+        if(NotEmptyOrNullValidator.isNullOrEmptyList(ruleRootModel.getChannelIds ())) campaignTemplateEntity.setChannelIds(ruleRootModel.getChannelIds());
         return campaignTemplateEntity;
-
     }
 
 }

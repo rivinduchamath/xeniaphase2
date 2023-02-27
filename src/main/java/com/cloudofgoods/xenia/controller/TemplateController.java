@@ -6,6 +6,7 @@ import com.cloudofgoods.xenia.service.TemplateService;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.ExecutionException;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/d6n/template")
+@Validated
 public class TemplateController {
 
     private final TemplateService templateService;

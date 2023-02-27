@@ -10,15 +10,19 @@ import jdk.jfr.Description;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/tags")
 @Slf4j
 @AllArgsConstructor
+@Validated
 public class TagsController {
 
     private final TagsService tagsService;
@@ -26,7 +30,7 @@ public class TagsController {
     @PostMapping(value = "${server.servlet.saveTags}")
     @Description("Add Tags")
     @Transactional
-    public ServiceResponseDTO saveTags(@RequestBody TagsDTO tagsDTO) {
+    public ServiceResponseDTO saveTags(@Valid @RequestBody TagsDTO tagsDTO) {
         log.info ("LOG::Inside the CustomerController saveUser ");
         return tagsService.saveOrUpdateTags (tagsDTO);
     }

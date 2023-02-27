@@ -7,6 +7,7 @@ import com.cloudofgoods.xenia.dto.response.AttributeTableResponseDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeTableSaveUpdateResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
+import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.repository.AttributeTableRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.AttributesTableService;
@@ -31,38 +32,43 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             if (attributeTableDTO.getOrganizationUuid() != null) {
-                if (attributeTableDTO.getId() != null) {
-                    Optional<AttributeTableEntity> save = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getId(), attributeTableDTO.getOrganizationUuid());
-                    if (save.isPresent()) {
-                        save.get().setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
-                        AttributeTableEntity save1 = attributeTableRepository.save(save.get());
-                        AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
-                        attributeTableSaveUpdateResponseDTO.setTableName(save1.getAttributeTableId().getAttributeTableName().toLowerCase());
-                        attributeTableSaveUpdateResponseDTO.setDisplayName(save1.getDisplayName());
-                        serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
-                        serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() update success");
+               Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid());
+                if (organizationEntity.isPresent()) {
+                    if (attributeTableDTO.getId() != null) {
+                        Optional<AttributeTableEntity> save = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getId(), attributeTableDTO.getOrganizationUuid());
+                        if (save.isPresent()) {
+                            save.get().setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
+                            AttributeTableEntity save1 = attributeTableRepository.save(save.get());
+                            AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
+                            attributeTableSaveUpdateResponseDTO.setTableName(save1.getAttributeTableId().getAttributeTableName().toLowerCase());
+                            attributeTableSaveUpdateResponseDTO.setDisplayName(save1.getDisplayName());
+                            serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
+                            serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() update success");
+                        } else {
+                            serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() attribute Not Found");
+                        }
+                        serviceResponseDTO.setData(save);
+                        serviceResponseDTO.setMessage("success");
+                        serviceResponseDTO.setCode("2000");
+                        serviceResponseDTO.setHttpStatus("OK");
+                        return serviceResponseDTO;
                     } else {
-                        serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() attribute Not Found");
+                        AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
+                        attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
+                        attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
+                        AttributeTableEntity save = attributeTableRepository.save(attributeTableEntity);
+                        serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() save success");
+                        AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
+                        attributeTableSaveUpdateResponseDTO.setTableName(save.getAttributeTableId().getAttributeTableName().toLowerCase());
+                        attributeTableSaveUpdateResponseDTO.setDisplayName(save.getDisplayName());
+                        serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
+                        serviceResponseDTO.setMessage("success");
+                        serviceResponseDTO.setCode("2000");
+                        serviceResponseDTO.setHttpStatus("OK");
+                        return serviceResponseDTO;
                     }
-                    serviceResponseDTO.setData(save);
-                    serviceResponseDTO.setMessage("success");
-                    serviceResponseDTO.setCode("2000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                    return serviceResponseDTO;
-                } else {
-                    AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
-                    attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
-                    attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
-                    AttributeTableEntity save = attributeTableRepository.save(attributeTableEntity);
-                    serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() save success");
-                    AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
-                    attributeTableSaveUpdateResponseDTO.setTableName(save.getAttributeTableId().getAttributeTableName().toLowerCase());
-                    attributeTableSaveUpdateResponseDTO.setDisplayName(save.getDisplayName());
-                    serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
-                    serviceResponseDTO.setMessage("success");
-                    serviceResponseDTO.setCode("2000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                    return serviceResponseDTO;
+                }else {
+                    serviceResponseDTO.setDescription("Organization Not Found");
                 }
             } else {
                 serviceResponseDTO.setDescription("Organization cannot be empty ");

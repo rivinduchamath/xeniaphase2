@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
+import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.AudienceDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AudienceEntity;
@@ -10,6 +11,7 @@ import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.AudienceService;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,19 +23,18 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AudienceServiceImpl implements AudienceService {
-    @Autowired
-    private AudienceRepository audienceRepository;
-    @Autowired
-    private OrganizationRepository organizationRepository;
+    private final AudienceRepository audienceRepository;
+    private final OrganizationRepository organizationRepository;
 
     @Override
     public ServiceResponseDTO saveAudience(AudienceDTO audienceDTO) {
+        log.info("LOG:: AudienceServiceImpl saveAudience Service Layer");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            if (!audienceDTO.getOrganizationUuid().equals("")) {
                 Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(audienceDTO.getOrganizationUuid());
-                if (organization.isPresent() && audienceDTO.getAudienceUuid() != null) {
+                if (organization.isPresent() && NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceUuid())) {
                     AudienceEntity audienceEntity = audienceRepository.findByAudienceUuid(audienceDTO.getAudienceUuid());
                     log.info("LOG:: AudienceServiceImpl saveAudience Update");
                     audienceEntity = setAudienceValues(audienceDTO, audienceEntity);
@@ -51,9 +52,6 @@ public class AudienceServiceImpl implements AudienceService {
                     serviceResponseDTO.setData(save);
                     serviceResponseDTO.setDescription("Save Audience Success");
                 }
-            } else {
-                serviceResponseDTO.setDescription("OrganizationUuid Cannot Be Null");
-            }
             serviceResponseDTO.setMessage("Success");
             serviceResponseDTO.setCode("2000");
 
@@ -69,17 +67,11 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     AudienceEntity setAudienceValues(AudienceDTO audienceDTO, AudienceEntity newAudience) {
-        if (audienceDTO.getAudienceName() != null) newAudience.setAudienceName(audienceDTO.getAudienceName());
-        if (audienceDTO.getAudienceDescription() != null)
-            newAudience.setAudienceDescription(audienceDTO.getAudienceDescription());
-        if (audienceDTO.getAudienceRuleString() != null)
-            newAudience.setAudienceRuleString(audienceDTO.getAudienceRuleString());
-        if (audienceDTO.getOrganizationUuid() != null)
-            newAudience.setOrganizationUuid(audienceDTO.getOrganizationUuid());
-        if (audienceDTO.getAudienceObject() != null)
-            newAudience.setAudienceObject(audienceDTO.getAudienceObject());
-        if (audienceDTO.getAudienceObject() != null)
-            newAudience.setAudienceObject(audienceDTO.getAudienceObject());
+        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceName())) newAudience.setAudienceName(audienceDTO.getAudienceName());
+        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceDescription())) newAudience.setAudienceDescription(audienceDTO.getAudienceDescription());
+        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceRuleString())) newAudience.setAudienceRuleString(audienceDTO.getAudienceRuleString());
+        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getOrganizationUuid())) newAudience.setOrganizationUuid(audienceDTO.getOrganizationUuid());
+        if (NotEmptyOrNullValidator.isNullObject(audienceDTO.getAudienceObject())) newAudience.setAudienceObject(audienceDTO.getAudienceObject());
         return newAudience;
     }
 

@@ -1,7 +1,8 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
+import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
+import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
@@ -36,46 +37,44 @@ public class AttributesServiceImpl implements AttributesService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer");
         try {
-            if (attributesDTO.getAttributeUuid() != null) { // Update
+            if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeUuid())) { // Update
                 log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
-                    Optional<AttributeEntity> attributeEntity = attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid());
-                    if (attributeEntity.isPresent()) {
-                        if (!attributesDTO.getOrganizationUuid().equals("") && !attributesDTO.getAttributeName().equals("")){
-                        attributeEntity.get().setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));}
+                Optional<AttributeEntity> attributeEntity = attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid());
+                if (attributeEntity.isPresent()) {
+                    attributeEntity.get().setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
+                    attributeEntity.get().setAttributeUuid(attributesDTO.getAttributeUuid());
+                    if(NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) attributeEntity.get().setDisplayName(attributesDTO.getDisplayName());
+                    if(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues())) attributeEntity.get().setValues(attributesDTO.getValues());
+                    attributeEntity.get().setType(attributesDTO.getType());
+                    attributeEntity.get().setTableName(attributesDTO.getTableName());
 
-                        attributeEntity.get().setAttributeUuid(attributesDTO.getAttributeUuid());
-                        attributeEntity.get().setDisplayName(attributesDTO.getDisplayName());
-                        attributeEntity.get().setType(attributesDTO.getType());
-                        attributeEntity.get().setValues(attributesDTO.getValues());
-                        attributeEntity.get().setTableName(attributesDTO.getTableName());
-
-                        serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity.get())));
-                        serviceResponseDTO.setDescription("Update Attribute Success");
-                    }else {
-                        serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Fount");
-                    }
+                    serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity.get())));
+                    serviceResponseDTO.setDescription("Update Attribute Success");
+                } else {
+                    serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Fount");
+                }
             } else {  // Save
                 log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Save");
 
-                    Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid());
-                    if (organization.isPresent()) {
-                        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                        AttributeEntity attributeEntity = new AttributeEntity();
-                        attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
-                        if (!attributesDTO.getOrganizationUuid().equals("") && !attributesDTO.getAttributeName().equals("")){
-                            attributeEntity.setAttributesId(new AttributesId(
-                                    attributesDTO.getOrganizationUuid(),
-                                            attributesDTO.getAttributeName()));
-                        }
-                        attributeEntity.setDisplayName(attributesDTO.getDisplayName());
-                        attributeEntity.setType(attributesDTO.getType());
-                        attributeEntity.setValues(attributesDTO.getValues());
-                        attributeEntity.setTableName(attributesDTO.getTableName());
-                        serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
-                        serviceResponseDTO.setDescription("Save Attribute Success");
-                    }else {
-                        serviceResponseDTO.setDescription("Save Attribute Fail Organization Not Found");
+                Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid());
+                if (organization.isPresent()) {
+                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                    AttributeEntity attributeEntity = new AttributeEntity();
+                    attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
+                    if (NotEmptyOrNullValidator.isNullOrEmpty( attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) {
+                        attributeEntity.setAttributesId(new AttributesId(
+                                attributesDTO.getOrganizationUuid(),
+                                attributesDTO.getAttributeName()));
                     }
+                    attributeEntity.setDisplayName(attributesDTO.getDisplayName());
+                    attributeEntity.setType(attributesDTO.getType());
+                    attributeEntity.setValues(attributesDTO.getValues());
+                    attributeEntity.setTableName(attributesDTO.getTableName());
+                    serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
+                    serviceResponseDTO.setDescription("Save Attribute Success");
+                } else {
+                    serviceResponseDTO.setDescription("Save Attribute Fail Organization Not Found");
+                }
             }
             serviceResponseDTO.setMessage("Success");
             serviceResponseDTO.setCode("2000");
@@ -87,7 +86,7 @@ public class AttributesServiceImpl implements AttributesService {
             serviceResponseDTO.setCode("5000");
         }
         serviceResponseDTO.setHttpStatus("OK");
-       return serviceResponseDTO;
+        return serviceResponseDTO;
     }
 
     private AttributeResponseDTO responseAttribute(AttributeEntity save) {
@@ -107,14 +106,14 @@ public class AttributesServiceImpl implements AttributesService {
         ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
             List<AttributeEntity> attributeEntities = attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn
-                    (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(),requestAttributeDTO.getType(),
+                    (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),
                             PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()));
             List<AttributeResponseDTO> attributeResponseDTOS = new ArrayList<>();
-            for (AttributeEntity attribute  :  attributeEntities){
-                attributeResponseDTOS.add( responseAttribute(attribute));
+            for (AttributeEntity attribute : attributeEntities) {
+                attributeResponseDTOS.add(responseAttribute(attribute));
             }
 
-           serviceResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn
+            serviceResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn
                     (requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType()));
 
             serviceResponseDTO.setData(attributeResponseDTOS);
@@ -138,17 +137,17 @@ public class AttributesServiceImpl implements AttributesService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
-            if(organizationEntity.isPresent()){
+            if (organizationEntity.isPresent()) {
                 Optional<AttributeEntity> attributeEntity = attributeRepository.deleteAttributeByAttributeUuid(attributeUuid);
-                if(attributeEntity.isPresent()){
+                if (attributeEntity.isPresent()) {
                     serviceResponseDTO.setData(attributeEntity);
                     serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Success");
                     serviceResponseDTO.setMessage("Success");
-                }else {
+                } else {
                     serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() attribute Not Found");
                     serviceResponseDTO.setMessage("Success");
                 }
-            }else {
+            } else {
                 serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Organization Not Found");
                 serviceResponseDTO.setMessage("Fail");
             }

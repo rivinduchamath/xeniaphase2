@@ -41,7 +41,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }else {
                 OrganizationEntity organizationEntity = new OrganizationEntity();
-                log.info ("LOG:: CampaignTemplateServiceImpl saveTemplate Save");
+                log.info ("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Save");
                 organizationEntity.setName (organizationDTO.getName ());
                 NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                 UUID firstUUID = timeBasedGenerator.generate();
@@ -49,7 +49,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationEntity.setPassword (organizationDTO.getPassword ());
                 organizationRepository.save (organizationEntity); // Save
                 serviceResponseDTO.setData (organizationEntity);
-                serviceResponseDTO.setDescription  ("Save Template Success");
+                serviceResponseDTO.setDescription  ("Save Organization Success");
                 serviceResponseDTO.setMessage ("Success");
                 serviceResponseDTO.setCode ("2000");
                 serviceResponseDTO.setHttpStatus ("OK");

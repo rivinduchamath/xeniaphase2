@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.config.droolconfig;
+package com.cloudofgoods.xenia.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

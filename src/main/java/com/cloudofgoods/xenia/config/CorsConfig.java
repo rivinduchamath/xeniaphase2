@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.config.droolconfig;
+package com.cloudofgoods.xenia.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
