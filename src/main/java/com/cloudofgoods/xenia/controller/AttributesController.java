@@ -1,6 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
-import com.cloudofgoods.xenia.dto.GetRequestAttributeDTO;
+import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;

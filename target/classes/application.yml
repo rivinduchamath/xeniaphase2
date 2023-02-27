@@ -60,7 +60,9 @@ server:
 #    DashboardController
     organizationDataDashboard: /organization/get
     campaignPerformance: /campaign/get
-
+#    Tags Controller
+    saveTags: /save
+    getTags: /get
 
 spring:
 #  redis:

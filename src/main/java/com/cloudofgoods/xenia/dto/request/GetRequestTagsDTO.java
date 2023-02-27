@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.dto;
+package com.cloudofgoods.xenia.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,12 +9,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetRequestAttributeDTO {
+public class GetRequestTagsDTO {
 
     private int page;
     private int size;
     private String organizationUuid;
-    private String attributeName;
-    private List<String> type;
-
+    private String tagsName;
 }

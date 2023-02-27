@@ -37,7 +37,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                         save.get().setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
                         AttributeTableEntity save1 = attributeTableRepository.save(save.get());
                         AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
-                        attributeTableSaveUpdateResponseDTO.setTableName(save1.getAttributeTableId().getAttributeTableName());
+                        attributeTableSaveUpdateResponseDTO.setTableName(save1.getAttributeTableId().getAttributeTableName().toLowerCase());
                         attributeTableSaveUpdateResponseDTO.setDisplayName(save1.getDisplayName());
                         serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
                         serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() update success");
@@ -52,11 +52,11 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                 } else {
                     AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
                     attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
-                    attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
+                    attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
                     AttributeTableEntity save = attributeTableRepository.save(attributeTableEntity);
                     serviceResponseDTO.setDescription("AttributesTableServiceImpl saveOrUpdateAttributeTable() save success");
                     AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
-                    attributeTableSaveUpdateResponseDTO.setTableName(save.getAttributeTableId().getAttributeTableName());
+                    attributeTableSaveUpdateResponseDTO.setTableName(save.getAttributeTableId().getAttributeTableName().toLowerCase());
                     attributeTableSaveUpdateResponseDTO.setDisplayName(save.getDisplayName());
                     serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
                     serviceResponseDTO.setMessage("success");
@@ -65,10 +65,8 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                     return serviceResponseDTO;
                 }
             } else {
-
                 serviceResponseDTO.setDescription("Organization cannot be empty ");
             }
-
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             exception.getStackTrace();
@@ -89,13 +87,16 @@ public class AttributesTableServiceImpl implements AttributesTableService {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
             Page<AttributeTableEntity> stream = null;
             long totalCount;
-            if (!attributeTableDTO.getName().equals("")) {
-                stream = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWith(attributeTableDTO.getName(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-                totalCount = attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWith(attributeTableDTO.getName());
+            if (attributeTableDTO.getName() != null && !attributeTableDTO.getName().equals("")) {
+                stream = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(
+                        attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(),PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                totalCount = attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(
+                        attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
 
             } else {
-                stream = attributeTableRepository.findAll(PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-                totalCount = attributeTableRepository.count();
+                stream = attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEquals(
+                          attributeTableDTO.getOrganizationUuid(),PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
+                totalCount = attributeTableRepository.countByAttributeTableId_OrganizationUuidEquals( attributeTableDTO.getOrganizationUuid());
             }
             attributeTableResponseDTO.setAttributeTableEntities(stream.getContent());
             attributeTableResponseDTO.setCount(totalCount);
@@ -108,6 +109,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl getAudienceWithPagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
+            exception.printStackTrace();
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");

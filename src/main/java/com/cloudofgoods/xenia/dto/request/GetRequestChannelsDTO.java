@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AttributeTableRequestDTO {
-    private String name;
-    private String organizationUuid;
+public class GetRequestChannelsDTO {
     private int page;
     private int size;
-}
+    private String organizationUuid;
+    private String channelName;
 
+}

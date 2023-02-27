@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/d6n/attribute")
+@RequestMapping("/d6n/attribute/table")
 @RequiredArgsConstructor
 public class AttributeTableController {
 

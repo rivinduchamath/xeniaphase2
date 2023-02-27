@@ -14,4 +14,12 @@ public interface AttributeTableRepository extends MongoRepository<AttributeTable
     long countByAttributeTableId_AttributeTableNameStartingWith(String name);
 
     Optional<AttributeTableEntity> findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(String name, String organizationUuid);
+
+    Page<AttributeTableEntity> findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(String toLowerCase, String organizationUuid, PageRequest of);
+
+    long countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(String toLowerCase, String organizationUuid);
+
+    Page<AttributeTableEntity> findAllByAttributeTableId_OrganizationUuidEquals(String organizationUuid, PageRequest of);
+
+    long countByAttributeTableId_OrganizationUuidEquals(String organizationUuid);
 }

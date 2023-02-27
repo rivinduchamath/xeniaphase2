@@ -1,13 +1,12 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.dto.GetRequestAttributeDTO;
+import com.cloudofgoods.xenia.dto.request.GetRequestAttributeDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeRequestDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AttributeEntity;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
-import com.cloudofgoods.xenia.models.AttributesObject;
 import com.cloudofgoods.xenia.models.composite.AttributesId;
 import com.cloudofgoods.xenia.repository.AttributeRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
@@ -16,17 +15,12 @@ import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Service
