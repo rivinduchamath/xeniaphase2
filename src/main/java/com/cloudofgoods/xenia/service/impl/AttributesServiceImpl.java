@@ -8,7 +8,6 @@ import com.cloudofgoods.xenia.dto.response.AttributeResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AttributeEntity;
-import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.composite.AttributesId;
 import com.cloudofgoods.xenia.repository.AttributeRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
@@ -40,46 +38,46 @@ public class AttributesServiceImpl implements AttributesService {
         log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-                organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid()).ifPresentOrElse(
-                        organizationEntity -> {
-                            if (NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeUuid())) { // Update
-                                log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
-                                attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid()).ifPresentOrElse(
-                                        attributeEntity -> {
-                                            attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
-                                            attributeEntity.setAttributeUuid(attributesDTO.getAttributeUuid());
-                                            attributeEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) ? attributesDTO.getAttributeName() : attributeEntity.getDisplayName());
-                                            attributeEntity.setValues(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()) ? attributesDTO.getValues() : attributeEntity.getValues());
-                                            attributeEntity.setValues(attributesDTO.getValues());
-                                            attributeEntity.setType(attributesDTO.getType());
-                                            attributeEntity.setTableName(attributesDTO.getTableName());
-                                            serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
-                                            serviceResponseDTO.setDescription("Update Attribute Success");
-                                        },
-                                        () -> {
-                                            serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Found");
-                                        }
-                                );
-                            } else {  // Save
-                                log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Save");
-                                NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                                AttributeEntity attributeEntity = new AttributeEntity();
-                                attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
-                                attributeEntity.setAttributesId((NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) )
-                                        ? new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()) : null );
-                                attributeEntity.setDisplayName(attributesDTO.getDisplayName());
-                                attributeEntity.setType(attributesDTO.getType());
-                                attributeEntity.setStatus(attributesDTO.isStatus());
-                                attributeEntity.setValues(attributesDTO.getValues());
-                                attributeEntity.setTableName(attributesDTO.getTableName());
-                                serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
-                                serviceResponseDTO.setDescription("Save Attribute Success");
-                            }
-                        },
-                        () -> {
-                            serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
+            organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid()).ifPresentOrElse(
+                    organizationEntity -> {
+                        if (NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeUuid())) { // Update
+                            log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
+                            attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid()).ifPresentOrElse(
+                                    attributeEntity -> {
+                                        attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
+                                        attributeEntity.setAttributeUuid(attributesDTO.getAttributeUuid());
+                                        attributeEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) ? attributesDTO.getAttributeName() : attributeEntity.getDisplayName());
+                                        attributeEntity.setValues(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()) ? attributesDTO.getValues() : attributeEntity.getValues());
+                                        attributeEntity.setValues(attributesDTO.getValues());
+                                        attributeEntity.setType(attributesDTO.getType());
+                                        attributeEntity.setTableName(attributesDTO.getTableName());
+                                        serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
+                                        serviceResponseDTO.setDescription("Update Attribute Success");
+                                    },
+                                    () -> {
+                                        serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Found");
+                                    }
+                            );
+                        } else {  // Save
+                            log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Save");
+                            NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                            AttributeEntity attributeEntity = new AttributeEntity();
+                            attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
+                            attributeEntity.setAttributesId((NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()))
+                                    ? new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()) : null);
+                            attributeEntity.setDisplayName(attributesDTO.getDisplayName());
+                            attributeEntity.setType(attributesDTO.getType());
+                            attributeEntity.setStatus(attributesDTO.isStatus());
+                            attributeEntity.setValues(attributesDTO.getValues());
+                            attributeEntity.setTableName(attributesDTO.getTableName());
+                            serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
+                            serviceResponseDTO.setDescription("Save Attribute Success");
                         }
-                );
+                    },
+                    () -> {
+                        serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
+                    }
+            );
             serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
@@ -108,7 +106,7 @@ public class AttributesServiceImpl implements AttributesService {
     @Override
     public ServiceGetResponseDTO getAttribute(GetRequestAttributeDTO requestAttributeDTO) {
         log.info("LOG:: AttributesServiceImpl getAttribute Service Layer");
-        ServiceGetResponseDTO serviceGetResponseDTO =new ServiceGetResponseDTO();
+        ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
             List<AttributeEntity> attributeEntities = requestAttributeDTO.isPagination()
                     ? attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(

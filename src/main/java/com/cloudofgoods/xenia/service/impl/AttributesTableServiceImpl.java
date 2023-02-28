@@ -10,7 +10,6 @@ import com.cloudofgoods.xenia.dto.response.AttributeTableSaveUpdateResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
-import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.repository.AttributeTableRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.AttributesTableService;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
 
@@ -36,40 +34,43 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         log.info("LOG:: AttributesTableServiceImpl saveOrUpdateAttributeTable()");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid());
-            if (organizationEntity.isPresent()) {
-                AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
-                if (NotEmptyOrNullValidator.isNotNullOrEmpty(attributeTableDTO.getId())) {
-                    Optional<AttributeTableEntity> save = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getId(), attributeTableDTO.getOrganizationUuid());
-                    if (save.isPresent()) {
-                        save.get().setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
-                        AttributeTableEntity attributeTableEntity = attributeTableRepository.save(save.get());
-                        attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
-                        attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
-                        serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
-                        serviceResponseDTO.setDescription("Attributes Table Service update success");
-                    } else {
-                        serviceResponseDTO.setDescription("Attributes Table Service update Fail attribute Not Found");
-                    }
-                    serviceResponseDTO.setMessage(SUCCESS);
-                    serviceResponseDTO.setCode(STATUS_2000);
-                    serviceResponseDTO.setHttpStatus(STATUS_OK);
-                } else {
-                    AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
-                    attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
-                    attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
-                    attributeTableEntity = attributeTableRepository.save(attributeTableEntity);
-                    serviceResponseDTO.setDescription("Attributes Table Service save success");
-                    attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
-                    attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
-                    serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
-                    serviceResponseDTO.setMessage(SUCCESS);
-                    serviceResponseDTO.setCode(STATUS_2000);
-                    serviceResponseDTO.setHttpStatus(STATUS_OK);
-                }
-            } else {
-                serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
-            }
+            organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid())
+                    .ifPresentOrElse(
+                            organizationEntity -> {
+                                AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
+                                if (NotEmptyOrNullValidator.isNotNullOrEmpty(attributeTableDTO.getId())) {
+                                    attributeTableRepository.findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getId(), attributeTableDTO.getOrganizationUuid())
+                                            .ifPresentOrElse(
+                                                    save -> {
+                                                        save.setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
+                                                        AttributeTableEntity attributeTableEntity = attributeTableRepository.save(save);
+                                                        attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
+                                                        attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
+                                                        serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
+                                                        serviceResponseDTO.setDescription("Attributes Table Service update success");
+                                                    },
+                                                    () -> serviceResponseDTO.setDescription("Attributes Table Service update Fail attribute Not Found")
+                                            );
+                                    serviceResponseDTO.setMessage(SUCCESS);
+                                    serviceResponseDTO.setCode(STATUS_2000);
+                                    serviceResponseDTO.setHttpStatus(STATUS_OK);
+                                } else {
+                                    AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
+                                    attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
+                                    attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
+                                    attributeTableEntity = attributeTableRepository.save(attributeTableEntity);
+                                    serviceResponseDTO.setDescription("Attributes Table Service save success");
+                                    attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
+                                    attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
+                                    serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
+                                    serviceResponseDTO.setMessage(SUCCESS);
+                                    serviceResponseDTO.setCode(STATUS_2000);
+                                    serviceResponseDTO.setHttpStatus(STATUS_OK);
+                                }
+                            },
+                            () -> serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND)
+                    );
+
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("AttributesTableServiceImpl saveAttributeTable() exception " + exception.getMessage());
@@ -86,16 +87,18 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         log.info("LOG:: AttributesTableServiceImpl getAttributes()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
-            List<AttributeTableEntity> stream;
-            if (attributeTableDTO.isPagination()) {
-                // With Pagination
-                stream = attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize()));
-                serviceResponseDTO.setMessage("AttributesTableServiceImpl Get Attributes With Pagination Success");
-            } else {
-                // Without Pagination
-                stream = attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
-                serviceResponseDTO.setMessage("AttributesTableServiceImpl Get Attributes Without Pagination Success");
-            }
+            List<AttributeTableEntity> stream = attributeTableDTO.isPagination() ?
+                    attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(
+                            attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(),
+                            PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize())
+                    ) :
+                    attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEquals(
+                            attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid()
+                    );
+            serviceResponseDTO.setMessage(attributeTableDTO.isPagination() ?
+                    "AttributesTableServiceImpl Get Attributes With Pagination Success" :
+                    "AttributesTableServiceImpl Get Attributes Without Pagination Success"
+            );
             attributeTableResponseDTO.setAttributeTableEntities(stream);
             attributeTableResponseDTO.setCount(attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
             serviceResponseDTO.setData(attributeTableResponseDTO);
@@ -119,19 +122,22 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         log.info("LOG:: AttributesTableServiceImpl activeInactiveAttributeTable");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
-            if (organizationEntity.isPresent()) {
-                Optional<AttributeTableEntity> attributeTableEntity = attributeTableRepository.findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableName.toLowerCase(), organizationUuid);
-                if (attributeTableEntity.isPresent()) {
-                    attributeTableEntity.get().setStatus(status);
-                    serviceResponseDTO.setData(attributeTableRepository.save(attributeTableEntity.get()));
-                    serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() Success");
-                } else {
-                    serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() attribute Not Found");
-                }
-            } else {
-                serviceResponseDTO.setDescription("AttributesTableServiceImpl activeInactiveAttributeTable() Organization Not Found");
-            }
+            organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid)
+                    .ifPresentOrElse(
+                            organizationEntity -> {
+                                attributeTableRepository.findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableName.toLowerCase(), organizationUuid)
+                                        .ifPresentOrElse(
+                                                attributeTableEntity -> {
+                                                    attributeTableEntity.setStatus(status);
+                                                    attributeTableRepository.save(attributeTableEntity);
+                                                    serviceResponseDTO.setData(attributeTableEntity);
+                                                    serviceResponseDTO.setDescription("Get Attribute Table Success");
+                                                },
+                                                () -> serviceResponseDTO.setDescription("Cannot Find Attribute Table")
+                                        );
+                            },
+                            () -> serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND)
+                    );
             serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
             serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -151,13 +157,14 @@ public class AttributesTableServiceImpl implements AttributesTableService {
     public ServiceGetResponseDTO getSingleAttributeTable(AttributeTableGetSingleDTO attributeRequestDTO) {
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            Optional<AttributeTableEntity> attributeTableEntity = attributeTableRepository.findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeTableName().toLowerCase());
-            if (attributeTableEntity.isPresent()) {
-                serviceGetResponseDTO.setData(attributeTableEntity.get());
-                serviceGetResponseDTO.setDescription("Get Attribute Table Success");
-            } else {
-                serviceGetResponseDTO.setDescription("Cannot Find Attribute Table");
-            }
+            attributeTableRepository.findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeTableName().toLowerCase())
+                    .ifPresentOrElse(
+                            attributeTableEntity -> {
+                                serviceGetResponseDTO.setData(attributeTableEntity);
+                                serviceGetResponseDTO.setDescription("Get Attribute Table Success");
+                            },
+                            () -> serviceGetResponseDTO.setDescription("Cannot Find Attribute Table")
+                    );
             serviceGetResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AttributesServiceImpl getSingleAttributeTable() exception: " + exception.getMessage());
