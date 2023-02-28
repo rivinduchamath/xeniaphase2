@@ -27,10 +27,11 @@ public class SegmentTemplateServiceImpl implements TemplateService {
     private final OrganizationRepository organizationRepository;
 
     private final SegmentTemplateRepository segmentTemplateRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
+
 
     @Override
     public ServiceResponseDTO getAllTemplate() {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             List<SegmentTemplateEntity> all = segmentTemplateRepository.findAll();
             serviceResponseDTO.setData(all);
@@ -50,6 +51,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
 
     @Override
     public ServiceResponseDTO getTemplateByName(String name) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findAllBySegmentNameStartsWith(name);
             serviceResponseDTO.setData(template);
@@ -73,6 +75,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
 
     @Override
     public ServiceResponseDTO getTemplateById(String templateId) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findById(templateId);
             serviceResponseDTO.setData(template);
@@ -96,6 +99,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
 
     @Override
     public ServiceResponseDTO deleteTemplateById(String templateId) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             segmentTemplateRepository.deleteById(templateId);
             serviceResponseDTO.setDescription("TemplateServiceImpl deleteTemplateById Success");
@@ -114,6 +118,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
     @Override
     public ServiceResponseDTO saveTemplate(SegmentTemplateEntity ruleRootModel) {
         log.info("LOG:: TemplateServiceImpl saveTemplate");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         Optional<OrganizationEntity> byUuid = organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid());
         if (byUuid.isPresent()) {
                 try {
@@ -156,6 +161,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
 
     @Override
     public ServiceResponseDTO getAllTemplatePagination(int page, int size) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             log.info("LOG:: TemplateServiceImpl getAllTemplatePagination()");
             List<SegmentTemplateEntity> templateEntities = segmentTemplateRepository.findAllBySegmentNameNotNull(PageRequest.of(page, size));

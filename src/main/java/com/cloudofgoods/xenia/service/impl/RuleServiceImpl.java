@@ -40,7 +40,6 @@ public class RuleServiceImpl implements RuleService {
     @Value("${knowledge.package.name}")
     private String packageName;
     private final AudienceRepository audienceRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
 
 //    @Override
 //    @Transactional
@@ -69,6 +68,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public ServiceResponseDTO updateRules(List<String> ruleRootModel) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG :: RuleServiceImpl saveOrUpdateRuleListRules ");
         try {
             List<RuleRequestRootEntity> ruleRequestRootEntities = new ArrayList<>();
@@ -237,6 +237,7 @@ public class RuleServiceImpl implements RuleService {
 
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
     public ServiceResponseDTO removeRuleFromKBAndDatabase(String segmentName) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + segmentName);
         try {
 
@@ -259,6 +260,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public ServiceResponseDTO updateCampaignStatus(String campaignId, String status) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         RuleRequestRootEntity ruleRequestRootEntity = findRootRuleById(campaignId);
         if ((RuleStatus.INACTIVE.toString().equals(status)) && ruleRequestRootEntity.getStatusEnum().equals(RuleStatus.ACTIVE)) {
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + campaignId);
@@ -315,6 +317,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public ServiceResponseDTO findByID(String id) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         Optional<RuleRequestRootEntity> byId = rootRuleRepository.findById(id);
         if (byId.isPresent()) {
             serviceResponseDTO.setData(byId);

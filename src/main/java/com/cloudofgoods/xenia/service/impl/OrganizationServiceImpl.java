@@ -21,12 +21,11 @@ import java.util.UUID;
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
-
     @Override
     public ServiceResponseDTO saveOrUpdateOrganization(OrganizationDTO organizationDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            if (NotEmptyOrNullValidator.isNullOrEmpty(organizationDTO.getOrganizationUuid())) {
+            if (NotEmptyOrNullValidator.isNotNullOrEmpty(organizationDTO.getOrganizationUuid())) {
                 Optional<OrganizationEntity> organizationEntity = organizationRepository.findByUuidEquals(organizationDTO.getOrganizationUuid());
                 if (organizationEntity.isPresent()) {
                     log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
@@ -65,6 +64,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ServiceResponseDTO getOrganization() {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             serviceResponseDTO.setData(organizationRepository.findAll());
             serviceResponseDTO.setDescription("Get Organization Success");

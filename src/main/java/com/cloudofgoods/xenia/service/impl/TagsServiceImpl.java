@@ -27,11 +27,11 @@ import static com.cloudofgoods.xenia.util.Utils.*;
 public class TagsServiceImpl implements TagsService {
     private final OrganizationRepository organizationRepository;
     private final TagsRepository tagsRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
-    private final ServiceGetResponseDTO serviceGetResponseDTO;
+
 
     @Override
     public ServiceResponseDTO saveOrUpdateTags(TagsDTO tagsRequestDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: TagsServiceImpl saveOrUpdateTags Service Layer");
         try {
             TagsDTO tagsResponseDTO = new TagsDTO();
@@ -71,6 +71,7 @@ public class TagsServiceImpl implements TagsService {
     @Override
     public ServiceGetResponseDTO getTags(GetRequestTagsDTO getRequestTagsDTO) {
         log.info("LOG:: TagsServiceImpl getTags Service Layer");
+        ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
             List<TagsEntity> tagsEntities;
             if (getRequestTagsDTO.getOrganizationUuid() != null) {

@@ -12,7 +12,7 @@ public class NotEmptyOrNullValidator implements ConstraintValidator<NotEmptyOrNu
     public boolean isValid(String value, ConstraintValidatorContext context) {
         return value != null && !value.trim().isEmpty();
     }
-    public static boolean isNullOrEmpty(String text) {
+    public static boolean isNotNullOrEmpty(String text) {
         return null != text && !text.trim().isEmpty();
     }
     public static boolean isNullObject(Object object) {

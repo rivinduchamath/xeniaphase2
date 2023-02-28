@@ -2,6 +2,7 @@ package com.cloudofgoods.xenia.dto.request;
 
 import com.cloudofgoods.xenia.config.customAnnotations.NonNegative;
 import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
+import com.cloudofgoods.xenia.config.customAnnotations.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class GetRequestAttributeDTO {
     private String organizationUuid;
     private String attributeName;
     private List<String> type;
+    @NotNull
     private boolean pagination;
 
 }

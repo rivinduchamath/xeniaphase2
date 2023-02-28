@@ -10,17 +10,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DroolConfiguration {
-
     @Bean
-    public KnowledgeBuilderConfiguration knowledgeBuilderConfiguration() {
-        return KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
-    }
-
+    public KnowledgeBuilderConfiguration knowledgeBuilderConfiguration() {return KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();}
     @Bean
     public KnowledgeBuilder knowledgeBuilder() {
         return KnowledgeBuilderFactory.newKnowledgeBuilder();
     }
-
     @Bean
     public InternalKnowledgeBase internalKnowledgeBase() {
         return KnowledgeBaseFactory.newKnowledgeBase();

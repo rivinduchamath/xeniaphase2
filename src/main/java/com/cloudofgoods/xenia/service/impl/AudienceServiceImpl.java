@@ -30,38 +30,32 @@ import static com.cloudofgoods.xenia.util.Utils.*;
 public class AudienceServiceImpl implements AudienceService {
     private final AudienceRepository audienceRepository;
     private final OrganizationRepository organizationRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveAudience(AudienceDTO audienceDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AudienceServiceImpl saveAudience Service Layer");
         try {
             Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(audienceDTO.getOrganizationUuid());
-            if (organization.isPresent()) {
-                if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceUuid())) {
-                    log.info("LOG:: AudienceServiceImpl saveAudience Update");// Update
-                    Optional<AudienceEntity> audienceEntity = audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceDTO.getAudienceUuid(), audienceDTO.getOrganizationUuid());
-                    if (audienceEntity.isPresent()) {
-                        serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, audienceEntity.get())));
-                        serviceResponseDTO.setDescription("Update Audience Success");
-                    } else {
-                        serviceResponseDTO.setDescription("Update Audience Fail Audience not Fount Under this Organization");
-                    }
-                } else {
-                    log.info("LOG:: AudienceServiceImpl saveAudience Save");// Save
-                    AudienceEntity audienceEntity = new AudienceEntity();
+            organization.ifPresentOrElse(org -> {
+                log.info("LOG:: AudienceServiceImpl saveAudience {}", NotEmptyOrNullValidator.isNotNullOrEmpty(audienceDTO.getAudienceUuid()) ? "Update" : "Save");
+                Optional<AudienceEntity> audienceEntity = NotEmptyOrNullValidator.isNotNullOrEmpty(audienceDTO.getAudienceUuid())
+                        ? audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceDTO.getAudienceUuid(), audienceDTO.getOrganizationUuid())
+                        : Optional.empty();
+                audienceEntity.ifPresentOrElse(entity -> {
+                    serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, entity)));
+                    serviceResponseDTO.setDescription("Update Audience Success");
+                }, () -> {
+                    AudienceEntity newAudienceEntity = new AudienceEntity();
                     NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                     UUID firstUUID = timeBasedGenerator.generate();
-                    audienceEntity.setAudienceUuid(firstUUID.toString());
-                    serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, audienceEntity)));
+                    newAudienceEntity.setAudienceUuid(firstUUID.toString());
+                    serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, newAudienceEntity)));
                     serviceResponseDTO.setDescription("Save Audience Success");
-                }
-            } else {
-                serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
-            }
+                });
+            }, () -> serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND));
             serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
-
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl saveAudience() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
@@ -75,27 +69,25 @@ public class AudienceServiceImpl implements AudienceService {
 
     AudienceEntity setAudienceValues(AudienceDTO audienceDTO, AudienceEntity newAudience) {
         newAudience.setAudienceName(audienceDTO.getAudienceName());
-        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceDescription()))
-            newAudience.setAudienceDescription(audienceDTO.getAudienceDescription());
-        if (NotEmptyOrNullValidator.isNullOrEmpty(audienceDTO.getAudienceRuleString()))
-            newAudience.setAudienceRuleString(audienceDTO.getAudienceRuleString());
+        newAudience.setAudienceDescription(NotEmptyOrNullValidator.isNotNullOrEmpty(audienceDTO.getAudienceDescription()) ? audienceDTO.getAudienceDescription() : newAudience.getAudienceDescription());
+        newAudience.setAudienceRuleString(NotEmptyOrNullValidator.isNotNullOrEmpty(audienceDTO.getAudienceRuleString()) ? audienceDTO.getAudienceRuleString() : newAudience.getAudienceRuleString());
         newAudience.setOrganizationUuid(audienceDTO.getOrganizationUuid());
-        if (NotEmptyOrNullValidator.isNullObject(audienceDTO.getAudienceObject()))
-            newAudience.setAudienceObject(audienceDTO.getAudienceObject());
+        newAudience.setAudienceObject(NotEmptyOrNullValidator.isNullObject(audienceDTO.getAudienceObject()) ? audienceDTO.getAudienceObject() : newAudience.getAudienceObject());
         return newAudience;
     }
 
     @Override
     public ServiceResponseDTO getAudienceById(AudienceGetSingleDTO audienceGetSingleDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG :: AudienceServiceImpl getAudienceById() audienceUuid : " + audienceGetSingleDTO.getAudienceUuId());
         try {
-            Optional<AudienceEntity> byAudienceUuid = audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceGetSingleDTO.getAudienceUuId(), audienceGetSingleDTO.getOrganizationUuid());
-            if (byAudienceUuid.isPresent()) {
-                serviceResponseDTO.setData(byAudienceUuid.get());
-                serviceResponseDTO.setDescription("AudienceService Get Audience success");
-            } else {
-                serviceResponseDTO.setDescription("AudienceService Audience Not Found Under this Organization");
-            }
+            audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceGetSingleDTO.getAudienceUuId(), audienceGetSingleDTO.getOrganizationUuid())
+                    .ifPresentOrElse(
+                            audienceEntity -> {
+                                serviceResponseDTO.setData(audienceEntity);
+                                serviceResponseDTO.setDescription("AudienceService Get Audience success");
+                            },
+                            () -> serviceResponseDTO.setDescription("AudienceService Audience Not Found Under this Organization"));
             serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
@@ -112,14 +104,19 @@ public class AudienceServiceImpl implements AudienceService {
     @Override
     public ServiceResponseDTO getAudienceWithPagination(AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceServiceImpl getAudienceWithPagination()");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             AudienceResponseObject audienceResponseObject = new AudienceResponseObject();
-            List<AudienceEntity> stream;
-            if (audienceRequestDTO.isPagination()) {
-                stream = audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()));
-            } else {
-                stream = audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName());
-            }
+            List<AudienceEntity> stream = audienceRequestDTO.isPagination() ?
+                    audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(
+                            audienceRequestDTO.getOrganizationId(),
+                            audienceRequestDTO.getAudienceName(),
+                            PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize())
+                    ) :
+                    audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWith(
+                            audienceRequestDTO.getOrganizationId(),
+                            audienceRequestDTO.getAudienceName()
+                    );
             long totalCount = audienceRepository.countAllByOrganizationUuidEquals(audienceRequestDTO.getOrganizationId());
             audienceResponseObject.setAudienceEntities(stream);
             audienceResponseObject.setTotal(totalCount);
@@ -141,19 +138,22 @@ public class AudienceServiceImpl implements AudienceService {
     @Override
     public ServiceResponseDTO activeInactiveAudience(String audienceUuid, String organizationUuid, boolean status) {
         log.info("LOG:: AudienceServiceImpl activeInactiveAudience");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
             if (organizationEntity.isPresent()) {
-                Optional<AudienceEntity> audienceEntity = audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid);
-                if (audienceEntity.isPresent()) {
-                    audienceEntity.get().setStatus(status);
-                    serviceResponseDTO.setData(audienceRepository.save(audienceEntity.get()));
-                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
-                    serviceResponseDTO.setMessage(SUCCESS);
-                } else {
-                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() attribute Not Found");
-                    serviceResponseDTO.setMessage(FAIL);
-                }
+                audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid).ifPresentOrElse(
+                        entity -> {
+                            entity.setStatus(status);
+                            serviceResponseDTO.setData(audienceRepository.save(entity));
+                            serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
+                            serviceResponseDTO.setMessage(SUCCESS);
+                        },
+                        () -> {
+                            serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() attribute Not Found");
+                            serviceResponseDTO.setMessage(FAIL);
+                        }
+                );
             } else {
                 serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Organization Not Found");
                 serviceResponseDTO.setMessage(FAIL);
@@ -166,7 +166,6 @@ public class AudienceServiceImpl implements AudienceService {
             serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() exception " + exception.getMessage());
             serviceResponseDTO.setMessage(FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
-
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;

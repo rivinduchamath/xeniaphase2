@@ -28,12 +28,13 @@ import java.util.concurrent.CompletableFuture;
 public class D6nServiceImpl implements D6nService {
     @Autowired
     private DroolServiceImpl droolService;
-    private final ServiceResponseDTO serviceResponseDTO;
+
     private final ResponseUserRepository responseUserRepository;
 
     @Override
     public ServiceResponseDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, String userEmail, User user, List<String> channel, List<String> slot, String organization) {
         log.info("LOG :: D6nServiceImpl makeDecision() Set Meta Data");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         MetaData metaData = new MetaData();
         metaData.setEndDate(Utils.today);
         metaData.setStartDate(Utils.today);

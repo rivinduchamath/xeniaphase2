@@ -30,18 +30,17 @@ import static com.cloudofgoods.xenia.util.Utils.*;
 @RequiredArgsConstructor
 public class ChannelServiceImpl implements ChannelService {
     private final ChannelRepository channelRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
-    private final ServiceGetResponseDTO serviceGetResponseDTO;
     private final OrganizationRepository organizationRepository;
 
     @Override
     public ServiceResponseDTO saveOrUpdateChannel(ChannelDTO channelDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: ChannelServiceImpl saveOrUpdateChannel Service Layer");
         try {
             Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(channelDTO.getOrganizationUuid());
             if (organization.isPresent()) {
                 ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
-                if (NotEmptyOrNullValidator.isNullOrEmpty(channelDTO.getChannelUuid())) {
+                if (NotEmptyOrNullValidator.isNotNullOrEmpty(channelDTO.getChannelUuid())) {
                     Optional<ChannelEntity> channelEntity = channelRepository.findByChannelUuidEquals(channelDTO.getChannelUuid());
                     if (channelEntity.isPresent()) { // Update
                         log.info("LOG:: ChannelServiceImpl saveOrUpdateChannel Update");
@@ -88,7 +87,7 @@ public class ChannelServiceImpl implements ChannelService {
     @Override
     public ServiceGetResponseDTO getChannels(GetRequestChannelsDTO requestChannelsDTO) {
         log.info("LOG:: ChannelServiceImpl getChannels");
-
+        ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
             List<ChannelsResponseDTO> channelsResponseDTOS = new ArrayList<>();
             List<ChannelEntity> channels;
@@ -126,6 +125,7 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ServiceResponseDTO deleteChannels(String channelUuid, String organizationUuid, boolean status) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: ChannelServiceImpl deleteChannels Service Layer");
         try {
             Optional<ChannelEntity> channelEntity = channelRepository.findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(organizationUuid, channelUuid);
@@ -151,6 +151,7 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     public ServiceGetResponseDTO getSingleChannelTable(ChannelsGetSingleDTO channelsGetSingleDTO) {
+        ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
             Optional<ChannelEntity> channelEntity = channelRepository.
                     findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(channelsGetSingleDTO.getOrganizationUuid(), channelsGetSingleDTO.getChannelUuid());

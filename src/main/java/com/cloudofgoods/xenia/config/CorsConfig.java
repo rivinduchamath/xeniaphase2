@@ -32,7 +32,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(false);
         config.setAllowedMethods(Collections.singletonList("*"));
-        config.addAllowedHeader("*");
+        config.setAllowedHeaders(headers);
         config.setAllowedOrigins(origin);
 
         source.registerCorsConfiguration("/**", config);

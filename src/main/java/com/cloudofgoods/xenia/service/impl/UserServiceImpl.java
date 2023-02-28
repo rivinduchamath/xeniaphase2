@@ -19,10 +19,10 @@ import static com.cloudofgoods.xenia.util.Utils.*;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveOrUpdateCustomer(AuthUser userDTO) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             AuthUser authUser = new AuthUser ();
             if (userDTO.getId () != null) {
@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ServiceResponseDTO getCustomer( int page, int size) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info ("LOG:: getCustomer");
         Instant now = Instant.now (); // 2023-10-15T11:22:11.000Z
         log.info (now.toString () + "  ");

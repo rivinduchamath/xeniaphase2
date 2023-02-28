@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Component
 public class ServiceGetResponseDTO implements Serializable {
     Object data;
     long count;

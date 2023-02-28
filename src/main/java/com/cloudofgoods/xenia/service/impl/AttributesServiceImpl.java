@@ -34,57 +34,52 @@ public class AttributesServiceImpl implements AttributesService {
 
     private final AttributeRepository attributeRepository;
     private final OrganizationRepository organizationRepository;
-    private final ServiceGetResponseDTO serviceGetResponseDTO;
-    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveAttribute(AttributeRequestDTO attributesDTO) {
         log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getOrganizationUuid())) {
-                Optional<OrganizationEntity> organizationEntity = organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid());
-                if (organizationEntity.isPresent()) {
-                    if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeUuid())) { // Update
-                        log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
-                        Optional<AttributeEntity> attributeEntity = attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid());
-                        if (attributeEntity.isPresent()) {
-                            attributeEntity.get().setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
-                            attributeEntity.get().setAttributeUuid(attributesDTO.getAttributeUuid());
-                            if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName()))
-                                attributeEntity.get().setDisplayName(attributesDTO.getDisplayName());
-                            if (NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()))
-                                attributeEntity.get().setValues(attributesDTO.getValues());
-                            attributeEntity.get().setType(attributesDTO.getType());
-                            attributeEntity.get().setTableName(attributesDTO.getTableName());
-
-                            serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity.get())));
-                            serviceResponseDTO.setDescription("Update Attribute Success");
-                        } else {
-                            serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Fount");
+                organizationRepository.findByUuidEquals(attributesDTO.getOrganizationUuid()).ifPresentOrElse(
+                        organizationEntity -> {
+                            if (NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeUuid())) { // Update
+                                log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
+                                attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid()).ifPresentOrElse(
+                                        attributeEntity -> {
+                                            attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
+                                            attributeEntity.setAttributeUuid(attributesDTO.getAttributeUuid());
+                                            attributeEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) ? attributesDTO.getAttributeName() : attributeEntity.getDisplayName());
+                                            attributeEntity.setValues(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()) ? attributesDTO.getValues() : attributeEntity.getValues());
+                                            attributeEntity.setValues(attributesDTO.getValues());
+                                            attributeEntity.setType(attributesDTO.getType());
+                                            attributeEntity.setTableName(attributesDTO.getTableName());
+                                            serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
+                                            serviceResponseDTO.setDescription("Update Attribute Success");
+                                        },
+                                        () -> {
+                                            serviceResponseDTO.setDescription("Update Attribute Fail Attribute Not Found");
+                                        }
+                                );
+                            } else {  // Save
+                                log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Save");
+                                NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
+                                AttributeEntity attributeEntity = new AttributeEntity();
+                                attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
+                                attributeEntity.setAttributesId((NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) )
+                                        ? new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()) : null );
+                                attributeEntity.setDisplayName(attributesDTO.getDisplayName());
+                                attributeEntity.setType(attributesDTO.getType());
+                                attributeEntity.setStatus(attributesDTO.isStatus());
+                                attributeEntity.setValues(attributesDTO.getValues());
+                                attributeEntity.setTableName(attributesDTO.getTableName());
+                                serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
+                                serviceResponseDTO.setDescription("Save Attribute Success");
+                            }
+                        },
+                        () -> {
+                            serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
                         }
-                    } else {  // Save
-                        log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Save");
-                        NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                        AttributeEntity attributeEntity = new AttributeEntity();
-                        attributeEntity.setAttributeUuid(timeBasedGenerator.generate() + "");
-                        if (NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getOrganizationUuid()) && NotEmptyOrNullValidator.isNullOrEmpty(attributesDTO.getAttributeName())) {
-                            attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
-                        }
-                        attributeEntity.setDisplayName(attributesDTO.getDisplayName());
-                        attributeEntity.setType(attributesDTO.getType());
-                        attributeEntity.setStatus(attributesDTO.isStatus());
-                        attributeEntity.setValues(attributesDTO.getValues());
-                        attributeEntity.setTableName(attributesDTO.getTableName());
-                        serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
-                        serviceResponseDTO.setDescription("Save Attribute Success");
-
-                    }
-                } else {
-                    serviceResponseDTO.setDescription("Save Attribute Fail Organization Not Found");
-                }
-            } else {
-                serviceResponseDTO.setDescription("Save Attribute Fail Organization Cannot Be Empty!");
-            }
+                );
             serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
@@ -113,13 +108,15 @@ public class AttributesServiceImpl implements AttributesService {
     @Override
     public ServiceGetResponseDTO getAttribute(GetRequestAttributeDTO requestAttributeDTO) {
         log.info("LOG:: AttributesServiceImpl getAttribute Service Layer");
+        ServiceGetResponseDTO serviceGetResponseDTO =new ServiceGetResponseDTO();
         try {
-            List<AttributeEntity> attributeEntities;
-            if (requestAttributeDTO.isPagination()) {
-                attributeEntities = attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(), PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()));
-            } else {
-                attributeEntities = attributeRepository.findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());
-            }
+            List<AttributeEntity> attributeEntities = requestAttributeDTO.isPagination()
+                    ? attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(
+                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),
+                    PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()))
+                    : attributeRepository.findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(
+                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());
+
             List<AttributeResponseDTO> attributeResponseDTOS = attributeEntities.stream().map(this::responseAttribute).collect(Collectors.toList());
             serviceGetResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType()));
             serviceGetResponseDTO.setData(attributeResponseDTOS);
@@ -139,6 +136,7 @@ public class AttributesServiceImpl implements AttributesService {
 
     @Override
     public ServiceGetResponseDTO getSingleAttribute(AttributeGetSingleDTO attributeRequestDTO) {
+        ServiceGetResponseDTO serviceGetResponseDTO =new ServiceGetResponseDTO();
         try {
             Optional<AttributeEntity> attributeEntities = attributeRepository.findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeUuid());
             if (attributeEntities.isPresent()) {
@@ -162,6 +160,7 @@ public class AttributesServiceImpl implements AttributesService {
 
     @Override
     public ServiceResponseDTO activeInactiveAttribute(String attributeUuid, String organizationUuid, boolean status) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AttributesServiceImpl deleteAttribute");
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);

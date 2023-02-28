@@ -27,17 +27,17 @@ import static org.apache.log4j.varia.ExternallyRolledFileAppender.OK;
 public class CampaignTemplateServiceImpl implements CampaignTemplateService {
 
     private final CampaignTemplateRepository campaignTemplateRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
     private final OrganizationRepository organizationRepository;
 
     @Override
     public ServiceResponseDTO saveOrUpdateTemplate(CampaignTemplateDTO ruleRootModel) {
         log.info("LOG:: CampaignTemplateServiceImpl saveTemplate");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<CampaignTemplateEntity> campaignTemplateEntity;
             Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid());
             if (organization.isPresent()) {
-                if (NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getId())) {
+                if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getId())) {
                     log.info("LOG:: CampaignTemplateServiceImpl saveTemplate Update");
                     campaignTemplateEntity = campaignTemplateRepository.findById(ruleRootModel.getId());
                     if (campaignTemplateEntity.isPresent()) {
@@ -75,6 +75,7 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
 
     @Override
     public ServiceResponseDTO getAllCampTemplatePagination(int page, int size) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: CampaignTemplateServiceImpl getAllCampTemplatePagination()");
         try {
             Page<CampaignTemplateEntity> campaignTemplateEntities = campaignTemplateRepository.findAll(PageRequest.of(page, size));
@@ -100,6 +101,7 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
 
     @Override
     public ServiceResponseDTO deleteTemplate(String templateId) {
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG :: CampaignTemplateServiceImpl deleteTemplate()");
         try {
             campaignTemplateRepository.deleteById(templateId);
@@ -118,15 +120,15 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
     }
 
     CampaignTemplateEntity campaignTemplateEntitySetValues(CampaignTemplateEntity campaignTemplateEntity, CampaignTemplateDTO ruleRootModel) {
-        if (NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getCampaignDescription()))
+        if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getCampaignDescription()))
             campaignTemplateEntity.setCampaignDescription(ruleRootModel.getCampaignDescription());
         campaignTemplateEntity.setCampaignName(ruleRootModel.getCampaignName());
         campaignTemplateEntity.setOrganization(ruleRootModel.getOrganizationUuid());
-        if (NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getUpdater()))
+        if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getUpdater()))
             campaignTemplateEntity.setUpdater(ruleRootModel.getUpdater());
-        if (NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getStartDateTime()))
+        if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getStartDateTime()))
             campaignTemplateEntity.setStartDateTime(ruleRootModel.getStartDateTime());
-        if (NotEmptyOrNullValidator.isNullOrEmpty(ruleRootModel.getEndDateTime()))
+        if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getEndDateTime()))
             campaignTemplateEntity.setEndDateTime(ruleRootModel.getEndDateTime());
         campaignTemplateEntity.setChannels(ruleRootModel.getChannels());
         if (NotEmptyOrNullValidator.isNullOrEmptyList(ruleRootModel.getTags()))
