@@ -136,15 +136,14 @@ public class AttributesServiceImpl implements AttributesService {
 
     @Override
     public ServiceGetResponseDTO getSingleAttribute(AttributeGetSingleDTO attributeRequestDTO) {
-        ServiceGetResponseDTO serviceGetResponseDTO =new ServiceGetResponseDTO();
+        ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            Optional<AttributeEntity> attributeEntities = attributeRepository.findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeUuid());
-            if (attributeEntities.isPresent()) {
-                serviceGetResponseDTO.setData(attributeEntities.get());
-                serviceGetResponseDTO.setDescription("Get Attribute Success");
-            } else {
-                serviceGetResponseDTO.setDescription("Cannot Find Data");
-            }
+            attributeRepository.findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeUuid())
+                    .ifPresent(attributeEntity -> {
+                        serviceGetResponseDTO.setData(attributeEntity);
+                        serviceGetResponseDTO.setDescription("Get Attribute Success");
+                    });
+            serviceGetResponseDTO.setDescription("Cannot Find Data");
             serviceGetResponseDTO.setMessage(SUCCESS);
             serviceGetResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
@@ -163,24 +162,22 @@ public class AttributesServiceImpl implements AttributesService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AttributesServiceImpl deleteAttribute");
         try {
-            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
-            if (organizationEntity.isPresent()) {
-                Optional<AttributeEntity> attributeEntity = attributeRepository.findByAttributeUuidEquals(attributeUuid);
-                if (attributeEntity.isPresent()) {
-                    attributeEntity.get().setStatus(status);
-                    serviceResponseDTO.setData(attributeRepository.save(attributeEntity.get()));
-                    serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Success");
-                    serviceResponseDTO.setMessage(SUCCESS);
-                } else {
-                    serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() attribute Not Found");
-                    serviceResponseDTO.setMessage(SUCCESS);
-                }
-            } else {
+            organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid)
+                    .ifPresent(organizationEntity -> {
+                        attributeRepository.findByAttributeUuidEquals(attributeUuid)
+                                .ifPresentOrElse(attributeEntity -> {
+                                    attributeEntity.setStatus(status);
+                                    serviceResponseDTO.setData(attributeRepository.save(attributeEntity));
+                                    serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Success");
+                                }, () -> {
+                                    serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() attribute Not Found");
+                                });
+                    });
+            if (NotEmptyOrNullValidator.isNotNullOrEmpty(serviceResponseDTO.getDescription())) {
                 serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Organization Not Found");
-                serviceResponseDTO.setMessage(FAIL);
             }
+            serviceResponseDTO.setMessage(SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
-            serviceResponseDTO.setHttpStatus(STATUS_OK);
         } catch (Exception exception) {
             log.info("LOG :: AttributesServiceImpl deleteAttribute() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
@@ -188,8 +185,8 @@ public class AttributesServiceImpl implements AttributesService {
             serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() exception " + exception.getMessage());
             serviceResponseDTO.setMessage(FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
-            serviceResponseDTO.setHttpStatus(STATUS_OK);
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
 }

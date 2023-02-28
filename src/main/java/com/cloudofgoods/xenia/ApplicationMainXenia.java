@@ -10,7 +10,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 
 @SpringBootApplication
 @EnableMongoAuditing
-@ConfigurationPropertiesScan
+//@ConfigurationPropertiesScan
 @EnableMongoRepositories({"com.cloudofgoods.xenia.repository"})
 @EnableCaching(proxyTargetClass = true)
 @EnableRedisRepositories

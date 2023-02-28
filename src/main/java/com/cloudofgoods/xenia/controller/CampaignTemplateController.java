@@ -25,8 +25,7 @@ public class CampaignTemplateController {
     @PostMapping(value = "${server.servlet.templateSave}")
     @Description("If Send Id It Will Update Template, Otherwise Save as a new Template ")
     public ServiceResponseDTO saveTemplate(@RequestBody @Valid CampaignTemplateDTO ruleRootModelDTO) {
-        log.info (ruleRootModelDTO + " LOG::Inside the CampaignTemplateController saveTemplate ");
-        log.info ("LOG::Inside the CampaignTemplateController saveTemplate Inside try");
+        log.info (" LOG::Inside the CampaignTemplateController saveTemplate "+ ruleRootModelDTO.campaignName);
         return templateService.saveOrUpdateTemplate(ruleRootModelDTO);
     }
     @GetMapping(value = "${server.servlet.getPagination}")

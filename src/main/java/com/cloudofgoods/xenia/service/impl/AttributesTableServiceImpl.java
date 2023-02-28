@@ -30,11 +30,11 @@ import static com.cloudofgoods.xenia.util.Utils.*;
 public class AttributesTableServiceImpl implements AttributesTableService {
     private final AttributeTableRepository attributeTableRepository;
     private final OrganizationRepository organizationRepository;
-    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveOrUpdateAttributeTable(AttributeTableDTO attributeTableDTO) {
         log.info("LOG:: AttributesTableServiceImpl saveOrUpdateAttributeTable()");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(attributeTableDTO.getOrganizationUuid());
             if (organizationEntity.isPresent()) {
@@ -54,7 +54,6 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                     serviceResponseDTO.setMessage(SUCCESS);
                     serviceResponseDTO.setCode(STATUS_2000);
                     serviceResponseDTO.setHttpStatus(STATUS_OK);
-                    return serviceResponseDTO;
                 } else {
                     AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
                     attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
@@ -67,7 +66,6 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                     serviceResponseDTO.setMessage(SUCCESS);
                     serviceResponseDTO.setCode(STATUS_2000);
                     serviceResponseDTO.setHttpStatus(STATUS_OK);
-                    return serviceResponseDTO;
                 }
             } else {
                 serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
@@ -84,7 +82,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
 
     @Override
     public ServiceResponseDTO getAttributes(AttributeTableRequestDTO attributeTableDTO) {
-
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AttributesTableServiceImpl getAttributes()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
@@ -119,6 +117,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
     @Override
     public ServiceResponseDTO activeInactiveAttributeTable(String attributeTableName, String organizationUuid, boolean status) {
         log.info("LOG:: AttributesTableServiceImpl activeInactiveAttributeTable");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
             if (organizationEntity.isPresent()) {
