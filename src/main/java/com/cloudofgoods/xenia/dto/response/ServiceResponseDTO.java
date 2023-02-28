@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+//@Component
 public class ServiceResponseDTO implements Serializable {
     Object data;
     Object error;
