@@ -19,43 +19,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.cloudofgoods.xenia.util.Utils.*;
+
 @Service
 @Slf4j
 @AllArgsConstructor
 public class TagsServiceImpl implements TagsService {
     private final OrganizationRepository organizationRepository;
     private final TagsRepository tagsRepository;
+    private final ServiceResponseDTO serviceResponseDTO;
+    private final ServiceGetResponseDTO serviceGetResponseDTO;
 
     @Override
     public ServiceResponseDTO saveOrUpdateTags(TagsDTO tagsRequestDTO) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: TagsServiceImpl saveOrUpdateTags Service Layer");
         try {
             TagsDTO tagsResponseDTO = new TagsDTO();
-            if (tagsRequestDTO.getOrganizationUuid() != null) {
-                Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(tagsRequestDTO.getOrganizationUuid());
-                if (organization.isPresent()) {
-                    TagsEntity tags = tagsRepository.save(new TagsEntity(tagsRequestDTO.getTagsName().toUpperCase(), tagsRequestDTO.getOrganizationUuid()));
-                    tagsResponseDTO.setTagsName(tags.getTagsId().getTagsName());
-                    tagsResponseDTO.setOrganizationUuid(tags.getTagsId().getOrganizationUuid());
-                    serviceResponseDTO.setData(tagsResponseDTO);
-                    serviceResponseDTO.setDescription("Save/Update Tags Success");
-                    serviceResponseDTO.setMessage("Success");
-                }
+
+            Optional<OrganizationEntity> organization = organizationRepository.findByUuidEquals(tagsRequestDTO.getOrganizationUuid());
+            if (organization.isPresent()) {
+                TagsEntity tags = tagsRepository.save(new TagsEntity(tagsRequestDTO.getTagsName().toUpperCase(), tagsRequestDTO.getOrganizationUuid()));
+                tagsResponseDTO.setTagsName(tags.getTagsId().getTagsName());
+                tagsResponseDTO.setOrganizationUuid(tags.getTagsId().getOrganizationUuid());
+                serviceResponseDTO.setData(tagsResponseDTO);
+                serviceResponseDTO.setDescription("Save/Update Tags Success");
             } else {
-                serviceResponseDTO.setDescription("Organization Uuid Cannot Be Empty");
-                serviceResponseDTO.setMessage("Fail");
+                serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
+
             }
-            serviceResponseDTO.setCode("2000");
+            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl saveOrUpdateTags() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             exception.printStackTrace();
             serviceResponseDTO.setDescription("TagsServiceImpl saveOrUpdateTags() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
         }
-        serviceResponseDTO.setHttpStatus("OK");
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
 
@@ -69,38 +71,34 @@ public class TagsServiceImpl implements TagsService {
     @Override
     public ServiceGetResponseDTO getTags(GetRequestTagsDTO getRequestTagsDTO) {
         log.info("LOG:: TagsServiceImpl getTags Service Layer");
-        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
             List<TagsEntity> tagsEntities;
             if (getRequestTagsDTO.getOrganizationUuid() != null) {
                 if (getRequestTagsDTO.getTagsName() != null) {
                     tagsEntities = tagsRepository.findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName(), PageRequest.of(getRequestTagsDTO.getPage(), getRequestTagsDTO.getSize()));
-                    serviceResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName()));
-
+                    serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName()));
                 } else {
                     tagsEntities = tagsRepository.findAllByTagsIdOrganizationUuidEquals(getRequestTagsDTO.getOrganizationUuid(), PageRequest.of(getRequestTagsDTO.getPage(), getRequestTagsDTO.getSize()));
-                    serviceResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEquals(getRequestTagsDTO.getOrganizationUuid()));
+                    serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEquals(getRequestTagsDTO.getOrganizationUuid()));
                 }
-
                 List<TagsResponseDTO> tagsResponseDTOS = new ArrayList<>();
                 for (TagsEntity tags : tagsEntities) {
                     tagsResponseDTOS.add(tagsResponseDTO(tags));
                 }
-                serviceResponseDTO.setData(tagsResponseDTOS);
-                serviceResponseDTO.setDescription("Get Tags Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
+                serviceGetResponseDTO.setData(tagsResponseDTOS);
+                serviceGetResponseDTO.setDescription("Get Tags Success");
+                serviceGetResponseDTO.setMessage(SUCCESS);
+                serviceGetResponseDTO.setCode(STATUS_2000);
             }
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl getTags() exception: " + exception.getMessage());
-            serviceResponseDTO.setError(exception.getStackTrace());
+            serviceGetResponseDTO.setError(exception.getStackTrace());
             exception.printStackTrace();
-            serviceResponseDTO.setDescription("TagsServiceImpl getTags() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
+            serviceGetResponseDTO.setDescription("TagsServiceImpl getTags() exception " + exception.getMessage());
+            serviceGetResponseDTO.setMessage(FAIL);
+            serviceGetResponseDTO.setCode(STATUS_5000);
         }
-
-        serviceResponseDTO.setHttpStatus("OK");
-        return serviceResponseDTO;
+        serviceGetResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceGetResponseDTO;
     }
 }

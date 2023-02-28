@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.config.validator;
+package com.cloudofgoods.xenia.config.customAnnotations.validator;
 
 import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
 

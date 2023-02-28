@@ -11,13 +11,14 @@ import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.cloudofgoods.xenia.util.Utils.*;
 
 @Service
 @Slf4j
@@ -26,90 +27,75 @@ public class SegmentTemplateServiceImpl implements TemplateService {
     private final OrganizationRepository organizationRepository;
 
     private final SegmentTemplateRepository segmentTemplateRepository;
+    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO getAllTemplate() {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             List<SegmentTemplateEntity> all = segmentTemplateRepository.findAll();
             serviceResponseDTO.setData(all);
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplate Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getAllTemplate() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 
     @Override
     public ServiceResponseDTO getTemplateByName(String name) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findAllBySegmentNameStartsWith(name);
             serviceResponseDTO.setData(template);
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
-
             } else {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success :: NO DATA");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
-
             }
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getTemplateByName() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 
     @Override
     public ServiceResponseDTO getTemplateById(String templateId) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             Optional<SegmentTemplateEntity> template = segmentTemplateRepository.findById(templateId);
             serviceResponseDTO.setData(template);
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateById Success");
-                serviceResponseDTO.setMessage("Success");
-                serviceResponseDTO.setCode("2000");
-                serviceResponseDTO.setHttpStatus("OK");
+                serviceResponseDTO.setMessage(SUCCESS);
+                serviceResponseDTO.setCode(STATUS_2000);
             } else {
                 serviceResponseDTO.setMessage("TemplateServiceImpl getTemplateById Success :: NO DATA");
             }
-            return serviceResponseDTO;
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getTemplateById() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateById() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 
     @Override
     public ServiceResponseDTO deleteTemplateById(String templateId) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             segmentTemplateRepository.deleteById(templateId);
             serviceResponseDTO.setDescription("TemplateServiceImpl deleteTemplateById Success");
@@ -118,16 +104,15 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             log.info("LOG :: TemplateServiceImpl deleteTemplateById() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl deleteTemplateById() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
+            serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
         }
     }
 
     @Override
     public ServiceResponseDTO saveTemplate(SegmentTemplateEntity ruleRootModel) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: TemplateServiceImpl saveTemplate");
         Optional<OrganizationEntity> byUuid = organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid());
         if (byUuid.isPresent()) {
@@ -135,34 +120,28 @@ public class SegmentTemplateServiceImpl implements TemplateService {
                     if (ruleRootModel.getId() != null) {
                         SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
                         serviceResponseDTO.setDescription("Update Template Success");
-                        serviceResponseDTO.setMessage("Success");
-                        serviceResponseDTO.setCode("2000");
-                        serviceResponseDTO.setHttpStatus("OK");
                         serviceResponseDTO.setData(save);
+
                     } else {
                         ruleRootModel.setSegmentName(saveTemplateNameGenerator(ruleRootModel.getSegmentName()));
                         SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
                         serviceResponseDTO.setDescription("Save Template Success");
-                        serviceResponseDTO.setMessage("Success");
-                        serviceResponseDTO.setCode("2000");
-                        serviceResponseDTO.setHttpStatus("OK");
                         serviceResponseDTO.setData(save);
                     }
-                    return serviceResponseDTO;
+                    serviceResponseDTO.setMessage(SUCCESS);
+                    serviceResponseDTO.setCode(STATUS_2000);
+
                 } catch (Exception exception) {
                     log.info("LOG :: TemplateServiceImpl saveTemplate() exception: " + exception.getMessage());
                     serviceResponseDTO.setError(exception.getStackTrace());
                     serviceResponseDTO.setDescription("TemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-                    serviceResponseDTO.setMessage("Fail");
-                    serviceResponseDTO.setCode("5000");
-                    serviceResponseDTO.setHttpStatus("OK");
-                    return serviceResponseDTO;
+                    serviceResponseDTO.setMessage(FAIL);
+                    serviceResponseDTO.setCode(STATUS_5000);
                 }
+        }else {
+            serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
         }
-        serviceResponseDTO.setDescription("Organization Uuid Not Found");
-        serviceResponseDTO.setMessage("Success");
-        serviceResponseDTO.setCode("2000");
-        serviceResponseDTO.setHttpStatus("OK");
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
 
@@ -177,8 +156,6 @@ public class SegmentTemplateServiceImpl implements TemplateService {
 
     @Override
     public ServiceResponseDTO getAllTemplatePagination(int page, int size) {
-
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             log.info("LOG:: TemplateServiceImpl getAllTemplatePagination()");
             List<SegmentTemplateEntity> templateEntities = segmentTemplateRepository.findAllBySegmentNameNotNull(PageRequest.of(page, size));
@@ -187,19 +164,19 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             templateCustomDTO.setTemplateEntities(templateEntities);
             templateCustomDTO.setTotal(count);
             serviceResponseDTO.setData(templateCustomDTO);
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
             serviceResponseDTO.setDescription("Get Template Success");
             return serviceResponseDTO;
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getAllTemplatePagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplatePagination() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
+
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 }

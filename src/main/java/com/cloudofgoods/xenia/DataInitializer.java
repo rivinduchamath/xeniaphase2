@@ -1,8 +1,8 @@
 package com.cloudofgoods.xenia;
 
-import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Country;
-import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Marital;
-import com.cloudofgoods.xenia.controller.controllconfig.d6nenums.Religion;
+import com.cloudofgoods.xenia.controller.controllenums.Country;
+import com.cloudofgoods.xenia.controller.controllenums.Marital;
+import com.cloudofgoods.xenia.controller.controllenums.Religion;
 import com.cloudofgoods.xenia.entity.AuthUser;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;

@@ -1,6 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
+import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.OrganizationDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
@@ -10,7 +10,6 @@ import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,10 +21,10 @@ import java.util.UUID;
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
+    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveOrUpdateOrganization(OrganizationDTO organizationDTO) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             if (NotEmptyOrNullValidator.isNullOrEmpty(organizationDTO.getOrganizationUuid())) {
                 Optional<OrganizationEntity> organizationEntity = organizationRepository.findByUuidEquals(organizationDTO.getOrganizationUuid());
@@ -66,7 +65,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ServiceResponseDTO getOrganization() {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             serviceResponseDTO.setData(organizationRepository.findAll());
             serviceResponseDTO.setDescription("Get Organization Success");

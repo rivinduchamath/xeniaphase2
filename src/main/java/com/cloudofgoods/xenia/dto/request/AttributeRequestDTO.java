@@ -17,6 +17,7 @@ public class AttributeRequestDTO {
     private String organizationUuid;
     @NotEmptyOrNull(message = "Attribute Name Must Not Be Empty")
     private String attributeName;
+    @NotEmptyOrNull(message = "Display Name Must Not Be Empty")
     private String displayName;
     @NotEmptyOrNull(message = "Type Must Not Be Empty")
     private String type;

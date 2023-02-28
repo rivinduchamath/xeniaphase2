@@ -1,15 +1,16 @@
 package com.cloudofgoods.xenia.dto.response;
 
-import com.cloudofgoods.xenia.entity.xenia.AudienceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class ServiceResponseDTO implements Serializable {
     Object data;
     Object error;
@@ -18,7 +19,7 @@ public class ServiceResponseDTO implements Serializable {
     String httpStatus;
     String description;
 
-    public ServiceResponseDTO(String code, String httpStatus, Object message, String description, Object data , Object error) {
+    public ServiceResponseDTO(String code, String httpStatus, Object message, String description, Object data, Object error) {
         this.data = data;
         this.error = error;
         this.message = message;
@@ -27,5 +28,5 @@ public class ServiceResponseDTO implements Serializable {
         this.description = description;
     }
 
-  
+
 }

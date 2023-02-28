@@ -9,9 +9,6 @@ import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 public interface ChannelService {
     ServiceResponseDTO saveOrUpdateChannel(ChannelDTO channelDTO);
 
-
-//    ServiceResponseDTO deleteChannels(String channelId);
-
     ServiceGetResponseDTO getChannels(GetRequestChannelsDTO getRequestChannelsDTO);
 
     ServiceResponseDTO deleteChannels(String channelUuid, String organizationUuid, boolean status);

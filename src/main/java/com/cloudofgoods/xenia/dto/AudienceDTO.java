@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.index.TextIndexed;
 public class AudienceDTO {
 
     private String audienceUuid;
+    @NotEmptyOrNull(message = "Audience Name Must Not Be Empty")
     private String audienceName;
     @TextIndexed
     private String audienceDescription;

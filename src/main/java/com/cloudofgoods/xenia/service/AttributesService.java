@@ -9,7 +9,6 @@ import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 public interface AttributesService {
     ServiceResponseDTO saveAttribute(AttributeRequestDTO attributesDTO);
 
-
     ServiceResponseDTO activeInactiveAttribute(String attributeId, String organizationUuid, boolean status);
 
     ServiceGetResponseDTO getAttribute(GetRequestAttributeDTO getRequestAttributeDTO);

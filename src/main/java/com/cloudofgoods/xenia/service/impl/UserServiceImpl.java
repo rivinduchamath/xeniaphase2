@@ -11,17 +11,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+import static com.cloudofgoods.xenia.util.Utils.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ServiceResponseDTO serviceResponseDTO;
 
     @Override
     public ServiceResponseDTO saveOrUpdateCustomer(AuthUser userDTO) {
-
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
         try {
             AuthUser authUser = new AuthUser ();
             if (userDTO.getId () != null) {
@@ -52,8 +53,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ServiceResponseDTO getCustomer( int page, int size) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO ();
-        log.info ("LOG:: ");
+        log.info ("LOG:: getCustomer");
         Instant now = Instant.now (); // 2023-10-15T11:22:11.000Z
         log.info (now.toString () + "  ");
         try {
@@ -64,22 +64,18 @@ public class UserServiceImpl implements UserService {
 //            customerObject.setTotal (count);
             serviceResponseDTO.setData (customerObject);
             serviceResponseDTO.setMessage ("InitialPageServiceImpl getCampaignForInitialPage Success");
-            serviceResponseDTO.setMessage ("Success");
-            serviceResponseDTO.setCode ("2000");
-            serviceResponseDTO.setHttpStatus ("OK");
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage (SUCCESS);
+            serviceResponseDTO.setCode (STATUS_2000);
 
         } catch (Exception exception) {
             log.info ("LOG :: InitialPageServiceImpl getCampaignForInitialPage() exception: " + exception.getMessage ());
             serviceResponseDTO.setError (exception.getStackTrace ());
             serviceResponseDTO.setMessage ("InitialPageServiceImpl getCampaignForInitialPage() exception " + exception.getMessage ());
-            serviceResponseDTO.setMessage ("Fail");
-            serviceResponseDTO.setCode ("5000");
-            serviceResponseDTO.setHttpStatus ("OK");
-
-
-            return serviceResponseDTO;
+            serviceResponseDTO.setMessage (FAIL);
+            serviceResponseDTO.setCode (STATUS_5000);
         }
+        serviceResponseDTO.setHttpStatus (STATUS_OK);
+        return serviceResponseDTO;
     }
 
     @Override

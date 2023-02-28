@@ -27,7 +27,7 @@ public class AudienceController {
     @PostMapping(value = "${server.servlet.saveAudience}")
     @Description("Add Audience")
     @Transactional
-    public ServiceResponseDTO saveAudience(@Valid @RequestBody AudienceDTO audienceDTO) {
+    public ServiceResponseDTO saveAudience(@RequestBody @Valid AudienceDTO audienceDTO) {
         log.info("LOG::Inside the AudienceController saveAudience ");
         return audienceService.saveAudience(audienceDTO);
     }
@@ -35,7 +35,7 @@ public class AudienceController {
     @PostMapping(value = "${server.servlet.getAudience}")
     @Description("Get OrganizationEntity")
     @Transactional
-    public ServiceResponseDTO getAudience(@RequestBody AudienceGetSingleDTO audienceGetSingleDTO) {
+    public ServiceResponseDTO getAudience(@RequestBody @Valid AudienceGetSingleDTO audienceGetSingleDTO) {
         log.info("LOG::Inside the AudienceController getAudience ");
         return audienceService.getAudienceById(audienceGetSingleDTO);
     }
@@ -43,7 +43,7 @@ public class AudienceController {
     @PostMapping(value = "${server.servlet.getAudienceWithPagination}")
     public ServiceResponseDTO getAudienceWithPagination(@RequestBody @Valid AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceController getAudienceWithPagination ");
-        return audienceService.getAudienceWithPagination(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getPage(), audienceRequestDTO.getSize());
+        return audienceService.getAudienceWithPagination(audienceRequestDTO);
     }
 
     @DeleteMapping(value = "${server.servlet.activeInactiveAudience}")

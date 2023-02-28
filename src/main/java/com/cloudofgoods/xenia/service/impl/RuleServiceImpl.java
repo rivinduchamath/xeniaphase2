@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
+import com.cloudofgoods.xenia.util.Utils;
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.*;
@@ -7,7 +8,6 @@ import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.*;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.RuleStatus;
-import com.cloudofgoods.xenia.util.Utility;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import static com.cloudofgoods.xenia.util.Utils.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -34,12 +36,11 @@ public class RuleServiceImpl implements RuleService {
     private final ChannelRepository channelRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
-    @Autowired
-    private SegmentTemplateRepository segmentTemplateRepository;
+    private final SegmentTemplateRepository segmentTemplateRepository;
     @Value("${knowledge.package.name}")
     private String packageName;
-    @Autowired
-    private AudienceRepository audienceRepository;
+    private final AudienceRepository audienceRepository;
+    private final ServiceResponseDTO serviceResponseDTO;
 
 //    @Override
 //    @Transactional
@@ -69,7 +70,6 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public ServiceResponseDTO updateRules(List<String> ruleRootModel) {
         log.info("LOG :: RuleServiceImpl saveOrUpdateRuleListRules ");
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             List<RuleRequestRootEntity> ruleRequestRootEntities = new ArrayList<>();
             Collections.reverse(ruleRootModel);
@@ -237,30 +237,28 @@ public class RuleServiceImpl implements RuleService {
 
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
     public ServiceResponseDTO removeRuleFromKBAndDatabase(String segmentName) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + segmentName);
         try {
 
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() ruleEntity Name " + segmentName);
             internalKnowledgeBase.removeRule(packageName, segmentName);
             serviceResponseDTO.setDescription("removeRuleFromKBAndDatabase Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
+            serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
+            serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
         }
     }
 
     @Override
     public ServiceResponseDTO updateCampaignStatus(String campaignId, String status) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         RuleRequestRootEntity ruleRequestRootEntity = findRootRuleById(campaignId);
         if ((RuleStatus.INACTIVE.toString().equals(status)) && ruleRequestRootEntity.getStatusEnum().equals(RuleStatus.ACTIVE)) {
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + campaignId);
@@ -272,24 +270,18 @@ public class RuleServiceImpl implements RuleService {
             RuleRequestRootEntity save = rootRuleRepository.save(ruleRequestRootEntity);
             serviceResponseDTO.setData(save);
             serviceResponseDTO.setDescription("updateCampaignStatus Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
+
         } else if ((RuleStatus.ACTIVE.toString().equals(status)) && (ruleRequestRootEntity.getStatusEnum().equals(RuleStatus.INACTIVE))) {
             ruleRequestRootEntity.setStatusEnum(RuleStatus.valueOf(status));
             droolService.feedKnowledge(ruleRequestRootEntity);
             RuleRequestRootEntity save = rootRuleRepository.save(ruleRequestRootEntity);
             serviceResponseDTO.setData(save);
             serviceResponseDTO.setDescription("updateCampaignStatus Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
-            return serviceResponseDTO;
-//        }else {
-//            return null;
         }
-        return null;
+        serviceResponseDTO.setMessage(SUCCESS);
+        serviceResponseDTO.setCode(STATUS_2000);
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 
     private String saveSegmentNameGenerator(String name) {
@@ -324,20 +316,16 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public ServiceResponseDTO findByID(String id) {
         Optional<RuleRequestRootEntity> byId = rootRuleRepository.findById(id);
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         if (byId.isPresent()) {
             serviceResponseDTO.setData(byId);
             serviceResponseDTO.setDescription("findByID Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
         } else {
             serviceResponseDTO.setData(byId);
             serviceResponseDTO.setDescription("findByID Success No Data");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
         }
+        serviceResponseDTO.setMessage(SUCCESS);
+        serviceResponseDTO.setCode(STATUS_2000);
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
 
@@ -386,8 +374,8 @@ public class RuleServiceImpl implements RuleService {
                     for (ChannelContentObject channelContentObject : ruleEntity.getEntryVariantMapping()) {
                         log.info("LOG:: DroolServiceImpl createDrlString() priority: " + priority);
                         String metadata =
-                                "startDate > \"" + Utility.formatter.format(ruleRequestRootModel.getStartDateTime()) +
-                                        "\" && endDate < \"" + Utility.formatter.format(ruleRequestRootModel.getEndDateTime()) +
+                                "startDate > \"" + Utils.formatter.format(ruleRequestRootModel.getStartDateTime()) +
+                                        "\" && endDate < \"" + Utils.formatter.format(ruleRequestRootModel.getEndDateTime()) +
                                         "\" && contextId.contains(" + "\"" + channelContentObject.getEntryId().toUpperCase() +
                                         "\"" + ") && (<channel>)";
                         log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);

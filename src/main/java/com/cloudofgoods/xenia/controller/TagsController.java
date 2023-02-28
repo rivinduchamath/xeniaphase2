@@ -38,7 +38,7 @@ public class TagsController {
     @PostMapping(value = "${server.servlet.getTags}")
     @Transactional
     @Description("Get TagsObject")
-    public ServiceGetResponseDTO getTags(@RequestBody GetRequestTagsDTO getRequestTagsDTO) {
+    public ServiceGetResponseDTO getTags(@RequestBody @Valid  GetRequestTagsDTO getRequestTagsDTO) {
         log.info ("LOG::Inside the TagsController getTags");
         return tagsService.getTags (getRequestTagsDTO);
     }

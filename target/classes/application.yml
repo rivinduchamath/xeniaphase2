@@ -85,5 +85,5 @@ spring:
   # Cors Allow(White List)
 allow:
   headers: ChannelContentObject-Type,Authorization,*
-  origin: https://qa-pay-cloudofgoods.incubatelabs.com,https://qa-cloudofgoods.incubatelabs.com,https://qa-v2-cloudofgoods.incubatelabs.com,https://www.cloudofgoods.com,https://qa-v4-cloudofgoods.incubatelabs.com,http://localhost:3000
+  origin: https://www.cloudofgoods.com,http://localhost:3000
 

@@ -12,6 +12,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,19 +21,20 @@ import javax.validation.Valid;
 @RequestMapping("/d6n/channel")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class ChannelsController {
     private final ChannelService channelService;
     @PostMapping(value = "${server.servlet.saveChannels}")
     @Transactional
     @Description("Add ChannelsEntity")
-    public ServiceResponseDTO saveChannels(@RequestBody ChannelDTO channelDTO) {
+    public ServiceResponseDTO saveChannels(@RequestBody @Valid ChannelDTO channelDTO) {
         log.info ("LOG::Inside the ChannelsController saveChannels ");
         return channelService.saveOrUpdateChannel(channelDTO);
     }
     @PostMapping(value = "${server.servlet.getChannels}")
     @Transactional
     @Description("Get ChannelsEntity")
-    public ServiceGetResponseDTO getChannels(@RequestBody GetRequestChannelsDTO requestChannelsDTO) {
+    public ServiceGetResponseDTO getChannels(@RequestBody @Valid GetRequestChannelsDTO requestChannelsDTO) {
         log.info ("LOG::Inside the ChannelsController getChannels ");
         return channelService.getChannels (requestChannelsDTO);
     }

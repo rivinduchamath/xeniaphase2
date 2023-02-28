@@ -15,4 +15,8 @@ public interface AudienceRepository extends MongoRepository<AudienceEntity, Stri
     List<AudienceEntity> findAllByOrganizationUuidEquals(String organizationId, PageRequest of);
 
     Optional<AudienceEntity> findByAudienceUuidEqualsAndOrganizationUuidEquals(String audienceUuid, String organizationUuid);
+
+    List<AudienceEntity> findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(String organizationId, String audienceName, PageRequest of);
+
+    List<AudienceEntity> findByOrganizationUuidEqualsAndAudienceNameStartingWith(String organizationId, String audienceName);
 }

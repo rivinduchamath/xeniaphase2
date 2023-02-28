@@ -31,7 +31,7 @@ public class SwaggerConfig {
                 "Xenia REST API Documentation",
                 "1.0",
                 "Terms of service",
-                new Contact("Xenia", "www.cloudofgoods.com", "rivindu@incubatelabs.com"),
+                new Contact("Xenia", "www.xenia.com", "rivindu@incubatelabs.com"),
                 "License of API",
                 "API license URL",
                 Collections.emptyList()
