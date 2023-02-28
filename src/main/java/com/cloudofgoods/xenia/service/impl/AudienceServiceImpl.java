@@ -2,7 +2,9 @@ package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.AudienceDTO;
+import com.cloudofgoods.xenia.dto.request.AudienceGetSingleDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
+import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
 import com.cloudofgoods.xenia.entity.xenia.AudienceEntity;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.responces.AudienceResponseObject;
@@ -76,14 +78,18 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
-    public ServiceResponseDTO getAudienceById(String audienceUuid) {
+    public ServiceResponseDTO getAudienceById(AudienceGetSingleDTO audienceGetSingleDTO) {
 
-        log.info("LOG :: AudienceServiceImpl getAudienceById() audienceUuid" + audienceUuid);
+        log.info("LOG :: AudienceServiceImpl getAudienceById() audienceUuid" + audienceGetSingleDTO);
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            AudienceEntity byAudienceUuid = audienceRepository.findByAudienceUuid(audienceUuid);
-            serviceResponseDTO.setData(byAudienceUuid);
-            serviceResponseDTO.setDescription("AudienceServiceImpl getAudienceById() success");
+            Optional<AudienceEntity> byAudienceUuid = audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceGetSingleDTO.getAudienceUuId(), audienceGetSingleDTO.getOrganizationUuid());
+           if(byAudienceUuid.isPresent()) {
+               serviceResponseDTO.setData(byAudienceUuid.get());
+               serviceResponseDTO.setDescription("AudienceServiceImpl getAudienceById() success");
+           }else {
+               serviceResponseDTO.setDescription("AudienceServiceImpl getAudienceById() Not Found");
+           }
             serviceResponseDTO.setMessage("success");
             serviceResponseDTO.setCode("2000");
             serviceResponseDTO.setHttpStatus("OK");
@@ -124,4 +130,41 @@ public class AudienceServiceImpl implements AudienceService {
             return serviceResponseDTO;
         }
     }
+
+    @Override
+    public ServiceResponseDTO activeInactiveAudience(String audienceUuid, String organizationUuid, boolean status) {
+        log.info("LOG:: AudienceServiceImpl activeInactiveAudience");
+        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+        try {
+            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
+            if (organizationEntity.isPresent()) {
+                Optional<AudienceEntity> audienceEntity = audienceRepository.
+                        findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid);
+                if (audienceEntity.isPresent()) {
+                    audienceEntity.get().setStatus(status);
+                    serviceResponseDTO.setData(audienceRepository.save(audienceEntity.get()));
+                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
+                    serviceResponseDTO.setMessage("Success");
+                } else {
+                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() attribute Not Found");
+                    serviceResponseDTO.setMessage("Success");
+                }
+            } else {
+                serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Organization Not Found");
+                serviceResponseDTO.setMessage("Fail");
+            }
+            serviceResponseDTO.setCode("2000");
+            serviceResponseDTO.setHttpStatus("OK");
+        } catch (Exception exception) {
+            log.info("LOG :: AudienceServiceImpl activeInactiveAudience() exception: " + exception.getMessage());
+            serviceResponseDTO.setError(exception.getStackTrace());
+            exception.printStackTrace();
+            serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("Fail");
+            serviceResponseDTO.setCode("5000");
+            serviceResponseDTO.setHttpStatus("OK");
+        }
+        return serviceResponseDTO;
+    }
+
 }

@@ -27,4 +27,6 @@ public interface AttributeTableRepository extends MongoRepository<AttributeTable
     List<AttributeTableEntity> findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(String organizationUuid, String toLowerCase, PageRequest of);
 
     Optional<AttributeTableEntity> findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(String attributeTableName, String organizationUuid);
+
+    Optional<AttributeTableEntity> findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(String organizationUuid, String attributeTableName);
 }

@@ -14,4 +14,6 @@ public class ChannelDTO {
     private String channelName;
     private String channelUuid;
     private String type;
+    private boolean status;
+
 }

@@ -20,4 +20,8 @@ public interface ChannelRepository extends MongoRepository <ChannelEntity, Chann
     long countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(String organizationUuid, String toUpperCase);
 
     List<ChannelEntity> findByChannelsId_OrganizationUuidEquals(String organizationId);
+
+    List<ChannelEntity>  findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(String organizationUuid, String toUpperCase);
+
+    Optional<ChannelEntity> findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(String organizationUuid, String channelUuid);
 }

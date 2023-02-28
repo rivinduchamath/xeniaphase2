@@ -3,9 +3,11 @@ package com.cloudofgoods.xenia.service.impl;
 import com.cloudofgoods.xenia.config.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.AttributeTableDTO;
 import com.cloudofgoods.xenia.dto.composite.AttributeTableId;
+import com.cloudofgoods.xenia.dto.request.AttributeTableGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeTableRequestDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeTableResponseDTO;
 import com.cloudofgoods.xenia.dto.response.AttributeTableSaveUpdateResponseDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AttributeEntity;
 import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
@@ -166,6 +168,31 @@ public class AttributesTableServiceImpl implements AttributesTableService {
             serviceResponseDTO.setCode("5000");
             serviceResponseDTO.setHttpStatus("OK");
         }
+        return serviceResponseDTO;
+    }
+
+    @Override
+    public ServiceGetResponseDTO getSingleAttributeTable(AttributeTableGetSingleDTO attributeRequestDTO) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
+        try {
+            Optional<AttributeTableEntity> attributeTableEntity = attributeTableRepository.
+                    findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeTableName());
+            if (attributeTableEntity.isPresent()) {
+                serviceResponseDTO.setData(attributeTableEntity.get());
+                serviceResponseDTO.setDescription("Get Attribute Table Success");
+            } else {
+                serviceResponseDTO.setDescription("Cannot Find Attribute Table");
+            }
+            serviceResponseDTO.setMessage("Success");
+            serviceResponseDTO.setCode("2000");
+        }catch (Exception exception){
+            log.info("LOG :: AttributesServiceImpl getSingleAttributeTable() exception: " + exception.getMessage());
+            serviceResponseDTO.setError(exception.getStackTrace());
+            serviceResponseDTO.setDescription("AttributesServiceImpl getSingleAttributeTable() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("Fail");
+            serviceResponseDTO.setCode("5000");
+        }
+        serviceResponseDTO.setHttpStatus("OK");
         return serviceResponseDTO;
     }
 }

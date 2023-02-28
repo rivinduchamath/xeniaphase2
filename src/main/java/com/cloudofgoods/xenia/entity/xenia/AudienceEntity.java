@@ -22,4 +22,5 @@ public class AudienceEntity {
     private String audienceRuleString;
     private String organizationUuid;
     private NodeObject audienceObject;
+    private boolean status;
    }

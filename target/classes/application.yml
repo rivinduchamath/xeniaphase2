@@ -49,14 +49,17 @@ server:
     saveOrUpdateAttributeTable: /save
     getAttributesTable: /get/all
     activeInactiveAttributeTable: /status
+    getSingleAttributeTable: /get/single
 #    ChannelsController
     saveChannels: /save
     getChannels: /get/all
     deleteChannels: /delete
+    getSingleChannelTable: /get/single
 #    Audience Controller
     saveAudience: /save
-    getAudience: /get
+    getAudience: /get/single
     getAudienceWithPagination: /get/all
+    activeInactiveAudience: /status
 #   LoginController
     authorizeUser: /authorize
 #    DashboardController

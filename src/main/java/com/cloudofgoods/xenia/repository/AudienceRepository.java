@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AudienceRepository extends MongoRepository<AudienceEntity, String> {
     AudienceEntity findByAudienceUuid(String audienceUuid);
@@ -12,4 +13,6 @@ public interface AudienceRepository extends MongoRepository<AudienceEntity, Stri
     long countAllByOrganizationUuidEquals(String organizationUuid );
 
     List<AudienceEntity> findAllByOrganizationUuidEquals(String organizationId, PageRequest of);
+
+    Optional<AudienceEntity> findByAudienceUuidEqualsAndOrganizationUuidEquals(String audienceUuid, String organizationUuid);
 }

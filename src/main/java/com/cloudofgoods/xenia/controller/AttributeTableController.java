@@ -1,7 +1,10 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.AttributeTableDTO;
+import com.cloudofgoods.xenia.dto.request.AttributeGetSingleDTO;
+import com.cloudofgoods.xenia.dto.request.AttributeTableGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeTableRequestDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.AttributesTableService;
 import jdk.jfr.Description;
@@ -44,5 +47,12 @@ public class AttributeTableController {
     public ServiceResponseDTO activeInactiveAttributeTable(@RequestParam @NonNull String attributeTableName, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
         log.info("LOG::Inside the AttributesController activeInactiveAttribute ");
         return attributesTableService.activeInactiveAttributeTable(attributeTableName, organizationUuid,status);
+    }
+    @PostMapping(value = "${server.servlet.getSingleAttributeTable}")
+    @Transactional
+    @Description("Get Single Get Single AttributeTable")
+    public ServiceGetResponseDTO getSingleAttributeTable(@RequestBody @Valid AttributeTableGetSingleDTO attributeRequestDTO) {
+        log.info("LOG::Inside the AttributesController getSingleAttributeTable");
+        return attributesTableService.getSingleAttributeTable(attributeRequestDTO);
     }
 }

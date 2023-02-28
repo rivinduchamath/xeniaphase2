@@ -1,6 +1,7 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.AudienceDTO;
+import com.cloudofgoods.xenia.dto.request.AudienceGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.AudienceService;
@@ -31,17 +32,25 @@ public class AudienceController {
         return audienceService.saveAudience(audienceDTO);
     }
 
-    @GetMapping(value = "${server.servlet.getAudience}")
+    @PostMapping(value = "${server.servlet.getAudience}")
     @Description("Get OrganizationEntity")
     @Transactional
-    public ServiceResponseDTO getAudience(@RequestParam @NonNull String audienceId) {
+    public ServiceResponseDTO getAudience(@RequestBody AudienceGetSingleDTO audienceGetSingleDTO) {
         log.info("LOG::Inside the AudienceController getAudience ");
-        return audienceService.getAudienceById(audienceId);
+        return audienceService.getAudienceById(audienceGetSingleDTO);
     }
 
     @PostMapping(value = "${server.servlet.getAudienceWithPagination}")
     public ServiceResponseDTO getAudienceWithPagination(@RequestBody @Valid AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceController getAudienceWithPagination ");
         return audienceService.getAudienceWithPagination(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getPage(), audienceRequestDTO.getSize());
+    }
+
+    @DeleteMapping(value = "${server.servlet.activeInactiveAudience}")
+    @Transactional
+    @Description("activeInactiveAudience")
+    public ServiceResponseDTO activeInactiveAudience(@RequestParam @NonNull String audienceUuid, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
+        log.info("LOG::Inside the AudienceController activeInactiveAudience ");
+        return audienceService.activeInactiveAudience(audienceUuid, organizationUuid,status);
     }
 }

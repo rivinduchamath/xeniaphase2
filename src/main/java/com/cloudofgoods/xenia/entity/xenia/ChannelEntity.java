@@ -20,10 +20,12 @@ public class ChannelEntity implements SuperEntity {
     @Indexed
     private String channelUuid;
     private String type;
+    private boolean status;
 
-    public ChannelEntity(String organizationUuid, String channelName, String channelUuid, String type) {
+    public ChannelEntity(String organizationUuid, String channelName, String channelUuid, String type,boolean status) {
         this.channelsId = new ChannelsId(organizationUuid, channelName);
         this.channelUuid = channelUuid;
         this.type = type;
+        this.status = status;
     }
 }

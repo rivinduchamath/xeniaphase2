@@ -1,10 +1,12 @@
 package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.dto.ChannelDTO;
+import com.cloudofgoods.xenia.dto.request.ChannelsGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.GetRequestChannelsDTO;
 import com.cloudofgoods.xenia.dto.response.ChannelsResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
+import com.cloudofgoods.xenia.entity.xenia.AttributeTableEntity;
 import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.entity.xenia.ChannelEntity;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
@@ -59,7 +61,7 @@ public class ChannelServiceImpl implements ChannelService {
                     } else { //Save
                         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
 
-                        ChannelEntity channel = channelRepository.save(new ChannelEntity(channelDTO.getOrganizationUuid(), channelDTO.getChannelName().toUpperCase(), timeBasedGenerator.generate() + "", channelDTO.getType().toUpperCase()));
+                        ChannelEntity channel = channelRepository.save(new ChannelEntity(channelDTO.getOrganizationUuid(), channelDTO.getChannelName().toUpperCase(), timeBasedGenerator.generate() + "", channelDTO.getType().toUpperCase(),channelDTO.isStatus()));
                         channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
                         channelsResponseDTO.setType(channel.getType());
                         channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
@@ -85,20 +87,39 @@ public class ChannelServiceImpl implements ChannelService {
         return serviceResponseDTO;
     }
 
+
+
     @Override
     public ServiceGetResponseDTO getChannels(GetRequestChannelsDTO requestChannelsDTO) {
         log.info("LOG:: ChannelServiceImpl getChannels");
         ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
             List<ChannelsResponseDTO> channelsResponseDTOS = new ArrayList<>();
-            for (ChannelEntity channel : channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(), PageRequest.of(requestChannelsDTO.getPage(), requestChannelsDTO.getSize()))) {
+            if (requestChannelsDTO.isPagination() ) {
+                List<ChannelEntity> channels = channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(
+                        requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(), PageRequest.of(requestChannelsDTO.getPage(), requestChannelsDTO.getSize()));
+                for (ChannelEntity channel :channels ) {
 
-                ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
-                channelsResponseDTO.setType(channel.getType());
-                channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
-                channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
-                channelsResponseDTO.setType(channel.getType());
-                channelsResponseDTOS.add(channelsResponseDTO);
+                    ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
+                    channelsResponseDTO.setType(channel.getType());
+                    channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
+                    channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
+                    channelsResponseDTO.setType(channel.getType());
+                    channelsResponseDTOS.add(channelsResponseDTO);
+                }
+
+            }else {
+                List<ChannelEntity> channels = channelRepository.findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(
+                    requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase());
+                for (ChannelEntity channel :channels ) {
+
+                    ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();
+                    channelsResponseDTO.setType(channel.getType());
+                    channelsResponseDTO.setChannelName(channel.getChannelsId().getChannelsName());
+                    channelsResponseDTO.setChannelUuid(channel.getChannelUuid());
+                    channelsResponseDTO.setType(channel.getType());
+                    channelsResponseDTOS.add(channelsResponseDTO);
+                }
             }
             serviceResponseDTO.setCount(channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase()));
             serviceResponseDTO.setData(channelsResponseDTOS);
@@ -118,13 +139,15 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
-    public ServiceResponseDTO deleteChannels(String channelUuId) {
+    public ServiceResponseDTO deleteChannels(String channelUuid, String organizationUuid, boolean status){
         log.info("LOG:: ChannelServiceImpl deleteChannels Service Layer");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<ChannelEntity> channelEntity = channelRepository.deleteByChannelUuidEquals(channelUuId);
+            Optional<ChannelEntity> channelEntity = channelRepository.findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(organizationUuid,channelUuid);
             if (channelEntity.isPresent()) {
-                serviceResponseDTO.setData(channelEntity.get());
+                channelEntity.get().setStatus(status);
+                ChannelEntity save = channelRepository.save(channelEntity.get());
+                serviceResponseDTO.setData(save);
                 serviceResponseDTO.setDescription("Delete Channel Success");
             } else {
                 serviceResponseDTO.setDescription("Delete Uuid is Not Found");
@@ -135,6 +158,31 @@ public class ChannelServiceImpl implements ChannelService {
             log.info("LOG :: ChannelServiceImpl deleteChannels() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setMessage("ChannelServiceImpl deleteChannels() exception " + exception.getMessage());
+            serviceResponseDTO.setMessage("Fail");
+            serviceResponseDTO.setCode("5000");
+        }
+        serviceResponseDTO.setHttpStatus("OK");
+        return serviceResponseDTO;
+    }
+
+    @Override
+    public ServiceGetResponseDTO getSingleChannelTable(ChannelsGetSingleDTO channelsGetSingleDTO) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
+        try {
+            Optional<ChannelEntity> channelEntity = channelRepository.
+                    findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(channelsGetSingleDTO.getOrganizationUuid(), channelsGetSingleDTO.getChannelUuid());
+            if (channelEntity.isPresent()) {
+                serviceResponseDTO.setData(channelEntity.get());
+                serviceResponseDTO.setDescription("Get Channel Table Success");
+            } else {
+                serviceResponseDTO.setDescription("Cannot Find Channel Table");
+            }
+            serviceResponseDTO.setMessage("Success");
+            serviceResponseDTO.setCode("2000");
+        }catch (Exception exception){
+            log.info("LOG :: ChannelServiceImpl getSingleChannelTable() exception: " + exception.getMessage());
+            serviceResponseDTO.setError(exception.getStackTrace());
+            serviceResponseDTO.setDescription("ChannelServiceImpl getSingleChannelTable() exception " + exception.getMessage());
             serviceResponseDTO.setMessage("Fail");
             serviceResponseDTO.setCode("5000");
         }
