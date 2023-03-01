@@ -4,7 +4,6 @@ import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +15,6 @@ public class AttributeTableDTO {
     private String displayName;
     @NotEmptyOrNull(message = "Organization Uuid Must Not Be Empty")
     private String organizationUuid;
+    private boolean status;
 
 }

@@ -25,7 +25,7 @@ public class TemplateController {
     @PostMapping(value = "${server.servlet.saveTemplate}")
     @Description("If Send Id It Will Update Template, Otherwise Save as a new Template ")
     public ServiceResponseDTO saveTemplate(@RequestBody SegmentTemplateEntity ruleRootModel) {
-        log.info(ruleRootModel + " LOG::Inside the TemplateController saveTemplate");
+        log.info("LOG::Inside the TemplateController saveTemplate");
         return templateService.saveTemplate(ruleRootModel);
     }
 

@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class AttributeTableSaveUpdateResponseDTO {
    private String tableName;
    private String displayName;
+   private boolean isActive;
 }

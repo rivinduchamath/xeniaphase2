@@ -2,7 +2,6 @@ package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.TagsDTO;
-import com.cloudofgoods.xenia.dto.request.AttributeGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.GetRequestTagsDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;

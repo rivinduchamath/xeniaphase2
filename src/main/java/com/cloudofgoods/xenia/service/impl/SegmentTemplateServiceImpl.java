@@ -119,34 +119,31 @@ public class SegmentTemplateServiceImpl implements TemplateService {
     public ServiceResponseDTO saveTemplate(SegmentTemplateEntity ruleRootModel) {
         log.info("LOG:: TemplateServiceImpl saveTemplate");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
-        Optional<OrganizationEntity> byUuid = organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid());
-        if (byUuid.isPresent()) {
-                try {
-                    if (ruleRootModel.getId() != null) {
-                        SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
-                        serviceResponseDTO.setDescription("Update Template Success");
-                        serviceResponseDTO.setData(save);
+        organizationRepository.findByUuidEquals(ruleRootModel.getOrganizationUuid()).ifPresentOrElse(
+                organizationEntity -> {
+                    try {
+                        if (ruleRootModel.getId() != null) {
+                            SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
+                            serviceResponseDTO.setDescription("Update Template Success");
+                            serviceResponseDTO.setData(save);
+                        } else {
+                            ruleRootModel.setSegmentName(saveTemplateNameGenerator(ruleRootModel.getSegmentName()));
+                            SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
+                            serviceResponseDTO.setDescription("Save Template Success");
+                            serviceResponseDTO.setData(save);
+                        }
+                        serviceResponseDTO.setMessage(SUCCESS);
+                        serviceResponseDTO.setCode(STATUS_2000);
 
-                    } else {
-                        ruleRootModel.setSegmentName(saveTemplateNameGenerator(ruleRootModel.getSegmentName()));
-                        SegmentTemplateEntity save = segmentTemplateRepository.save(ruleRootModel);
-                        serviceResponseDTO.setDescription("Save Template Success");
-                        serviceResponseDTO.setData(save);
+                    } catch (Exception exception) {
+                        log.info("LOG :: TemplateServiceImpl saveTemplate() exception: " + exception.getMessage());
+                        serviceResponseDTO.setError(exception.getStackTrace());
+                        serviceResponseDTO.setDescription("TemplateServiceImpl saveTemplate() exception " + exception.getMessage());
+                        serviceResponseDTO.setMessage(FAIL);
+                        serviceResponseDTO.setCode(STATUS_5000);
                     }
-                    serviceResponseDTO.setMessage(SUCCESS);
-                    serviceResponseDTO.setCode(STATUS_2000);
-
-                } catch (Exception exception) {
-                    log.info("LOG :: TemplateServiceImpl saveTemplate() exception: " + exception.getMessage());
-                    serviceResponseDTO.setError(exception.getStackTrace());
-                    serviceResponseDTO.setDescription("TemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-                    serviceResponseDTO.setMessage(FAIL);
-                    serviceResponseDTO.setCode(STATUS_5000);
-                }
-        }else {
-            serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND);
-        }
-        serviceResponseDTO.setHttpStatus(STATUS_OK);
+                }, ()->   serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND)
+        );
         return serviceResponseDTO;
     }
 

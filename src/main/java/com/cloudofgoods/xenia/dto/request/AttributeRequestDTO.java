@@ -1,7 +1,6 @@
 package com.cloudofgoods.xenia.dto.request;
 
 import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
-import com.cloudofgoods.xenia.config.customAnnotations.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Validated
 public class AttributeRequestDTO {
     @NotEmptyOrNull(message = "Organization Uuid Must Not Be Empty")
     private String organizationUuid;
@@ -26,7 +24,6 @@ public class AttributeRequestDTO {
     private String attributeUuid;
     @NotEmptyOrNull(message = "Table Name Must Not Be Empty")
     private String tableName;
-    @NotNull
     private boolean status;
 }
 

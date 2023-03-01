@@ -27,7 +27,6 @@ public class AttributeTableController {
     private final AttributesTableService attributesTableService;
 
     @PostMapping(value = "${server.servlet.saveOrUpdateAttributeTable}")
-    @Transactional
     @Description("Add Attributes Table Object")
     public ServiceResponseDTO saveOrUpdateAttributeTable(@Valid @RequestBody AttributeTableDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController saveAttributesTable ");
@@ -35,14 +34,12 @@ public class AttributeTableController {
     }
 
     @PostMapping(value = "${server.servlet.getAttributesTable}")
-    @Transactional
     @Description("Get Attributes Table Object")
     public ServiceResponseDTO getAttributesTable(@Valid @RequestBody AttributeTableRequestDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController getAttributesTable ");
         return attributesTableService.getAttributes(attributeTableDTO);
     }
     @DeleteMapping(value = "${server.servlet.activeInactiveAttributeTable}")
-    @Transactional
     @Description("activeInactiveAttribute")
     public ServiceResponseDTO activeInactiveAttributeTable(@RequestParam @NonNull String attributeTableName, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
         log.info("LOG::Inside the AttributesController activeInactiveAttribute ");

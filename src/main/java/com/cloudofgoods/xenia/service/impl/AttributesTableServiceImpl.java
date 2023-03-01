@@ -43,9 +43,12 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                                             .ifPresentOrElse(
                                                     save -> {
                                                         save.setAttributeTableId(new AttributeTableId(attributeTableDTO.getDisplayName(), attributeTableDTO.getOrganizationUuid()));
+                                                        save.setDisplayName(attributeTableDTO.getDisplayName());
+                                                        save.setActive(attributeTableDTO.isStatus());
                                                         AttributeTableEntity attributeTableEntity = attributeTableRepository.save(save);
                                                         attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
                                                         attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
+                                                        attributeTableSaveUpdateResponseDTO.setActive(attributeTableEntity.isActive());
                                                         serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
                                                         serviceResponseDTO.setDescription("Attributes Table Service update success");
                                                     },
@@ -57,11 +60,13 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                                 } else {
                                     AttributeTableEntity attributeTableEntity = new AttributeTableEntity();
                                     attributeTableEntity.setDisplayName(attributeTableDTO.getDisplayName());
+                                    attributeTableEntity.setActive(attributeTableDTO.isStatus());
                                     attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
                                     attributeTableEntity = attributeTableRepository.save(attributeTableEntity);
                                     serviceResponseDTO.setDescription("Attributes Table Service save success");
                                     attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
                                     attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
+                                    attributeTableSaveUpdateResponseDTO.setActive(attributeTableEntity.isActive());
                                     serviceResponseDTO.setData(attributeTableSaveUpdateResponseDTO);
                                     serviceResponseDTO.setMessage(SUCCESS);
                                     serviceResponseDTO.setCode(STATUS_2000);
@@ -128,7 +133,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                                 attributeTableRepository.findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableName.toLowerCase(), organizationUuid)
                                         .ifPresentOrElse(
                                                 attributeTableEntity -> {
-                                                    attributeTableEntity.setStatus(status);
+                                                    attributeTableEntity.setActive(status);
                                                     attributeTableRepository.save(attributeTableEntity);
                                                     serviceResponseDTO.setData(attributeTableEntity);
                                                     serviceResponseDTO.setDescription("Active/Inactive Attribute Table Success");
