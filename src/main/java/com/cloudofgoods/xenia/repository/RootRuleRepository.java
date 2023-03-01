@@ -17,4 +17,10 @@ public interface RootRuleRepository extends MongoRepository <RuleRequestRootEnti
     List<RuleRequestRootEntity> findByStatusEnumAndEndDateTimeGreaterThan(RuleStatus active, Date date);
 
     List<RuleRequestRootEntity> findByOrganizationIdEquals(String organizationId, PageRequest of);
+
+    List<RuleRequestRootEntity> findAllByEndDateTimeIsGreaterThanEqualAndOrganizationIdEquals(Date from, String organizationUuid, PageRequest of);
+
+    List<RuleRequestRootEntity> findAllByOrganizationIdEqualsAndEndDateTimeIsGreaterThanEqual(String organizationUuid, Date from);
+
+    long countAllByOrganizationIdEqualsAndEndDateTimeIsGreaterThanEqual(String organizationUuid, Date from);
 }

@@ -68,6 +68,8 @@ server:
 #    Tags Controller
     saveTags: /save
     getTags: /get
+    activeInactiveTags: /status
+    getSingleTag: /get/single
 
 spring:
 #  redis:

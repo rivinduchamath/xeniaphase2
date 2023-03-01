@@ -1,12 +1,14 @@
 package com.cloudofgoods.xenia.controller;
 
 
+import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.RuleRequestRootEntity;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.RuleStatus;
 import jdk.jfr.Description;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,23 +61,13 @@ public class RuleController {
 
     @DeleteMapping(value = "${server.servlet.deleteCampaignWithAllSegments}")
     @Description("Delete Campaign With All Segments From Id If Delete It Will Delete With All Rules(Multiple Rules)")
-    public ServiceResponseDTO deleteCampaignWithAllSegments(@RequestParam String campaignId) throws ExecutionException, InterruptedException {
-        if (campaignId != null) {
+    public ServiceResponseDTO deleteCampaignWithAllSegments(@RequestParam @NonNull String campaignId) throws ExecutionException, InterruptedException {
             log.info ("LOG::Inside the RuleController deleteCampaignWithAllSegments " + campaignId);
             return ruleService.removeRuleFromKBAndDatabase (campaignId);
-        }else {
-            log.info ("LOG:: RuleController deleteCampaignWithAllSegments campaignId == null");
-            ServiceResponseDTO responseDTO = new ServiceResponseDTO ();
-            responseDTO.setMessage ("Success");
-            responseDTO.setCode ("4000");
-            responseDTO.setDescription ("REQUESTED RANGE NOT SATISFIABLE campaignId == null");
-            responseDTO.setHttpStatus ("OK");
-            return responseDTO;
-        }
     }
 
     @GetMapping(value = "${server.servlet.getCampaignById}/{id}")
-    public ServiceResponseDTO getCampaignById(@PathVariable("id") String id) {
+    public ServiceResponseDTO getCampaignById(@PathVariable("id") @NonNull String id) {
         log.info ("LOG::Inside the RuleController getRuleById ");
         return ruleService.findByID (id);
     }

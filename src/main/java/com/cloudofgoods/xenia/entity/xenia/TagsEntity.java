@@ -15,8 +15,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class TagsEntity {
     @Id
     private TagsId tagsId;
+    private boolean status;
 
-    public TagsEntity(String tagName, String organizationUuid) {
+    public TagsEntity(String tagName, String organizationUuid, boolean status) {
         tagsId = new TagsId(organizationUuid, tagName);
+        this.status  =status;
     }
 }

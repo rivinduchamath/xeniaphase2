@@ -12,6 +12,8 @@ public class TagsDTO {
 
     @NotEmptyOrNull(message = "Organization Uuid Cannot be Empty")
     private String organizationUuid;
+    @NotEmptyOrNull(message = "Tags Name Cannot be Empty")
     private String tagsName;
+    private boolean status;
 
 }

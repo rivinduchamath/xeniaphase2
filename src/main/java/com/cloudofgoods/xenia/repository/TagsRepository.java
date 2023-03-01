@@ -19,4 +19,8 @@ public interface TagsRepository extends MongoRepository<TagsEntity, TagsId> {
     List<TagsEntity> findAllByTagsIdOrganizationUuidEquals(String organizationUuid, PageRequest of);
 
     long countByTagsIdOrganizationUuidEquals(String organizationUuid);
+
+    List<TagsEntity> findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameStartsWith(String organizationUuid, String tagsName);
+
+    Optional<TagsEntity> findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameEquals(String organizationUuid, String tagsName);
 }

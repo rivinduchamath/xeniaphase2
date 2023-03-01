@@ -14,5 +14,6 @@ public class TagsResponseDTO implements SuperEntity {
 
     private String tagsName;
     private String organizationUuid;
+    private boolean status;
 }
 
