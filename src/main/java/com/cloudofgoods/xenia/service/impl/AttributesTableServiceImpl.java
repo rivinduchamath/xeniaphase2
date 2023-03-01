@@ -134,8 +134,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                                         .ifPresentOrElse(
                                                 attributeTableEntity -> {
                                                     attributeTableEntity.setActive(status);
-                                                    attributeTableRepository.save(attributeTableEntity);
-                                                    serviceResponseDTO.setData(attributeTableEntity);
+                                                    serviceResponseDTO.setData(attributeTableRepository.save(attributeTableEntity));
                                                     serviceResponseDTO.setDescription("Active/Inactive Attribute Table Success");
                                                 },
                                                 () -> serviceResponseDTO.setDescription("Cannot Find Attribute Table")
