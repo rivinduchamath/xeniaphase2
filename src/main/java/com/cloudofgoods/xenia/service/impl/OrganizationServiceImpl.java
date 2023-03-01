@@ -26,17 +26,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             if (NotEmptyOrNullValidator.isNotNullOrEmpty(organizationDTO.getOrganizationUuid())) {
-                Optional<OrganizationEntity> organizationEntity = organizationRepository.findByUuidEquals(organizationDTO.getOrganizationUuid());
-                if (organizationEntity.isPresent()) {
-                    log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
-                    organizationEntity.get().setName(organizationDTO.getName());
-                    organizationEntity.get().setPassword(organizationDTO.getPassword());
-                    OrganizationEntity save = organizationRepository.save(organizationEntity.get());// Update
-                    serviceResponseDTO.setData(save);
-                    serviceResponseDTO.setDescription("Update Organization Success");
-                } else {
-                    serviceResponseDTO.setDescription("Update Organization Not Found");
-                }
+                organizationRepository.findByUuidEquals(organizationDTO.getOrganizationUuid())
+                        .ifPresentOrElse(
+                                organizationEntity -> {
+                                    log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
+                                    organizationEntity.setName(organizationDTO.getName());
+                                    organizationEntity.setPassword(organizationDTO.getPassword());
+                                    OrganizationEntity save = organizationRepository.save(organizationEntity);
+                                    serviceResponseDTO.setData(save);
+                                    serviceResponseDTO.setDescription("Update Organization Success");
+                                },
+                                () -> serviceResponseDTO.setDescription("Update Organization Not Found")
+                        );
+
             } else {
                 OrganizationEntity organizationEntity = new OrganizationEntity();
                 log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Save");

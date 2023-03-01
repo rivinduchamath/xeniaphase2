@@ -131,7 +131,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
                                                     attributeTableEntity.setStatus(status);
                                                     attributeTableRepository.save(attributeTableEntity);
                                                     serviceResponseDTO.setData(attributeTableEntity);
-                                                    serviceResponseDTO.setDescription("Get Attribute Table Success");
+                                                    serviceResponseDTO.setDescription("Active/Inactive Attribute Table Success");
                                                 },
                                                 () -> serviceResponseDTO.setDescription("Cannot Find Attribute Table")
                                         );
@@ -155,6 +155,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
 
     @Override
     public ServiceGetResponseDTO getSingleAttributeTable(AttributeTableGetSingleDTO attributeRequestDTO) {
+        log.info("LOG :: AttributesTableServiceImpl getSingleAttributeTable() Service Layer");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
             attributeTableRepository.findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeTableName().toLowerCase())

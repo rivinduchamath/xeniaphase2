@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.entity.xenia;
 
+import com.cloudofgoods.xenia.config.customAnnotations.NotNull;
 import com.cloudofgoods.xenia.models.composite.AttributesId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,5 +27,6 @@ public class AttributeEntity {
     private String attributeUuid;
     @Indexed(name = "table_name")
     private String tableName;
+    @NotNull
     private boolean status;
 }

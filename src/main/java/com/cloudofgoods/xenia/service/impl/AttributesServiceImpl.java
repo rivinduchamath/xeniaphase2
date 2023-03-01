@@ -44,12 +44,14 @@ public class AttributesServiceImpl implements AttributesService {
                             log.info("LOG:: AttributesServiceImpl saveAttribute Service Layer Update");
                             attributeRepository.findByAttributeUuidEquals(attributesDTO.getAttributeUuid()).ifPresentOrElse(
                                     attributeEntity -> {
-                                        attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
                                         attributeEntity.setAttributeUuid(attributesDTO.getAttributeUuid());
-                                        attributeEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName()) ? attributesDTO.getAttributeName() : attributeEntity.getDisplayName());
-                                        attributeEntity.setValues(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues()) ? attributesDTO.getValues() : attributeEntity.getValues());
-                                        attributeEntity.setValues(attributesDTO.getValues());
+                                        attributeEntity.setAttributesId(new AttributesId(attributesDTO.getOrganizationUuid(), attributesDTO.getAttributeName()));
+                                        attributeEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributesDTO.getAttributeName())
+                                                ? attributesDTO.getAttributeName() : attributeEntity.getDisplayName());
                                         attributeEntity.setType(attributesDTO.getType());
+                                        attributeEntity.setStatus(attributesDTO.isStatus());
+                                        attributeEntity.setValues(NotEmptyOrNullValidator.isNullOrEmptyList(attributesDTO.getValues())
+                                                ? attributesDTO.getValues() : attributeEntity.getValues());
                                         attributeEntity.setTableName(attributesDTO.getTableName());
                                         serviceResponseDTO.setData(responseAttribute(attributeRepository.save(attributeEntity)));
                                         serviceResponseDTO.setDescription("Update Attribute Success");
@@ -91,15 +93,15 @@ public class AttributesServiceImpl implements AttributesService {
         return serviceResponseDTO;
     }
 
-    private AttributeResponseDTO responseAttribute(AttributeEntity save) {
+    private AttributeResponseDTO responseAttribute(AttributeEntity attributeEntity) {
         AttributeResponseDTO attributeResponseDTO = new AttributeResponseDTO();
-        attributeResponseDTO.setAttributeName(save.getAttributesId().getAttributeName());
-        attributeResponseDTO.setAttributeUuid(save.getAttributeUuid());
-        attributeResponseDTO.setDisplayName(save.getDisplayName());
-        attributeResponseDTO.setType(save.getType());
-        attributeResponseDTO.setStatus(save.isStatus());
-        attributeResponseDTO.setValues(save.getValues());
-        attributeResponseDTO.setTableName(save.getTableName());
+        attributeResponseDTO.setAttributeName(attributeEntity.getAttributesId().getAttributeName());
+        attributeResponseDTO.setAttributeUuid(attributeEntity.getAttributeUuid());
+        attributeResponseDTO.setDisplayName(attributeEntity.getDisplayName());
+        attributeResponseDTO.setType(attributeEntity.getType());
+        attributeResponseDTO.setStatus(attributeEntity.isStatus());
+        attributeResponseDTO.setValues(attributeEntity.getValues());
+        attributeResponseDTO.setTableName(attributeEntity.getTableName());
         return attributeResponseDTO;
     }
 
@@ -114,7 +116,6 @@ public class AttributesServiceImpl implements AttributesService {
                     PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()))
                     : attributeRepository.findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(
                     requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());
-
             List<AttributeResponseDTO> attributeResponseDTOS = attributeEntities.stream().map(this::responseAttribute).collect(Collectors.toList());
             serviceGetResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType()));
             serviceGetResponseDTO.setData(attributeResponseDTOS);
@@ -141,7 +142,9 @@ public class AttributesServiceImpl implements AttributesService {
                         serviceGetResponseDTO.setData(attributeEntity);
                         serviceGetResponseDTO.setDescription("Get Attribute Success");
                     });
-            serviceGetResponseDTO.setDescription("Cannot Find Data");
+            if (!NotEmptyOrNullValidator.isNotNullOrEmpty(serviceGetResponseDTO.getDescription())) {
+                serviceGetResponseDTO.setDescription("Cannot Find Data");
+            }
             serviceGetResponseDTO.setMessage(SUCCESS);
             serviceGetResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
@@ -171,7 +174,7 @@ public class AttributesServiceImpl implements AttributesService {
                                     serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() attribute Not Found");
                                 });
                     });
-            if (NotEmptyOrNullValidator.isNotNullOrEmpty(serviceResponseDTO.getDescription())) {
+            if (!NotEmptyOrNullValidator.isNotNullOrEmpty(serviceResponseDTO.getDescription())) {
                 serviceResponseDTO.setDescription("AttributesServiceImpl deleteAttribute() Organization Not Found");
             }
             serviceResponseDTO.setMessage(SUCCESS);

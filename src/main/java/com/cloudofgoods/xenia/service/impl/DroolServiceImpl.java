@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,77 +54,69 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 
     @Override
     public Collection<KiePackage> getAllRuleFromKnowledgeBase() {
-        Collection<KiePackage> collection = knowledgeBuilder.getKnowledgePackages();
-        log.info("LOG::DroolServiceImpl getAllRuleFromKnowledgeBase() collection Size : " + collection.size());
-        return collection;
+        return knowledgeBuilder.getKnowledgePackages().stream()
+                .peek(kiePackage -> log.info("LOG::DroolServiceImpl getAllRuleFromKnowledgeBase() collection : " + kiePackage.toString()))
+                .collect(Collectors.toList());
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void loadKnowledgeBuilder() {
         log.info("LOG:: DroolServiceImpl loadKnowledgeBuilder() Get All Rules From Database");
-        List<RuleRequestRootEntity> activeRule = rootRuleRepository.findByStatusEnumAndEndDateTimeGreaterThan(RuleStatus.ACTIVE, new Date());
-        for (RuleRequestRootEntity ruleRequestRootEntity : activeRule) {
-            feedKnowledge(ruleRequestRootEntity);
-        }
+        rootRuleRepository.findByStatusEnumAndEndDateTimeGreaterThan(RuleStatus.ACTIVE, new Date()).forEach(this::feedKnowledge);
     }
 
     public void feedKnowledgeBuilderWhenUpdate(RuleRequestRootEntity allRuleSet, RuleRequestRootEntity pastRule) {
         log.info("LOG:: DroolServiceImpl loadKnowledgeBuilder() Get All Rules From Database");
-        for (RuleChannelObject channelsEntity : pastRule.getChannels()) {
-            for (AudienceObject audienceObject : channelsEntity.getAudienceObjects()) {
-                for (SegmentsObject segmentsObject : audienceObject.getSegments()) {
-                    removeFromKB(segmentsObject.getSegmentName());
-                }
-            }
-        }
+        pastRule.getChannels().stream().flatMap(channelsEntity -> channelsEntity.getAudienceObjects().stream())
+                .flatMap(audienceObject -> audienceObject.getSegments().stream()).map(SegmentsObject::getSegmentName).forEach(this::removeFromKB);
         log.info("LOG:: DroolServiceImpl loadKnowledgeBuilder() after for");
         feedKnowledge(allRuleSet);
     }
 
     public void removeFromKB(String ruleName) {
         log.info("LOG:: RuleServiceImpl removeFromKB() : " + ruleName);
-        if (ruleName != null) {
+        Optional.ofNullable(ruleName).ifPresent(name -> {
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() rule Is Present ");
-            internalKnowledgeBase.removeRule(packageName, ruleName);
-        }
+            internalKnowledgeBase.removeRule(packageName, name);
+        });
+
     }
 
     public void feedKnowledge(RuleRequestRootEntity allRuleSet) {
         log.info("LOG:: DroolServiceImpl feedKnowledge() ");
-        for (RuleChannelObject ruleChannelObject : allRuleSet.getChannels()) {
-            for (AudienceObject audienceObject : ruleChannelObject.getAudienceObjects()) {
-                for (SegmentsObject segmentsObject : audienceObject.getSegments()) {
-                    knowledgeBuilder.add(ResourceFactory.newByteArrayResource(segmentsObject.getFullRuleString().getBytes()), ResourceType.DRL);
-                    KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
-                    if (errors.size() > 0) {
-                        for (KnowledgeBuilderError error : errors) {
-                            log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
-                            log.error("Log :: DroolServiceImpl Error Size " + errors.size());
-                            try {
-                                knowledgeBuilder.undo();
-                                removeRuleFromKBAndDatabase(allRuleSet.getId());
-                            } catch (ExecutionException | InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        throw new IllegalArgumentException("Could not parse knowledge.");
-                    } else {
-                        // Add To Knowledge Base
-                        log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
-                        internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
-                        // Delete From Knowledge Builder
-//                    log.info ("Log :: DroolServiceImpl feedKnowledge() undo >> Delete All in feedKnowledge");
+        allRuleSet.getChannels().stream().flatMap(ruleChannelObject -> ruleChannelObject.getAudienceObjects().stream()).flatMap(audienceObject -> audienceObject.getSegments().stream()).forEach(segmentsObject -> {
+            knowledgeBuilder.add(ResourceFactory.newByteArrayResource(segmentsObject.getFullRuleString().getBytes()), ResourceType.DRL);
+            KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
+            if (errors.size() > 0) {
+                errors.forEach(error -> {
+                    log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
+                    log.error("Log :: DroolServiceImpl Error Size " + errors.size());
+                    try {
+                        knowledgeBuilder.undo();
+                        removeRuleFromKBAndDatabase(allRuleSet.getId());
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
-                    knowledgeBuilder.undo();
-                }
+                });
+                throw new IllegalArgumentException("Could not parse knowledge.");
+            } else {
+                // Add To Knowledge Base
+                log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
+                internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
+                // Delete From Knowledge Builder
             }
-        }
+            knowledgeBuilder.undo();
+        });
     }
 
     public void removeRuleFromKBAndDatabase(String ruleId) throws ExecutionException, InterruptedException {
-        log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + ruleId);
-        rootRuleRepository.deleteById(ruleId);
-        throw new IllegalArgumentException("Could not parse knowledge.");
+        try {
+            log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + ruleId);
+            rootRuleRepository.deleteById(ruleId);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not parse knowledge.");
+        }
+
     }
 
 //    //Find Root SegmentsObject With Multiple Child Rules From SegmentsObject ID
@@ -174,14 +167,12 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
     // Return Imports In Drool String
     public String createImports() {
         log.info("LOG:: DroolServiceImpl createImports");
-        PackageDescrBuilder pkg = DescrFactory.newPackage().name("com.cloudofgoods.xenia")
+        PackageDescr pkg = DescrFactory.newPackage().name("com.cloudofgoods.xenia")
                 .newImport().target("com.cloudofgoods.xenia.dto.caution.User").end()
                 .newImport().target("org.springframework.util.CollectionUtils").end()
                 .newImport().target("com.cloudofgoods.xenia.dto.caution.MetaData").end()
-                .newGlobal().type("com.cloudofgoods.xenia.dto.D6nResponseModelDTO").identifier("response").end();
-        PackageDescrBuilder pkgDescBuilder = pkg.end();
-        PackageDescr packageDescr = pkgDescBuilder.getDescr();
+                .newGlobal().type("com.cloudofgoods.xenia.dto.D6nResponseModelDTO").identifier("response").end().getDescr();
         DrlDumper dumper = new DrlDumper();
-        return dumper.dump(packageDescr);
+        return dumper.dump(pkg);
     }
 }
