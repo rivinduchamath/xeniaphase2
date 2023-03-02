@@ -2,7 +2,9 @@ package com.cloudofgoods.xenia.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@AllArgsConstructor
+@NoArgsConstructor
 public class D6nResponseModelDTO implements Serializable {
 
     private String slotId;
@@ -23,7 +27,7 @@ public class D6nResponseModelDTO implements Serializable {
         this.variant = variant;
         this.slotId = slotId;
         this.priority = priority;
-        this.satisfiedConditions.add("{ \"priority\" : \"" + priority + "\" ,\"Slot\" :\"" + slotId + "\", \"ChannelContentObject\" : \"" + variant+"\"}");
+        this.satisfiedConditions.add("{ 'priority' : '" + priority + "' ,'slotId' :'" + slotId + "', 'variant' : '" + variant+"'}");
     }
 
 }

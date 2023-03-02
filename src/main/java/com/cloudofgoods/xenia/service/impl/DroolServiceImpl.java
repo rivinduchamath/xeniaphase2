@@ -125,44 +125,6 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 //        return rootRuleRepository.findById (ruleId).get ();
 //    }
 
-    //Remove Rules From Knowledge Base And Database From SegmentsObject ID
-    public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization, String uuid) {
-        log.info("Log :: DroolServiceImpl makeDecision()");
-        log.info("Log :: DroolServiceImpl makeDecision() metaData : " + metaData.toString());
-        log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
-        log.info("Log :: DroolServiceImpl makeDecision() organization : " + organization);
-        D6nResponseModelDTO d6nResponse = new D6nResponseModelDTO();
-        KieSession kieSession = internalKnowledgeBase.newKieSession();
-
-        Agenda agenda = kieSession.getAgenda();
-        agenda.getAgendaGroup(organization).setFocus();
-        kieSession.getGlobals().set("response", d6nResponse);
-        kieSession.insert(user);
-
-        kieSession.insert(metaData);
-        // Add listener to retrieve satisfied conditions
-//        List<String> satisfiedConditionsName =  new ArrayList<>();
-//        kieSession.addEventListener(new DefaultAgendaEventListener() {
-//
-//            @Override
-//            public void afterMatchFired(AfterMatchFiredEvent event) {
-//
-//                super.afterMatchFired(event);
-//                List<Object> name = event.getMatch().getObjects();
-////                List<Object> namea = Collections.singletonList(event.getMatch().getFactHandles());
-//            }
-//        });
-        int ruleCount = kieSession.fireAllRules();
-        log.info("LOG:: DroolServiceImpl makeDecision Executed " + ruleCount + " rules.");
-        kieSession.dispose();
-
-        List<String> subList = d6nResponse.getSatisfiedConditions();
-        Collections.reverse(subList);
-        d6nResponse.setSatisfiedConditions( subList.subList(numberOfResponseFrom, numberOfResponse));
-        d6nResponse.setTotalCount(ruleCount);
-        return d6nResponse;
-    }
-
 
     // Return Imports In Drool String
     public String createImports() {
