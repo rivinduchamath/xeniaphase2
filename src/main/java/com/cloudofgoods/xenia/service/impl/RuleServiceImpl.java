@@ -240,7 +240,6 @@ public class RuleServiceImpl implements RuleService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + segmentName);
         try {
-
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() ruleEntity Name " + segmentName);
             internalKnowledgeBase.removeRule(packageName, segmentName);
             serviceResponseDTO.setDescription("removeRuleFromKBAndDatabase Success");
@@ -301,15 +300,12 @@ public class RuleServiceImpl implements RuleService {
         } catch (Exception e) {
             name = name + "##$$$##" + firstUUID.timestamp();
         }
-
-
         String separator = "##$$$##";
         int sepPos = name.lastIndexOf(separator);
         if (sepPos != -1) {
             name = name.substring(0, sepPos);
         }
         name = name + separator + firstUUID.timestamp();
-
         log.info("LOG:: Segment String :" + name);
         templateEntity.setCampTemplateName(name);
         return name;
@@ -395,9 +391,14 @@ public class RuleServiceImpl implements RuleService {
                                 "\"").lhs().pattern(
                                 "$user : User").constraint(fact + "").end().pattern(
                                 "$meta : MetaData").constraint(metaString).end().end().rhs(
-                                "response.addToResponse(" + ruleEntity.getPriority() +
-                                        ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" +
-                                        channelContentObject.getVariantId() + "\");").end();
+                                "response.addToResponse("
+                                        +"\""+ruleEntity.getAbTestEnable()
+                                        + "\",\"" + ruleEntity.getAbTestPercentage()
+                                        + "\",\"" + ruleEntity.getAbTestStartDate()
+                                        + "\",\"" + ruleEntity.getAbTestEndDateTime()
+                                        + "\"," + ruleEntity.getPriority() +",\"" + channelContentObject.getEntryId().toUpperCase()
+                                        + "\",\"" + channelContentObject.getVariantId()
+                                        + "\");").end();
 
                         PackageDescr packageDescr = pkgDescBuilder.getDescr();
                         DrlDumper dumper = new DrlDumper();
@@ -412,7 +413,6 @@ public class RuleServiceImpl implements RuleService {
                     }
                 }
             }
-
         } catch (Exception e) {
             log.error("LOG:: DroolServiceImpl createDrlString() Exception :" + e.getMessage());
             return "...............Error Drool String Creation...............";
@@ -429,6 +429,5 @@ public class RuleServiceImpl implements RuleService {
         segmentTemplateEntity.setSegmentationDescription(getSegmentationDescription);
         segmentTemplateEntity.setFact(fact);
         SegmentTemplateEntity save = segmentTemplateRepository.save(segmentTemplateEntity);
-
     }
 }

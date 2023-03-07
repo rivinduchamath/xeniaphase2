@@ -9,11 +9,11 @@ import java.util.Date;
 public class ChannelContentObject {
     private String entryId;
     private String variantId;
-    private String abTestEnable;
-    private String abTestPercentage;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
-    private Date abTestStartDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
-    private Date abTestEndDateTime;
+//    private String abTestEnable;
+//    private String abTestPercentage;
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
+//    private Date abTestStartDate;
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
+//    private Date abTestEndDateTime;
 
 }
