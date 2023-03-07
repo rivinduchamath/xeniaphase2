@@ -1,13 +1,11 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.util.Utils;
 import com.cloudofgoods.xenia.dto.D6nResponseModelDTO;
 import com.cloudofgoods.xenia.dto.caution.MetaData;
 import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
-import com.cloudofgoods.xenia.entity.xenia.UserAnalyticsEntity;
-import com.cloudofgoods.xenia.repository.redis.ResponseUserRepository;
 import com.cloudofgoods.xenia.service.D6nService;
+import com.cloudofgoods.xenia.util.Utils;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +18,16 @@ import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class D6nServiceImpl implements D6nService {
 
-//    private final ResponseUserRepository responseUserRepository;
+    //  private final ResponseUserRepository responseUserRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
 
@@ -50,8 +49,8 @@ public class D6nServiceImpl implements D6nService {
                 metaData.setContextId(Collections.singletonList(s.toUpperCase()));
                 metaData.setChannels(channel);
                 D6nResponseModelDTO d6nResponseModelDTO1 = makeDecision(numberOfResponseFrom, numberOfResponse, metaData, user, organization.toUpperCase(), (dateFormat.format(date) + "##$$##" + firstUUID));
-                if(d6nResponseModelDTO1.getVariant() == null) d6nResponseModelDTO1.setVariant("null");
-                if(d6nResponseModelDTO1.getSlotId() == null) d6nResponseModelDTO1.setSlotId(s);
+                if (d6nResponseModelDTO1.getVariant() == null) d6nResponseModelDTO1.setVariant("null");
+                if (d6nResponseModelDTO1.getSlotId() == null) d6nResponseModelDTO1.setSlotId(s);
                 d6nResponseModelDTO.add(d6nResponseModelDTO1);
             });
 //            CompletableFuture.runAsync(() -> databaseAnalytics(d6nResponseModelDTO, userEmail, organization));
@@ -81,6 +80,7 @@ public class D6nServiceImpl implements D6nService {
 //        UserAnalyticsEntity save = responseUserRepository.save(userAnalyticsEntity);
 //
 //    }
+// Define the A/B testing parameters
 
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
     public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization, String uuid) {
@@ -89,15 +89,52 @@ public class D6nServiceImpl implements D6nService {
         log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
         log.info("Log :: DroolServiceImpl makeDecision() organization : " + organization);
         D6nResponseModelDTO d6nResponse = new D6nResponseModelDTO();
-        KieSession kieSession = internalKnowledgeBase.newKieSession();
 
+        KieSession kieSession = internalKnowledgeBase.newKieSession();
         Agenda agenda = kieSession.getAgenda();
         agenda.getAgendaGroup(organization).setFocus();
         kieSession.getGlobals().set("response", d6nResponse);
         kieSession.insert(user);
-
         kieSession.insert(metaData);
-        // Add listener to retrieve satisfied conditions
+
+        int ruleCount = kieSession.fireAllRules();
+        log.info("LOG:: DroolServiceImpl makeDecision Executed " + ruleCount + " rules.");
+        kieSession.dispose();
+
+        List<String> subList = d6nResponse.getSatisfiedConditions();
+        numberOfResponse = Math.min(numberOfResponse, subList.size());
+
+        Collections.reverse(subList);
+        d6nResponse.setSatisfiedConditions(subList.subList(numberOfResponseFrom, numberOfResponse));
+        d6nResponse.setTotalCount(ruleCount);
+        // Check if the current date is within the A/B test period
+        double percentage = Double.parseDouble(d6nResponse.getAbTestPercentage());
+        LocalDate startDate = LocalDate.parse(d6nResponse.getAbTestStartDate(), DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss"));
+        LocalDate endDate = LocalDate.parse(d6nResponse.getAbTestEndDateTime(), DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss"));
+        LocalDate currentDate = LocalDate.now();
+        if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
+            Random random = new Random();
+            double randomNumber = random.nextDouble();
+            if (randomNumber < percentage / 100.0) {
+                // percentage is within range
+                return d6nResponse;
+            } else {
+                // percentage is outside the range
+                d6nResponse.setPriority(0);
+                d6nResponse.setTotalCount(0);
+                d6nResponse.setSatisfiedConditions(null);
+                d6nResponse.setVariant("null");
+                return d6nResponse;
+            }
+        }
+        //Without AB Test
+        return d6nResponse;
+
+    }
+}
+
+
+// Add listener to retrieve satisfied conditions
 //        List<String> satisfiedConditionsName =  new ArrayList<>();
 //        kieSession.addEventListener(new DefaultAgendaEventListener() {
 //
@@ -109,16 +146,3 @@ public class D6nServiceImpl implements D6nService {
 ////                List<Object> namea = Collections.singletonList(event.getMatch().getFactHandles());
 //            }
 //        });
-        int ruleCount = kieSession.fireAllRules();
-        log.info("LOG:: DroolServiceImpl makeDecision Executed " + ruleCount + " rules.");
-        kieSession.dispose();
-
-        List<String> subList = d6nResponse.getSatisfiedConditions();
-        numberOfResponse = Math.min(numberOfResponse, subList.size());
-
-        Collections.reverse(subList);
-        d6nResponse.setSatisfiedConditions( subList.subList(numberOfResponseFrom, numberOfResponse));
-        d6nResponse.setTotalCount(ruleCount);
-        return d6nResponse;
-    }
-}
