@@ -4,9 +4,7 @@ import com.cloudofgoods.xenia.dto.D6nResponseModelDTO;
 import com.cloudofgoods.xenia.dto.caution.MetaData;
 import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.entity.xenia.RuleRequestRootEntity;
-import com.cloudofgoods.xenia.models.AudienceObject;
-import com.cloudofgoods.xenia.models.RuleChannelObject;
-import com.cloudofgoods.xenia.models.SegmentsObject;
+import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.service.DroolService;
 import com.cloudofgoods.xenia.util.RuleStatus;
@@ -84,29 +82,37 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 
     public void feedKnowledge(RuleRequestRootEntity allRuleSet) {
         log.info("LOG:: DroolServiceImpl feedKnowledge() ");
-        allRuleSet.getChannels().stream().flatMap(ruleChannelObject -> ruleChannelObject.getAudienceObjects().stream()).flatMap(audienceObject -> audienceObject.getSegments().stream()).forEach(segmentsObject -> {
-            knowledgeBuilder.add(ResourceFactory.newByteArrayResource(segmentsObject.getFullRuleString().getBytes()), ResourceType.DRL);
-            KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
-            if (errors.size() > 0) {
-                errors.forEach(error -> {
-                    log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
-                    log.error("Log :: DroolServiceImpl Error Size " + errors.size());
-                    try {
-                        knowledgeBuilder.undo();
-                        removeRuleFromKBAndDatabase(allRuleSet.getId());
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException(e);
+        for (RuleChannelObject ruleChannelObject : allRuleSet.getChannels()) {
+            for (AudienceObject audienceObject : ruleChannelObject.getAudienceObjects()) {
+                for (SegmentsObject segmentsObject : audienceObject.getSegments()) {
+                    for (ExperiencesObject experiencesObject : segmentsObject.getExperiences()) {
+                        for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                            knowledgeBuilder.add(ResourceFactory.newByteArrayResource(channelContentObject.getFullRuleString().getBytes()), ResourceType.DRL);
+                            KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
+                            if (errors.size() > 0) {
+                                errors.forEach(error -> {
+                                    log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
+                                    log.error("Log :: DroolServiceImpl Error Size " + errors.size());
+                                    try {
+                                        knowledgeBuilder.undo();
+                                        removeRuleFromKBAndDatabase(allRuleSet.getId());
+                                    } catch (ExecutionException | InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                                throw new IllegalArgumentException("Could not parse knowledge.");
+                            } else {
+                                // Add To Knowledge Base
+                                log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
+                                internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
+                                // Delete From Knowledge Builder
+                            }
+                            knowledgeBuilder.undo();
+                        }
                     }
-                });
-                throw new IllegalArgumentException("Could not parse knowledge.");
-            } else {
-                // Add To Knowledge Base
-                log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
-                internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
-                // Delete From Knowledge Builder
+                }
             }
-            knowledgeBuilder.undo();
-        });
+        }
     }
 
     public void removeRuleFromKBAndDatabase(String ruleId) throws ExecutionException, InterruptedException {

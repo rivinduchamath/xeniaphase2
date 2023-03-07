@@ -24,16 +24,7 @@ public class SegmentsObject {
     @TextIndexed
     private String segmentRuleString;
     private boolean template;
-    @TextIndexed
-    private String fullRuleString;
     private String channelId;
     private NodeObject ruleObject;
-    private List <ChannelContentObject> entryVariantMapping;
-    private String abTestEnable;
-    private String abTestPercentage;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
-    private Date abTestStartDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
-    private Date abTestEndDateTime;
-
+    private List <ExperiencesObject> experiences;
 }
