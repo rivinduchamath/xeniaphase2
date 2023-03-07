@@ -4,9 +4,7 @@ import com.cloudofgoods.xenia.dto.D6nResponseModelDTO;
 import com.cloudofgoods.xenia.dto.caution.MetaData;
 import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.entity.xenia.RuleRequestRootEntity;
-import com.cloudofgoods.xenia.models.AudienceObject;
-import com.cloudofgoods.xenia.models.RuleChannelObject;
-import com.cloudofgoods.xenia.models.SegmentsObject;
+import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.service.DroolService;
 import com.cloudofgoods.xenia.util.RuleStatus;
@@ -84,29 +82,37 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 
     public void feedKnowledge(RuleRequestRootEntity allRuleSet) {
         log.info("LOG:: DroolServiceImpl feedKnowledge() ");
-        allRuleSet.getChannels().stream().flatMap(ruleChannelObject -> ruleChannelObject.getAudienceObjects().stream()).flatMap(audienceObject -> audienceObject.getSegments().stream()).forEach(segmentsObject -> {
-            knowledgeBuilder.add(ResourceFactory.newByteArrayResource(segmentsObject.getFullRuleString().getBytes()), ResourceType.DRL);
-            KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
-            if (errors.size() > 0) {
-                errors.forEach(error -> {
-                    log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
-                    log.error("Log :: DroolServiceImpl Error Size " + errors.size());
-                    try {
-                        knowledgeBuilder.undo();
-                        removeRuleFromKBAndDatabase(allRuleSet.getId());
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new RuntimeException(e);
+        for (RuleChannelObject ruleChannelObject : allRuleSet.getChannels()) {
+            for (AudienceObject audienceObject : ruleChannelObject.getAudienceObjects()) {
+                for (SegmentsObject segmentsObject : audienceObject.getSegments()) {
+                    for (ExperiencesObject experiencesObject : segmentsObject.getExperiences()) {
+                        for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                            knowledgeBuilder.add(ResourceFactory.newByteArrayResource(channelContentObject.getFullRuleString().getBytes()), ResourceType.DRL);
+                            KnowledgeBuilderErrors errors = knowledgeBuilder.getErrors();
+                            if (errors.size() > 0) {
+                                errors.forEach(error -> {
+                                    log.error("Log ::DroolServiceImpl Error In Feed To the Knowledge builder. Error Message " + error.getMessage());
+                                    log.error("Log :: DroolServiceImpl Error Size " + errors.size());
+                                    try {
+                                        knowledgeBuilder.undo();
+                                        removeRuleFromKBAndDatabase(allRuleSet.getId());
+                                    } catch (ExecutionException | InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                                throw new IllegalArgumentException("Could not parse knowledge.");
+                            } else {
+                                // Add To Knowledge Base
+                                log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
+                                internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
+                                // Delete From Knowledge Builder
+                            }
+                            knowledgeBuilder.undo();
+                        }
                     }
-                });
-                throw new IllegalArgumentException("Could not parse knowledge.");
-            } else {
-                // Add To Knowledge Base
-                log.info("Log :: DroolServiceImpl feedKnowledge() addPackages");
-                internalKnowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
-                // Delete From Knowledge Builder
+                }
             }
-            knowledgeBuilder.undo();
-        });
+        }
     }
 
     public void removeRuleFromKBAndDatabase(String ruleId) throws ExecutionException, InterruptedException {
@@ -124,44 +130,6 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 //        log.info ("Find Root SegmentsObject By id " + ruleId);
 //        return rootRuleRepository.findById (ruleId).get ();
 //    }
-
-    //Remove Rules From Knowledge Base And Database From SegmentsObject ID
-    public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization, String uuid) {
-        log.info("Log :: DroolServiceImpl makeDecision()");
-        log.info("Log :: DroolServiceImpl makeDecision() metaData : " + metaData.toString());
-        log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
-        log.info("Log :: DroolServiceImpl makeDecision() organization : " + organization);
-        D6nResponseModelDTO d6nResponse = new D6nResponseModelDTO();
-        KieSession kieSession = internalKnowledgeBase.newKieSession();
-
-        Agenda agenda = kieSession.getAgenda();
-        agenda.getAgendaGroup(organization).setFocus();
-        kieSession.getGlobals().set("response", d6nResponse);
-        kieSession.insert(user);
-
-        kieSession.insert(metaData);
-        // Add listener to retrieve satisfied conditions
-//        List<String> satisfiedConditionsName =  new ArrayList<>();
-//        kieSession.addEventListener(new DefaultAgendaEventListener() {
-//
-//            @Override
-//            public void afterMatchFired(AfterMatchFiredEvent event) {
-//
-//                super.afterMatchFired(event);
-//                List<Object> name = event.getMatch().getObjects();
-////                List<Object> namea = Collections.singletonList(event.getMatch().getFactHandles());
-//            }
-//        });
-        int ruleCount = kieSession.fireAllRules();
-        log.info("LOG:: DroolServiceImpl makeDecision Executed " + ruleCount + " rules.");
-        kieSession.dispose();
-
-        List<String> subList = d6nResponse.getSatisfiedConditions();
-        Collections.reverse(subList);
-        d6nResponse.setSatisfiedConditions( subList.subList(numberOfResponseFrom, numberOfResponse));
-        d6nResponse.setTotalCount(ruleCount);
-        return d6nResponse;
-    }
 
 
     // Return Imports In Drool String

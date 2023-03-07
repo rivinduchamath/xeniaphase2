@@ -1,13 +1,16 @@
 package com.cloudofgoods.xenia.service.impl;
 
-import com.cloudofgoods.xenia.util.Utils;
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.*;
 import com.cloudofgoods.xenia.models.*;
-import com.cloudofgoods.xenia.repository.*;
+import com.cloudofgoods.xenia.repository.AudienceRepository;
+import com.cloudofgoods.xenia.repository.ChannelRepository;
+import com.cloudofgoods.xenia.repository.RootRuleRepository;
+import com.cloudofgoods.xenia.repository.SegmentTemplateRepository;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.RuleStatus;
+import com.cloudofgoods.xenia.util.Utils;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
@@ -34,12 +37,12 @@ public class RuleServiceImpl implements RuleService {
     private final RootRuleRepository rootRuleRepository;
     private final DroolServiceImpl droolService;
     private final ChannelRepository channelRepository;
+    private final SegmentTemplateRepository segmentTemplateRepository;
+    private final AudienceRepository audienceRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
-    private final SegmentTemplateRepository segmentTemplateRepository;
     @Value("${knowledge.package.name}")
     private String packageName;
-    private final AudienceRepository audienceRepository;
 
 //    @Override
 //    @Transactional
@@ -74,25 +77,25 @@ public class RuleServiceImpl implements RuleService {
             List<RuleRequestRootEntity> ruleRequestRootEntities = new ArrayList<>();
             Collections.reverse(ruleRootModel);
             for (String ruleRequestRootEntity : ruleRootModel) {
-                Optional<RuleRequestRootEntity> ruleRequestRootEntity1 = rootRuleRepository.findById(ruleRequestRootEntity);
+                Optional<RuleRequestRootEntity> ruleRequestRootEntityOpt = rootRuleRepository.findById(ruleRequestRootEntity);
 
-                RuleRequestRootEntity ruleRequestRoot1 = null;
-                if (ruleRequestRootEntity1.isPresent()) {
-                    RuleRequestRootDTO ruleRequestRoot = new RuleRequestRootDTO();
-                    ruleRequestRoot.setId(ruleRequestRootEntity1.get().getId());
-                    ruleRequestRoot.setChannels(ruleRequestRootEntity1.get().getChannels());
-                    ruleRequestRoot.setTags(ruleRequestRootEntity1.get().getTags());
-                    ruleRequestRoot.setCampaignDescription(ruleRequestRootEntity1.get().getCampaignDescription());
-                    ruleRequestRoot.setCampaignName(ruleRequestRootEntity1.get().getCampaignName());
-                    ruleRequestRoot.setPriority(ruleRequestRootEntity1.get().getPriority());
-                    ruleRequestRoot.setEndDateTime(ruleRequestRootEntity1.get().getEndDateTime());
-                    ruleRequestRoot.setStartDateTime(ruleRequestRootEntity1.get().getStartDateTime());
-                    ruleRequestRoot.setOrganizationId(ruleRequestRootEntity1.get().getOrganizationId());
-                    ruleRequestRoot.setChannelIds(ruleRequestRootEntity1.get().getChannelIds());
-                    ruleRequestRoot.setStatus(ruleRequestRootEntity1.get().getStatusEnum());
-                    ruleRequestRoot1 = updateRootRuleRepository(ruleRequestRoot, ruleRequestRootEntity1.get());
+                RuleRequestRootEntity ruleRequestRoot = null;
+                if (ruleRequestRootEntityOpt.isPresent()) {
+                    RuleRequestRootDTO ruleRequestRootDTO = new RuleRequestRootDTO();
+                    ruleRequestRootDTO.setId(ruleRequestRootEntityOpt.get().getId());
+                    ruleRequestRootDTO.setChannels(ruleRequestRootEntityOpt.get().getChannels());
+                    ruleRequestRootDTO.setTags(ruleRequestRootEntityOpt.get().getTags());
+                    ruleRequestRootDTO.setCampaignDescription(ruleRequestRootEntityOpt.get().getCampaignDescription());
+                    ruleRequestRootDTO.setCampaignName(ruleRequestRootEntityOpt.get().getCampaignName());
+                    ruleRequestRootDTO.setPriority(ruleRequestRootEntityOpt.get().getPriority());
+                    ruleRequestRootDTO.setEndDateTime(ruleRequestRootEntityOpt.get().getEndDateTime());
+                    ruleRequestRootDTO.setStartDateTime(ruleRequestRootEntityOpt.get().getStartDateTime());
+                    ruleRequestRootDTO.setOrganizationId(ruleRequestRootEntityOpt.get().getOrganizationId());
+                    ruleRequestRootDTO.setChannelIds(ruleRequestRootEntityOpt.get().getChannelIds());
+                    ruleRequestRootDTO.setStatus(ruleRequestRootEntityOpt.get().getStatusEnum());
+                    ruleRequestRoot = updateRootRuleRepository(ruleRequestRootDTO, ruleRequestRootEntityOpt.get());
                 }
-                ruleRequestRootEntities.add(ruleRequestRoot1);
+                ruleRequestRootEntities.add(ruleRequestRoot);
             }
             serviceResponseDTO.setData(ruleRequestRootEntities);
             serviceResponseDTO.setMessage("Success");
@@ -146,16 +149,29 @@ public class RuleServiceImpl implements RuleService {
         ruleRequestRootModel.getChannels().forEach(ruleChannelObject -> {
             ruleChannelObject.getAudienceObjects().forEach(audienceObject -> {
                 if (audienceObject.isTemplate()) {
-                    CompletableFuture.runAsync(() -> audienceSaveTemplate(audienceObject, ruleChannelObject.getChannelId(), ruleRequestRootModel.getCampaignId(), ruleRequestRootModel.getOrganizationId()));
+                    CompletableFuture.runAsync(() -> audienceSaveTemplate(
+                            audienceObject,
+                            ruleChannelObject.getChannelId(),
+                            ruleRequestRootModel.getCampaignId(),
+                            ruleRequestRootModel.getOrganizationId())
+                    );
                 }
                 List<SegmentsObject> segmentsObjects = new ArrayList<>();
                 audienceObject.getSegments().forEach(segments -> {
-                    segments.setSegmentRuleString(
-                            audienceObject.getAudienceRuleString() != null
-                                    ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString()
-                                    : segments.getSegmentRuleString());
-                    String drlString = createDrlString(segments, ruleRequestRootModel);
-                    segments.setSegmentRuleString(imports + " " + drlString);
+                    segments.setSegmentRuleString(audienceObject.getAudienceRuleString() != null ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
+
+                    List<ExperiencesObject> experiencesObjects = new ArrayList<>();
+                    for (ExperiencesObject experiencesObject : segments.getExperiences()) {
+                        List<ChannelContentObject> channelContentObjects = new ArrayList<>();
+                        for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                            String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
+                            channelContentObject.setFullRuleString(imports + "\n" + drlString);
+                            channelContentObjects.add(channelContentObject);
+                        }
+                        experiencesObject.setEntryVariantMapping(channelContentObjects);
+                        experiencesObjects.add(experiencesObject);
+                    }
+                    segments.setExperiences(experiencesObjects);
                     segmentsObjects.add(segments);// Add To List
                 });
                 audienceObject.setSegments(segmentsObjects);
@@ -178,8 +194,7 @@ public class RuleServiceImpl implements RuleService {
             audienceEntity.setAudienceDescription(audienceObject.getAudienceDescription());
         if (audienceObject.getAudienceRuleString() != null)
             audienceObject.setAudienceRuleString(audienceObject.getAudienceRuleString());
-        if (organizationId != null)
-            audienceEntity.setOrganizationUuid(organizationId);
+        if (organizationId != null) audienceEntity.setOrganizationUuid(organizationId);
         if (audienceObject.getAudienceObject() != null)
             audienceEntity.setAudienceObject(audienceObject.getAudienceObject());
         audienceRepository.save(audienceEntity);
@@ -202,18 +217,23 @@ public class RuleServiceImpl implements RuleService {
                     audienceObject.getSegments().forEach(segments -> {
 
                         segments.setPriority(segments.getPriority() == 0 ? 999999999 : (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority());
-                        segments.setSegmentRuleString(
-                                audienceObject.getAudienceRuleString() != null
-                                        ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString()
-                                        : segments.getSegmentRuleString());
+                        segments.setSegmentRuleString(audienceObject.getAudienceRuleString() != null ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
 
-                        Optional.ofNullable(segments.getSegmentName())
-                                .ifPresent(name -> segments.setSegmentName(saveSegmentNameGenerator(name)));
-
-                        String drlString = createDrlString(segments, ruleRequestRootModel);
-
-                        segments.setFullRuleString(imports + "\n" + drlString);
+                        Optional.ofNullable(segments.getSegmentName()).ifPresent(name -> segments.setSegmentName(saveSegmentNameGenerator(name)));
+                        List<ExperiencesObject> experiencesObjects = new ArrayList<>();
+                        for (ExperiencesObject experiencesObject : segments.getExperiences()) {
+                            List<ChannelContentObject> channelContentObjects = new ArrayList<>();
+                            for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                                String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
+                                channelContentObject.setFullRuleString(imports + "\n" + drlString);
+                                channelContentObjects.add(channelContentObject);
+                            }
+                            experiencesObject.setEntryVariantMapping(channelContentObjects);
+                            experiencesObjects.add(experiencesObject);
+                        }
+                        segments.setExperiences(experiencesObjects);
                         segmentsObjectsList.add(segments);// Add To List
+
                     });
                     audienceObject.setSegments(segmentsObjectsList);
                     audiencesList.add(audienceObject);
@@ -240,7 +260,6 @@ public class RuleServiceImpl implements RuleService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase()" + segmentName);
         try {
-
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() ruleEntity Name " + segmentName);
             internalKnowledgeBase.removeRule(packageName, segmentName);
             serviceResponseDTO.setDescription("removeRuleFromKBAndDatabase Success");
@@ -301,15 +320,12 @@ public class RuleServiceImpl implements RuleService {
         } catch (Exception e) {
             name = name + "##$$$##" + firstUUID.timestamp();
         }
-
-
         String separator = "##$$$##";
         int sepPos = name.lastIndexOf(separator);
         if (sepPos != -1) {
             name = name.substring(0, sepPos);
         }
         name = name + separator + firstUUID.timestamp();
-
         log.info("LOG:: Segment String :" + name);
         templateEntity.setCampTemplateName(name);
         return name;
@@ -355,7 +371,7 @@ public class RuleServiceImpl implements RuleService {
     }
 
     // Create Drool String to Create Multiple Rules
-    public String createDrlString(SegmentsObject ruleEntity, RuleRequestRootDTO ruleRequestRootModel) {
+    public String createDrlString(ChannelContentObject channelContentObject, SegmentsObject ruleEntity, RuleRequestRootDTO ruleRequestRootModel) {
         boolean channelValidate = false;
         log.info("LOG:: DroolServiceImpl createDrlString() Inside Method ");
 
@@ -374,45 +390,32 @@ public class RuleServiceImpl implements RuleService {
                     }
                 }
                 if (channelValidate) {
-                    for (ChannelContentObject channelContentObject : ruleEntity.getEntryVariantMapping()) {
-                        log.info("LOG:: DroolServiceImpl createDrlString() priority: " + priority);
-                        String metadata =
-                                "startDate > \"" + Utils.formatter.format(ruleRequestRootModel.getStartDateTime()) +
-                                        "\" && endDate < \"" + Utils.formatter.format(ruleRequestRootModel.getEndDateTime()) +
-                                        "\" && contextId.contains(" + "\"" + channelContentObject.getEntryId().toUpperCase() +
-                                        "\"" + ") && (<channel>)";
-                        log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);
-                        StringBuilder channel = new StringBuilder();
+                    for (ExperiencesObject experiencesObject : ruleEntity.getExperiences()) {
+                            log.info("LOG:: DroolServiceImpl createDrlString() priority: " + priority);
+                            String metadata = "startDate > \"" + Utils.formatter.format(ruleRequestRootModel.getStartDateTime()) + "\" && endDate < \"" + Utils.formatter.format(ruleRequestRootModel.getEndDateTime()) + "\" && contextId.contains(" + "\"" + channelContentObject.getEntryId().toUpperCase() + "\"" + ") && (<channel>)";
+                            log.info("LOG:: DroolServiceImpl createDrlString() metadata: " + metadata);
+                            StringBuilder channel = new StringBuilder();
 
-                        channel.append("channels.contains(").append("\"").append(channelObj.getChannelUuid().toUpperCase()).append("\"").append(")").append(" || ");
+                            channel.append("channels.contains(").append("\"").append(channelObj.getChannelUuid().toUpperCase()).append("\"").append(")").append(" || ");
 
-                        String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
-                        PackageDescrBuilder pkg = DescrFactory.newPackage();
-                        PackageDescrBuilder pkgDescBuilder = pkg.end();
-                        pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute(
-                                "salience", priority + "").attribute("agenda-group", "\"" +
-                                ruleRequestRootModel.getOrganizationId().toUpperCase() +
-                                "\"").lhs().pattern(
-                                "$user : User").constraint(fact + "").end().pattern(
-                                "$meta : MetaData").constraint(metaString).end().end().rhs(
-                                "response.addToResponse(" + ruleEntity.getPriority() +
-                                        ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" +
-                                        channelContentObject.getVariantId() + "\");").end();
+                            String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
+                            PackageDescrBuilder pkg = DescrFactory.newPackage();
+                            PackageDescrBuilder pkgDescBuilder = pkg.end();
+                            pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute("salience", priority + "").attribute("agenda-group", "\"" + ruleRequestRootModel.getOrganizationId().toUpperCase() + "\"").lhs().pattern("$user : User").constraint(fact + "").end().pattern("$meta : MetaData").constraint(metaString).end().end().rhs("response.addToResponse(" + "\"" + experiencesObject.getAbTestEnable() + "\",\"" + experiencesObject.getAbTestPercentage() + "\",\"" + experiencesObject.getAbTestStartDate() + "\",\"" + experiencesObject.getAbTestEndDateTime() + "\"," + ruleEntity.getPriority() + ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" + channelContentObject.getVariantId() + "\");").end();
 
-                        PackageDescr packageDescr = pkgDescBuilder.getDescr();
-                        DrlDumper dumper = new DrlDumper();
+                            PackageDescr packageDescr = pkgDescBuilder.getDescr();
+                            DrlDumper dumper = new DrlDumper();
 
-                        String drlFile = dumper.dump(packageDescr);
-                        log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
-                        drlFile = drlFile.replaceFirst("package ", "");
-                        if (ruleEntity.isTemplate()) {
-                            saveTemplate(ruleEntity.getSegmentDescription(), ruleEntity.getSegmentName(), ruleEntity.getRuleObject());
+                            String drlFile = dumper.dump(packageDescr);
+                            log.info("LOG:: DroolServiceImpl createDrlString() Single drlFile :" + drlFile);
+                            drlFile = drlFile.replaceFirst("package ", "");
+                            if (ruleEntity.isTemplate()) {
+                                saveTemplate(ruleEntity.getSegmentDescription(), ruleEntity.getSegmentName(), ruleEntity.getRuleObject());
+                            }
+                            return drlFile;
                         }
-                        return drlFile;
                     }
                 }
-            }
-
         } catch (Exception e) {
             log.error("LOG:: DroolServiceImpl createDrlString() Exception :" + e.getMessage());
             return "...............Error Drool String Creation...............";
@@ -429,6 +432,5 @@ public class RuleServiceImpl implements RuleService {
         segmentTemplateEntity.setSegmentationDescription(getSegmentationDescription);
         segmentTemplateEntity.setFact(fact);
         SegmentTemplateEntity save = segmentTemplateRepository.save(segmentTemplateEntity);
-
     }
 }

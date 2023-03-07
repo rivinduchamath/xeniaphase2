@@ -1,11 +1,13 @@
 package com.cloudofgoods.xenia.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -22,10 +24,7 @@ public class SegmentsObject {
     @TextIndexed
     private String segmentRuleString;
     private boolean template;
-    @TextIndexed
-    private String fullRuleString;
     private String channelId;
     private NodeObject ruleObject;
-    private List <ChannelContentObject> entryVariantMapping;
-
+    private List <ExperiencesObject> experiences;
 }
