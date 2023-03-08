@@ -6,8 +6,6 @@ import com.cloudofgoods.xenia.dto.caution.User;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.D6nService;
 import com.cloudofgoods.xenia.util.Utils;
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.NoArgGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.core.impl.InternalKnowledgeBase;
@@ -16,78 +14,58 @@ import org.kie.api.runtime.rule.Agenda;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.cloudofgoods.xenia.util.Utils.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class D6nServiceImpl implements D6nService {
 
-    //  private final ResponseUserRepository responseUserRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
 
     @Override
-    public ServiceResponseDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, String userEmail, User user, List<String> channel, List<String> slot, String organization) {
-        log.info("LOG :: D6nServiceImpl makeDecision() Set Meta Data");
+    public ServiceResponseDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, String userEmail, User userData, List<String> channel, List<String> slot, String organization) {
+        log.info("LOG :: D6nServiceImpl makeDecision() One Set Meta Data");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
-
         try {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/ddHH:mm:ss.SSSZ");
-            Date date = new Date();
-            NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-            UUID firstUUID = timeBasedGenerator.generate();
             List<D6nResponseModelDTO> d6nResponseModelDTO = new ArrayList<>();
-            slot.forEach(s -> {
+            slot.forEach(value -> {
                 MetaData metaData = new MetaData();
                 metaData.setEndDate(Utils.today);
                 metaData.setStartDate(Utils.today);
-                metaData.setContextId(Collections.singletonList(s.toUpperCase()));
-                metaData.setChannels(channel);
-                D6nResponseModelDTO d6nResponseModelDTO1 = makeDecision(numberOfResponseFrom, numberOfResponse, metaData, user, organization.toUpperCase(), (dateFormat.format(date) + "##$$##" + firstUUID));
+                metaData.setContextId(Collections.singletonList(value.toUpperCase()));
+                metaData.setChannels(channel.stream().map(String::toUpperCase).collect(Collectors.toList()));
+                D6nResponseModelDTO d6nResponseModelDTO1 = makeDecision(numberOfResponseFrom, numberOfResponse, metaData, userData, organization.toUpperCase());
                 if (d6nResponseModelDTO1.getVariant() == null) d6nResponseModelDTO1.setVariant("null");
-                if (d6nResponseModelDTO1.getSlotId() == null) d6nResponseModelDTO1.setSlotId(s);
+                if (d6nResponseModelDTO1.getSlotId() == null) d6nResponseModelDTO1.setSlotId(value);
                 d6nResponseModelDTO.add(d6nResponseModelDTO1);
             });
 //            CompletableFuture.runAsync(() -> databaseAnalytics(d6nResponseModelDTO, userEmail, organization));
             serviceResponseDTO.setData(d6nResponseModelDTO);
             serviceResponseDTO.setDescription("makeDecision Success");
-            serviceResponseDTO.setMessage("Success");
-            serviceResponseDTO.setCode("2000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
+            serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage("Fail");
-            serviceResponseDTO.setCode("5000");
-            serviceResponseDTO.setHttpStatus("OK");
+            serviceResponseDTO.setMessage(STATUS_FAIL);
+            serviceResponseDTO.setCode(STATUS_5000);
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
 
-//    private void databaseAnalytics(D6nResponseModelDTO d6nResponseModelDTO, String userEmail, String organization) {
-//        UserAnalyticsEntity userAnalyticsEntity = new UserAnalyticsEntity();
-//        userAnalyticsEntity.setUserEmail(userEmail);
-//        userAnalyticsEntity.setOrganizationName(organization);
-//
-//        userAnalyticsEntity.setMatchedRulesCount(d6nResponseModelDTO.getSatisfiedConditions().size());
-//        userAnalyticsEntity.setSatisfiedConditionsName(d6nResponseModelDTO.getSatisfiedConditions());
-////        String createdAt = mongoTemplate.indexOps(UserAnalyticsEntity.class).ensureIndex(new Index().on("satisfiedConditionsName", Sort.Direction.ASC).expire(10));
-//        UserAnalyticsEntity save = responseUserRepository.save(userAnalyticsEntity);
-//
-//    }
-// Define the A/B testing parameters
-
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
-    public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization, String uuid) {
-        log.info("Log :: DroolServiceImpl makeDecision()");
+    public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization) {
+        log.info("Log :: DroolServiceImpl makeDecision() Two");
         log.info("Log :: DroolServiceImpl makeDecision() metaData : " + metaData.toString());
         log.info("Log :: DroolServiceImpl makeDecision() user : " + user.toString());
-        log.info("Log :: DroolServiceImpl makeDecision() organization : " + organization);
         D6nResponseModelDTO d6nResponse = new D6nResponseModelDTO();
 
         KieSession kieSession = internalKnowledgeBase.newKieSession();
@@ -107,33 +85,64 @@ public class D6nServiceImpl implements D6nService {
         Collections.reverse(subList);
         d6nResponse.setSatisfiedConditions(subList.subList(numberOfResponseFrom, numberOfResponse));
         d6nResponse.setTotalCount(ruleCount);
-        // Check if the current date is within the A/B test period
-        double percentage = Double.parseDouble(d6nResponse.getAbTestPercentage());
-        LocalDate startDate = LocalDate.parse(d6nResponse.getAbTestStartDate(), DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss"));
-        LocalDate endDate = LocalDate.parse(d6nResponse.getAbTestEndDateTime(), DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss"));
-        LocalDate currentDate = LocalDate.now();
-        if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
-            Random random = new Random();
-            double randomNumber = random.nextDouble();
-            if (randomNumber < percentage / 100.0) {
-                // percentage is within range
-                return d6nResponse;
-            } else {
-                // percentage is outside the range
-                d6nResponse.setPriority(0);
-                d6nResponse.setTotalCount(0);
-                d6nResponse.setSatisfiedConditions(null);
-                d6nResponse.setVariant("null");
-                return d6nResponse;
+
+        try {
+            LocalDateTime currentDate = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy");
+            LocalDateTime startDate = LocalDateTime.parse(d6nResponse.getAbTestStartDate(), formatter);
+            LocalDateTime endDate = LocalDateTime.parse(d6nResponse.getAbTestEndDateTime(), formatter);
+
+            if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
+
+                Double storedValue = VARIABLES_MAP.getOrDefault(d6nResponse.getSegmentName(), 0.0);
+                double percentage = d6nResponse.getAbTestPercentage();
+                if (percentage == 0) {
+                    return d6nResponse;
+                }
+                if (percentage > 50 && 100 >= percentage) {
+                    double defaultVal = (100 - percentage) / percentage;
+                    if (storedValue >= 1) {
+                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
+                        return d6nResponse; // default Banner
+                    } else {
+                        storedValue += defaultVal;
+                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
+                    }
+                } else if (percentage <= 50 && 0.0 < percentage) {
+                    double actualVal = percentage / (100 - percentage);
+                    if (storedValue >= 1) {
+                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
+                        return d6nResponse; // actual Banner
+                    } else {
+                        storedValue += actualVal;
+                        VARIABLES_MAP.put("segmentName", storedValue);
+                        d6nResponse.setVariant("null");
+                        d6nResponse.setTotalCount(0);
+                        return d6nResponse;
+                    }
+                }
             }
+        }catch (Exception e){
+            return d6nResponse;
         }
         //Without AB Test
         return d6nResponse;
-
     }
 }
 
 
+//    private void databaseAnalytics(D6nResponseModelDTO d6nResponseModelDTO, String userEmail, String organization) {
+//        UserAnalyticsEntity userAnalyticsEntity = new UserAnalyticsEntity();
+//        userAnalyticsEntity.setUserEmail(userEmail);
+//        userAnalyticsEntity.setOrganizationName(organization);
+//
+//        userAnalyticsEntity.setMatchedRulesCount(d6nResponseModelDTO.getSatisfiedConditions().size());
+//        userAnalyticsEntity.setSatisfiedConditionsName(d6nResponseModelDTO.getSatisfiedConditions());
+////        String createdAt = mongoTemplate.indexOps(UserAnalyticsEntity.class).ensureIndex(new Index().on("satisfiedConditionsName", Sort.Direction.ASC).expire(10));
+//        UserAnalyticsEntity save = responseUserRepository.save(userAnalyticsEntity);
+//
+//    }
+// Define the A/B testing parameters
 // Add listener to retrieve satisfied conditions
 //        List<String> satisfiedConditionsName =  new ArrayList<>();
 //        kieSession.addEventListener(new DefaultAgendaEventListener() {

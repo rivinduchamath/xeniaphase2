@@ -26,27 +26,26 @@ public class AttributeTableController {
 
     private final AttributesTableService attributesTableService;
 
-    @PostMapping(value = "${server.servlet.saveOrUpdateAttributeTable}")
+    @PostMapping(value = "${server.servlet.saveOrUpdateAttributeTable}")// Avg Response Time 15ms Local
     @Description("Add Attributes Table Object")
-    public ServiceResponseDTO saveOrUpdateAttributeTable(@Valid @RequestBody AttributeTableDTO attributeTableDTO) {
+    public ServiceResponseDTO saveOrUpdateAttributeTable(@RequestBody @Valid AttributeTableDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController saveAttributesTable ");
         return attributesTableService.saveOrUpdateAttributeTable(attributeTableDTO);
     }
 
-    @PostMapping(value = "${server.servlet.getAttributesTable}")
+    @PostMapping(value = "${server.servlet.getAttributesTable}")// Avg Response Time 15ms Local
     @Description("Get Attributes Table Object")
-    public ServiceResponseDTO getAttributesTable(@Valid @RequestBody AttributeTableRequestDTO attributeTableDTO) {
+    public ServiceResponseDTO getAttributesTable(@RequestBody @Valid AttributeTableRequestDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController getAttributesTable ");
         return attributesTableService.getAttributes(attributeTableDTO);
     }
     @DeleteMapping(value = "${server.servlet.activeInactiveAttributeTable}")
-    @Description("activeInactiveAttribute")
+    @Description("activeInactiveAttribute")// Avg Response Time 15ms Local
     public ServiceResponseDTO activeInactiveAttributeTable(@RequestParam @NonNull String attributeTableName, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
         log.info("LOG::Inside the AttributesController activeInactiveAttribute ");
         return attributesTableService.activeInactiveAttributeTable(attributeTableName, organizationUuid,status);
     }
     @PostMapping(value = "${server.servlet.getSingleAttributeTable}")
-    @Transactional
     @Description("Get Single Get Single AttributeTable")
     public ServiceGetResponseDTO getSingleAttributeTable(@RequestBody @Valid AttributeTableGetSingleDTO attributeRequestDTO) {
         log.info("LOG::Inside the AttributesController getSingleAttributeTable");

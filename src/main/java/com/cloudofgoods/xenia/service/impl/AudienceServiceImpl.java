@@ -6,21 +6,19 @@ import com.cloudofgoods.xenia.dto.request.AudienceGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AudienceEntity;
-import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.responces.AudienceResponseObject;
 import com.cloudofgoods.xenia.repository.AudienceRepository;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
 import com.cloudofgoods.xenia.service.AudienceService;
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.NoArgGenerator;
+import com.cloudofgoods.xenia.util.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
 
@@ -32,6 +30,7 @@ public class AudienceServiceImpl implements AudienceService {
     private final OrganizationRepository organizationRepository;
 
     @Override
+    @Transactional
     public ServiceResponseDTO saveAudience(AudienceDTO audienceDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: AudienceServiceImpl saveAudience Service Layer");
@@ -50,20 +49,18 @@ public class AudienceServiceImpl implements AudienceService {
                     });
                 } else {
                     AudienceEntity newAudienceEntity = new AudienceEntity();
-                    NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
-                    UUID firstUUID = timeBasedGenerator.generate();
-                    newAudienceEntity.setAudienceUuid(firstUUID.toString());
+                    newAudienceEntity.setAudienceUuid(Utils.timeUuidGenerate());
                     serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, newAudienceEntity)));
                     serviceResponseDTO.setDescription("Save Audience Success");
                 }
             }, () -> serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND));
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl saveAudience() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("AudienceServiceImpl saveAudience() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -80,6 +77,7 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ServiceResponseDTO getAudienceById(AudienceGetSingleDTO audienceGetSingleDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG :: AudienceServiceImpl getAudienceById() audienceUuid : " + audienceGetSingleDTO.getAudienceUuId());
@@ -88,13 +86,13 @@ public class AudienceServiceImpl implements AudienceService {
                 serviceResponseDTO.setData(audienceEntity);
                 serviceResponseDTO.setDescription("AudienceService Get Audience success");
             }, () -> serviceResponseDTO.setDescription("AudienceService Audience Not Found Under this Organization"));
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl getAudienceById() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("AudienceServiceImpl getAudienceById() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -102,26 +100,25 @@ public class AudienceServiceImpl implements AudienceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ServiceResponseDTO getAudienceWithPagination(AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceServiceImpl getAudienceWithPagination()");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             AudienceResponseObject audienceResponseObject = new AudienceResponseObject();
-            List<AudienceEntity> stream = audienceRequestDTO.isPagination()
+            CompletableFuture.runAsync(() ->  audienceResponseObject.setTotal(audienceRepository.countAllByOrganizationUuidEquals(audienceRequestDTO.getOrganizationId())));
+            audienceResponseObject.setAudienceEntities(audienceRequestDTO.isPagination()
                     ? audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()))
-                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName());
-            long totalCount = audienceRepository.countAllByOrganizationUuidEquals(audienceRequestDTO.getOrganizationId());
-            audienceResponseObject.setAudienceEntities(stream);
-            audienceResponseObject.setTotal(totalCount);
+                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName()));
             serviceResponseDTO.setData(audienceResponseObject);
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination Success");
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl getAudienceWithPagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -133,28 +130,21 @@ public class AudienceServiceImpl implements AudienceService {
         log.info("LOG:: AudienceServiceImpl activeInactiveAudience");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-            Optional<OrganizationEntity> organizationEntity = organizationRepository.findOrganizationEntityByUuidEquals(organizationUuid);
-            if (organizationEntity.isPresent()) {
                 audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid).ifPresentOrElse(entity -> {
                     entity.setStatus(status);
                     serviceResponseDTO.setData(audienceRepository.save(entity));
                     serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
-                    serviceResponseDTO.setMessage(SUCCESS);
+                    serviceResponseDTO.setMessage(STATUS_SUCCESS);
                 }, () -> {
-                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() attribute Not Found");
-                    serviceResponseDTO.setMessage(FAIL);
+                    serviceResponseDTO.setDescription("Attribute Or Organization may Not Found");
+                    serviceResponseDTO.setMessage(STATUS_FAIL);
                 });
-            } else {
-                serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Organization Not Found");
-                serviceResponseDTO.setMessage(FAIL);
-            }
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl activeInactiveAudience() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
-            exception.printStackTrace();
             serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);

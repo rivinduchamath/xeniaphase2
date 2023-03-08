@@ -20,7 +20,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @Validated
 public class CampaignTemplateController {
-    private final CampaignTemplateService templateService;
+    private final CampaignTemplateService templateService; //////////////////// @TODO NOT COMPLETE
 
     @PostMapping(value = "${server.servlet.templateSave}")
     @Description("If Send Id It Will Update Template, Otherwise Save as a new Template ")
@@ -34,7 +34,6 @@ public class CampaignTemplateController {
         return templateService.getAllCampTemplatePagination (page, size);
     }
     @DeleteMapping(value = "${server.servlet.deleteTemplate}")
-    @Transactional
     @Description("Delete AttributesObject")
     public ServiceResponseDTO deleteTemplate(@RequestParam @NonNull String templateId) {
         log.info ("LOG::Inside the CampaignTemplateController deleteTemplate ");

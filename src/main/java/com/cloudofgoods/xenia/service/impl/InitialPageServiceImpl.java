@@ -43,14 +43,14 @@ public class InitialPageServiceImpl implements InitialPageService {
             ruleRequestRootObject.setTotal (count);
             serviceResponseDTO.setData (ruleRequestRootObject);
             serviceResponseDTO.setDescription ("InitialPageServiceImpl getCampaignForInitialPage Success");
-            serviceResponseDTO.setMessage (SUCCESS);
+            serviceResponseDTO.setMessage (STATUS_SUCCESS);
             serviceResponseDTO.setCode (STATUS_2000);
 
         } catch (Exception exception) {
             log.info ("LOG :: InitialPageServiceImpl getCampaignForInitialPage() exception: " + exception.getMessage ());
             serviceResponseDTO.setError (exception.getStackTrace ());
             serviceResponseDTO.setDescription ("InitialPageServiceImpl getCampaignForInitialPage() exception " + exception.getMessage ());
-            serviceResponseDTO.setMessage (FAIL);
+            serviceResponseDTO.setMessage (STATUS_FAIL);
             serviceResponseDTO.setCode (STATUS_5000);
 
         }

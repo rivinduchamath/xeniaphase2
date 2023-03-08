@@ -219,7 +219,7 @@ public class RuleServiceImpl implements RuleService {
                         segments.setPriority(segments.getPriority() == 0 ? 999999999 : (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority());
                         segments.setSegmentRuleString(audienceObject.getAudienceRuleString() != null ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
 
-                        Optional.ofNullable(segments.getSegmentName()).ifPresent(name -> segments.setSegmentName(saveSegmentNameGenerator(name)));
+
                         List<ExperiencesObject> experiencesObjects = new ArrayList<>();
                         for (ExperiencesObject experiencesObject : segments.getExperiences()) {
                             List<ChannelContentObject> channelContentObjects = new ArrayList<>();
@@ -263,14 +263,14 @@ public class RuleServiceImpl implements RuleService {
             log.info("LOG:: RuleServiceImpl removeRuleFromKBAndDatabase() ruleEntity Name " + segmentName);
             internalKnowledgeBase.removeRule(packageName, segmentName);
             serviceResponseDTO.setDescription("removeRuleFromKBAndDatabase Success");
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
             serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
             serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
@@ -299,7 +299,7 @@ public class RuleServiceImpl implements RuleService {
             serviceResponseDTO.setData(save);
             serviceResponseDTO.setDescription("updateCampaignStatus Success");
         }
-        serviceResponseDTO.setMessage(SUCCESS);
+        serviceResponseDTO.setMessage(STATUS_SUCCESS);
         serviceResponseDTO.setCode(STATUS_2000);
         serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
@@ -342,7 +342,7 @@ public class RuleServiceImpl implements RuleService {
             serviceResponseDTO.setData(byId);
             serviceResponseDTO.setDescription("findByID Success No Data");
         }
-        serviceResponseDTO.setMessage(SUCCESS);
+        serviceResponseDTO.setMessage(STATUS_SUCCESS);
         serviceResponseDTO.setCode(STATUS_2000);
         serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
@@ -375,8 +375,7 @@ public class RuleServiceImpl implements RuleService {
         boolean channelValidate = false;
         log.info("LOG:: DroolServiceImpl createDrlString() Inside Method ");
 
-        String fact = ruleEntity.getSegmentRuleString();//"\"saman\".equals(userData.get(\"name\")) && 12 < userData.get(\"age\")";
-
+        String fact = ruleEntity.getSegmentRuleString();
         double priority = ruleEntity.getPriority();
         try {
             List<ChannelEntity> channelEntityList = channelRepository.findByChannelsId_OrganizationUuidEquals(ruleRequestRootModel.getOrganizationId());
@@ -401,7 +400,9 @@ public class RuleServiceImpl implements RuleService {
                             String metaString = metadata.replace("<channel>", channel.substring(0, channel.length() - 4));
                             PackageDescrBuilder pkg = DescrFactory.newPackage();
                             PackageDescrBuilder pkgDescBuilder = pkg.end();
-                            pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute("salience", priority + "").attribute("agenda-group", "\"" + ruleRequestRootModel.getOrganizationId().toUpperCase() + "\"").lhs().pattern("$user : User").constraint(fact + "").end().pattern("$meta : MetaData").constraint(metaString).end().end().rhs("response.addToResponse(" + "\"" + experiencesObject.getAbTestEnable() + "\",\"" + experiencesObject.getAbTestPercentage() + "\",\"" + experiencesObject.getAbTestStartDate() + "\",\"" + experiencesObject.getAbTestEndDateTime() + "\"," + ruleEntity.getPriority() + ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" + channelContentObject.getVariantId() + "\");").end();
+                            Optional.ofNullable(ruleEntity.getSegmentName()).ifPresent(name -> ruleEntity.setSegmentName(saveSegmentNameGenerator(name)));
+                            pkgDescBuilder.newRule().name(ruleEntity.getSegmentName()).attribute("salience", priority + "").attribute("agenda-group", "\"" + ruleRequestRootModel.getOrganizationId().toUpperCase() + "\"").lhs().pattern("$user : User").constraint(fact + "").end().pattern("$meta : MetaData").constraint(metaString).end().end().rhs(
+                                    "response.addToResponse(" + "\"" + ruleEntity.getSegmentName()+"\",\""+ experiencesObject.getAbTestEnable() + "\"," + experiencesObject.getAbTestPercentage() + ",\"" + experiencesObject.getAbTestStartDate() + "\",\"" + experiencesObject.getAbTestEndDateTime() + "\"," + ruleEntity.getPriority() + ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" + channelContentObject.getVariantId() + "\");").end();
 
                             PackageDescr packageDescr = pkgDescBuilder.getDescr();
                             DrlDumper dumper = new DrlDumper();

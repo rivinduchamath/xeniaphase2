@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
 import static org.apache.log4j.varia.ExternallyRolledFileAppender.OK;
@@ -37,7 +38,7 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
                             organization -> {
                                 if (NotEmptyOrNullValidator.isNotNullOrEmpty(ruleRootModel.getId())) {
                                     log.info("LOG:: CampaignTemplateServiceImpl saveTemplate Update");
-                                    campaignTemplateRepository.findById(ruleRootModel.getId())
+                                    campaignTemplateRepository.findByIdAndOrganizationEquals(ruleRootModel.getId(),ruleRootModel.getOrganizationUuid())
                                             .ifPresentOrElse(
                                                     entity -> {
                                                         entity.setId(ruleRootModel.getId());
@@ -48,16 +49,15 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
                                                     () -> serviceResponseDTO.setDescription("Update Template Not Found")
                                             );
                                 } else {
-                                    CampaignTemplateEntity campaignTemplate;
+                                    CampaignTemplateEntity campaignTemplate = campaignTemplateEntitySetValues(new CampaignTemplateEntity(), ruleRootModel);
                                     log.info("LOG:: CampaignTemplateServiceImpl saveTemplate Save");
-                                    campaignTemplate = campaignTemplateEntitySetValues(new CampaignTemplateEntity(), ruleRootModel);
                                     campaignTemplate.setCreatedDate(new Date().toString());
                                     campaignTemplate.setCreator(ruleRootModel.getCreator());
                                     // Save
                                     serviceResponseDTO.setData(campaignTemplateRepository.save(campaignTemplate));
                                     serviceResponseDTO.setDescription("Save Template Success");
                                 }
-                                serviceResponseDTO.setMessage(SUCCESS);
+                                serviceResponseDTO.setMessage(STATUS_SUCCESS);
                                 serviceResponseDTO.setCode(STATUS_2000);
                             },
                             () -> serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND)
@@ -66,7 +66,7 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
             log.info("LOG :: CampaignTemplateServiceImpl saveTemplate() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -78,21 +78,19 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         log.info("LOG:: CampaignTemplateServiceImpl getAllCampTemplatePagination()");
         try {
-            Page<CampaignTemplateEntity> campaignTemplateEntities = campaignTemplateRepository.findAll(PageRequest.of(page, size));
-            long count = campaignTemplateRepository.count();
-
             CampaignTemplateCustomObject campaignTemplateCustomObject = new CampaignTemplateCustomObject();
+            CompletableFuture.runAsync(() -> campaignTemplateCustomObject.setTotal(campaignTemplateRepository.count()));
+            Page<CampaignTemplateEntity> campaignTemplateEntities = campaignTemplateRepository.findAll(PageRequest.of(page, size));
             campaignTemplateCustomObject.setCampaignTemplateDTOS(campaignTemplateEntities);
-            campaignTemplateCustomObject.setTotal(count);
             serviceResponseDTO.setDescription("Get AllCamp Template With Pagination Success");
             serviceResponseDTO.setData(campaignTemplateCustomObject);
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: CampaignTemplateServiceImpl getAllCampTemplatePagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl getAllCampTemplatePagination() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(OK);
@@ -106,13 +104,13 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
         try {
             campaignTemplateRepository.deleteById(templateId);
             serviceResponseDTO.setMessage("Delete Template Success");
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: CampaignTemplateServiceImpl deleteTemplate() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setMessage("CampaignTemplateServiceImpl deleteTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(OK);

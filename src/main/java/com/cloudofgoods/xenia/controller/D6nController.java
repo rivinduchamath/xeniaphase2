@@ -46,8 +46,7 @@ public class D6nController {
         } else {
 
         }
-        return d6nService.makeDecision(d6nDTO.getNumberOfResponseFrom(), d6nDTO.getNumberOfResponse(), d6nDTO.getUserEmail(), userDTO, d6nDTO.getChannels().stream()
-                .map(String::toUpperCase).collect(Collectors.toList()), d6nDTO.getSlot(), d6nDTO.getOrganization().toUpperCase());
+        return d6nService.makeDecision(d6nDTO.getNumberOfResponseFrom(), d6nDTO.getNumberOfResponse(), d6nDTO.getUserEmail(), userDTO, d6nDTO.getChannels(), d6nDTO.getSlot(), d6nDTO.getOrganization());
 
     }
 }
