@@ -99,13 +99,13 @@ public class AttributesServiceImpl implements AttributesService {
         log.info("LOG:: AttributesServiceImpl getAttribute Service Layer");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(attributeRepository.countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getType())));
+            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(attributeRepository.countByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeInAndStatusEquals(true,requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(), true)));
             List<AttributeEntity> attributeEntities = requestAttributeDTO.isPagination()
-                    ? attributeRepository.findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(
-                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),
+                    ? attributeRepository.findAllByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrStatusEqualsAndAttributesIdOrganizationUuidEqualsAndTypeIn(true,
+                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), true, requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),
                     PageRequest.of(requestAttributeDTO.getPage(), requestAttributeDTO.getSize()))
-                    : attributeRepository.findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(
-                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());;
+                    : attributeRepository.findAllByStatusEqualsAndAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrStatusEqualsAndAttributesIdOrganizationUuidEqualsAndTypeIn(true,
+                    requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),true, requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType());
             serviceGetResponseDTO.setData(attributeEntities.stream().map(this::responseAttribute).collect(Collectors.toList()));
             serviceGetResponseDTO.setDescription("Get Attribute Success");
             serviceGetResponseDTO.setMessage(STATUS_SUCCESS);

@@ -115,17 +115,4 @@ public class DroolServiceImpl extends RuleImpl implements DroolService {
 //        log.info ("Find Root SegmentsObject By id " + ruleId);
 //        return rootRuleRepository.findById (ruleId).get ();
 //    }
-
-
-    // Return Imports In Drool String
-    public String createImports() {
-        log.info("LOG:: DroolServiceImpl createImports");
-        PackageDescr pkg = DescrFactory.newPackage().name("com.cloudofgoods.xenia")
-                .newImport().target("com.cloudofgoods.xenia.dto.caution.User").end()
-                .newImport().target("org.springframework.util.CollectionUtils").end()
-                .newImport().target("com.cloudofgoods.xenia.dto.caution.MetaData").end()
-                .newGlobal().type("com.cloudofgoods.xenia.dto.D6nResponseModelDTO").identifier("response").end().getDescr();
-        DrlDumper dumper = new DrlDumper();
-        return dumper.dump(pkg);
-    }
 }

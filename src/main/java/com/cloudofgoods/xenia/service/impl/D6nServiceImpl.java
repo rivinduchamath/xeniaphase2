@@ -60,7 +60,7 @@ public class D6nServiceImpl implements D6nService {
         serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
     }
-
+    Map<String, Double> VARIABLES_MAP = new HashMap<>();
     //Remove Rules From Knowledge Base And Database From SegmentsObject ID
     public D6nResponseModelDTO makeDecision(int numberOfResponseFrom, int numberOfResponse, MetaData metaData, User user, String organization) {
         log.info("Log :: DroolServiceImpl makeDecision() Two");
@@ -103,6 +103,9 @@ public class D6nServiceImpl implements D6nService {
                     double defaultVal = (100 - percentage) / percentage;
                     if (storedValue >= 1) {
                         VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
+                        d6nResponse.setVariant("null");
+                        d6nResponse.setPriority(0.0);
+                        d6nResponse.setTotalCount(0);
                         return d6nResponse; // default Banner
                     } else {
                         storedValue += defaultVal;
@@ -115,8 +118,9 @@ public class D6nServiceImpl implements D6nService {
                         return d6nResponse; // actual Banner
                     } else {
                         storedValue += actualVal;
-                        VARIABLES_MAP.put("segmentName", storedValue);
+                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
                         d6nResponse.setVariant("null");
+                        d6nResponse.setPriority(0.0);
                         d6nResponse.setTotalCount(0);
                         return d6nResponse;
                     }

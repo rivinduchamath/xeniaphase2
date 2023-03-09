@@ -34,14 +34,14 @@ public class D6nController {
         User userDTO = new User();
 
         if (d6nDTO.getUserEmail() != null) {
-            user = this.users.findByUsername(d6nDTO.getUserEmail());
+//            user = this.users.findByUsername(d6nDTO.getUserEmail());
             LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<String, Object>();
-            linkedHashMap.put("age", user.getAge());
-            linkedHashMap.put("hobby", user.getHobby());
-            linkedHashMap.put("roles", user.getRoles());
-            linkedHashMap.put("country", user.getCountry());
-            linkedHashMap.put("religion", user.getReligion());
-            linkedHashMap.put("maritalStatus", user.getMaritalStatus());
+            linkedHashMap.put("age", "33");
+//            linkedHashMap.put("hobby", user.getHobby());
+//            linkedHashMap.put("roles", user.getRoles());
+            linkedHashMap.put("country", "USA");
+//            linkedHashMap.put("religion", user.getReligion());
+//            linkedHashMap.put("maritalStatus", user.getMaritalStatus());
             userDTO.setUserData(linkedHashMap);
         } else {
 

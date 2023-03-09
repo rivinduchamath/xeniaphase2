@@ -1,7 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.AttributeTableDTO;
-import com.cloudofgoods.xenia.dto.request.AttributeGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeTableGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AttributeTableRequestDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
@@ -11,7 +10,6 @@ import jdk.jfr.Description;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +35,7 @@ public class AttributeTableController {
     @Description("Get Attributes Table Object")
     public ServiceResponseDTO getAttributesTable(@RequestBody @Valid AttributeTableRequestDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController getAttributesTable ");
-        return attributesTableService.getAttributes(attributeTableDTO);
+        return attributesTableService.getAttributesTables(attributeTableDTO);
     }
     @DeleteMapping(value = "${server.servlet.activeInactiveAttributeTable}")
     @Description("activeInactiveAttribute")// Avg Response Time 15ms Local

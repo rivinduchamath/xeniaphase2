@@ -13,15 +13,14 @@ import java.util.Optional;
 public interface ChannelRepository extends MongoRepository <ChannelEntity, ChannelsId> {
     Optional<ChannelEntity> findByChannelUuidEquals(String uuid);
 
-    Optional<ChannelEntity>  deleteByChannelUuidEquals(String channelUuId);
-
-    List<ChannelEntity> findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(String organizationUuid, String toUpperCase, PageRequest of);
-
-    long countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(String organizationUuid, String toUpperCase);
+    long countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean bol);
 
     List<ChannelEntity> findByChannelsId_OrganizationUuidEquals(String organizationId);
 
-    List<ChannelEntity>  findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(String organizationUuid, String toUpperCase);
 
     Optional<ChannelEntity> findByChannelsId_OrganizationUuidEqualsAndChannelUuidEquals(String organizationUuid, String channelUuid);
+
+    List<ChannelEntity> findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean bol, PageRequest of);
+
+    List<ChannelEntity> findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean bol);
 }

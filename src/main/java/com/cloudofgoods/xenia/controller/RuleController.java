@@ -12,8 +12,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequestMapping("/d6n/segment")
 @Slf4j
+@Validated
 @RequiredArgsConstructor
 public class RuleController {
 
@@ -29,7 +32,7 @@ public class RuleController {
     @Transactional
     @PostMapping(value = "${server.servlet.saveRule}")
     @Description("If Send Id It Will Update SegmentsObject, Otherwise Save as a new rule ")
-    public RuleRequestRootEntity saveRule(@RequestBody RuleRequestRootDTO ruleRootModel) throws ExecutionException, InterruptedException {
+    public RuleRequestRootEntity saveRule(@RequestBody @Valid RuleRequestRootDTO ruleRootModel) throws ExecutionException, InterruptedException {
         log.info ("LOG::Inside the RuleController saveRule ");
         return ruleService.saveOrUpdateSingleRule (ruleRootModel);
     }

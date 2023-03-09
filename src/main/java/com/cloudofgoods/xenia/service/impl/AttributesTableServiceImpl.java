@@ -64,13 +64,15 @@ public class AttributesTableServiceImpl implements AttributesTableService {
 
     @Override
     @Transactional(readOnly = true)
-    public ServiceResponseDTO getAttributes(AttributeTableRequestDTO attributeTableDTO) {
+    public ServiceResponseDTO getAttributesTables(AttributeTableRequestDTO attributeTableDTO) {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
-        log.info("LOG:: AttributesTableServiceImpl getAttributes()");
+        log.info("LOG:: AttributesTableServiceImpl getAttributesTables()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
-            CompletableFuture.runAsync(() -> attributeTableResponseDTO.setCount(attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid())));
-            List<AttributeTableEntity> stream = attributeTableDTO.isPagination() ? attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(), PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize())) : attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid());
+            CompletableFuture.runAsync(() -> attributeTableResponseDTO.setCount(attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(), true)));
+            List<AttributeTableEntity> stream = attributeTableDTO.isPagination() ?
+                    attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWithAndStatusEquals(attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(),true, PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize())) :
+                    attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(),true);
             serviceResponseDTO.setMessage("AttributesTableServiceImpl Get Attributes " + (attributeTableDTO.isPagination() ? "With Pagination" : "Without Pagination") + " Success");
             attributeTableResponseDTO.setAttributeTableEntities(stream);
             serviceResponseDTO.setData(attributeTableResponseDTO);
@@ -94,7 +96,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             attributeTableRepository.findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(attributeTableName.toLowerCase(), organizationUuid).ifPresentOrElse(attributeTableEntity -> {
-                attributeTableEntity.setActive(status);
+                attributeTableEntity.setStatus(status);
                 serviceResponseDTO.setData(attributeTableRepository.save(attributeTableEntity));
                 serviceResponseDTO.setDescription("Active/Inactive Attribute Table Success");
             }, () -> serviceResponseDTO.setDescription("Cannot Find Attribute Table Under this Organization"));
@@ -135,14 +137,14 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
         attributeTableEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributeTableDTO.getDisplayName()) ? attributeTableDTO.getDisplayName() :
                 attributeTableEntity.getDisplayName());
-        attributeTableEntity.setActive(attributeTableDTO.isStatus());
+        attributeTableEntity.setStatus(attributeTableDTO.isStatus());
         return attributeTableEntity;
     }
     private AttributeTableSaveUpdateResponseDTO setSaveOrUpdateResponse(AttributeTableEntity attributeTableEntity) {
         AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
         attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());
         attributeTableSaveUpdateResponseDTO.setDisplayName(attributeTableEntity.getDisplayName());
-        attributeTableSaveUpdateResponseDTO.setActive(attributeTableEntity.isActive());
+        attributeTableSaveUpdateResponseDTO.setActive(attributeTableEntity.isStatus());
         return attributeTableSaveUpdateResponseDTO;
     }
 

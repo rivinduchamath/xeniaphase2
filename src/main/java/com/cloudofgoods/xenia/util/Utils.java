@@ -19,7 +19,7 @@ public class Utils {
     public static String ORGANIZATION_NOT_EMPTY= "Organization cannot be empty";
     public static DateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     public static Date today = new Date();
-    public static Map<String, Double> VARIABLES_MAP = new HashMap<>();
+
     public static String timeUuidGenerate(){
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         return timeBasedGenerator.generate().toString();

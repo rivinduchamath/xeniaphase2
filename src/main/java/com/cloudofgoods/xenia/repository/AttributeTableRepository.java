@@ -14,19 +14,13 @@ public interface AttributeTableRepository extends MongoRepository<AttributeTable
 
     Optional<AttributeTableEntity> findAllByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(String name, String organizationUuid);
 
-    long countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEquals(String toLowerCase, String organizationUuid);
-
-    List<AttributeTableEntity> findAllByAttributeTableId_OrganizationUuidEquals(String organizationUuid, PageRequest of);
-
-    long countByAttributeTableId_OrganizationUuidEquals(String organizationUuid);
-
-    List<AttributeTableEntity> findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEquals(String toLowerCase, String organizationUuid);
-
-    List<AttributeTableEntity> findAllByAttributeTableIdOrganizationUuidEquals(String organizationUuid);
-
-    List<AttributeTableEntity> findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWith(String organizationUuid, String toLowerCase, PageRequest of);
-
     Optional<AttributeTableEntity> findByAttributeTableId_AttributeTableNameEqualsAndAttributeTableId_OrganizationUuidEquals(String attributeTableName, String organizationUuid);
 
     Optional<AttributeTableEntity> findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(String organizationUuid, String attributeTableName);
+
+    long countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEqualsAndStatusEquals(String toLowerCase, String organizationUuid, boolean b);
+
+    List<AttributeTableEntity> findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWithAndStatusEquals(String organizationUuid, String toLowerCase, boolean b, PageRequest of);
+
+    List<AttributeTableEntity> findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEqualsAndStatusEquals(String toLowerCase, String organizationUuid, boolean b);
 }

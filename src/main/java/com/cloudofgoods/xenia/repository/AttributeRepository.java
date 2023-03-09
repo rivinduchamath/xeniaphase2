@@ -11,16 +11,14 @@ import java.util.Optional;
 
 @Repository
 public interface AttributeRepository extends MongoRepository <AttributeEntity, AttributesId> {
-    Optional<AttributeEntity>  deleteAttributeByAttributeUuid(String attributeId);
-
     Optional<AttributeEntity> findByAttributeUuidEquals(String uuid);
-
-    List<AttributeEntity> findAllByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(String organization, String attributeName, String organization2, List<String> type, PageRequest of);
-
-    long countByAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrTypeIn(String organizationUuid, String attributeName, List<String> type);
-
-    List<AttributeEntity> findAllByAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeIn(String organizationUuid, String attributeName, String organizationUuid1, List<String> type);
 
    Optional<AttributeEntity> findByAttributesId_OrganizationUuidEqualsAndAttributeUuidEquals(String organizationUuid, String attributeUuid);
 
-}
+    long countByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeInAndStatusEquals(boolean b, String organizationUuid, String attributeName,String organizationUuid2, List<String> type, boolean bool);
+
+    List<AttributeEntity> findAllByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrStatusEqualsAndAttributesIdOrganizationUuidEqualsAndTypeIn(boolean b, String organizationUuid, String attributeName,boolean c, String organizationUuid1, List<String> type, PageRequest of);
+
+    List<AttributeEntity> findAllByStatusEqualsAndAttributesId_OrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrStatusEqualsAndAttributesIdOrganizationUuidEqualsAndTypeIn(boolean b, String organizationUuid, String attributeName,boolean c, String organizationUuid1, List<String> type);
+
+   }

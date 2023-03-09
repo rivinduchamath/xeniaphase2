@@ -89,13 +89,14 @@ public class ChannelServiceImpl implements ChannelService {
         log.info("LOG:: ChannelServiceImpl getChannels");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase())));
+            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(
+                    channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),true)));
             List<ChannelEntity> channels = requestChannelsDTO.isPagination() ?
-                    channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(
-                            requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),
+                    channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(
+                            requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),true,
                             PageRequest.of(requestChannelsDTO.getPage(), requestChannelsDTO.getSize())) :
-                    channelRepository.findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWith(
-                            requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase());
+                    channelRepository.findByChannelsId_OrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(
+                            requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase() ,true);
             List<ChannelsResponseDTO> channelsResponseDTOS = new ArrayList<>();
             channels.forEach(channel -> {
                 ChannelsResponseDTO channelsResponseDTO = new ChannelsResponseDTO();

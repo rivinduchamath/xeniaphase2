@@ -106,10 +106,10 @@ public class AudienceServiceImpl implements AudienceService {
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
             AudienceResponseObject audienceResponseObject = new AudienceResponseObject();
-            CompletableFuture.runAsync(() ->  audienceResponseObject.setTotal(audienceRepository.countAllByOrganizationUuidEquals(audienceRequestDTO.getOrganizationId())));
+            CompletableFuture.runAsync(() ->  audienceResponseObject.setTotal(audienceRepository.countAllByOrganizationUuidEqualsAndStatusEquals(audienceRequestDTO.getOrganizationId() ,true)));
             audienceResponseObject.setAudienceEntities(audienceRequestDTO.isPagination()
-                    ? audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()))
-                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWith(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName()));
+                    ? audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), true,PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()))
+                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(),true));
             serviceResponseDTO.setData(audienceResponseObject);
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination Success");
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
