@@ -57,7 +57,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success");
             } else {
-                serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success :: NO DATA");
+                serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName :: NO DATA");
             }
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
@@ -83,7 +83,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
                 serviceResponseDTO.setMessage(STATUS_SUCCESS);
                 serviceResponseDTO.setCode(STATUS_2000);
             } else {
-                serviceResponseDTO.setMessage("TemplateServiceImpl getTemplateById Success :: NO DATA");
+                serviceResponseDTO.setMessage("TemplateServiceImpl getTemplateById :: NO DATA");
             }
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getTemplateById() exception: " + exception.getMessage());

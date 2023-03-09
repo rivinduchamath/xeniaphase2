@@ -50,6 +50,7 @@ public class AudienceServiceImpl implements AudienceService {
                 } else {
                     AudienceEntity newAudienceEntity = new AudienceEntity();
                     newAudienceEntity.setAudienceUuid(Utils.timeUuidGenerate());
+                    newAudienceEntity.setStatus((true));
                     serviceResponseDTO.setData(audienceRepository.save(setAudienceValues(audienceDTO, newAudienceEntity)));
                     serviceResponseDTO.setDescription("Save Audience Success");
                 }
