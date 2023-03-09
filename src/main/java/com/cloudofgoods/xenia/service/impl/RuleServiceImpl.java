@@ -4,11 +4,13 @@ import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullV
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.*;
+import com.cloudofgoods.xenia.entity.xenia.analytics.OrganizationAnalyticsEntity;
 import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.AudienceRepository;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.repository.SegmentTemplateRepository;
+import com.cloudofgoods.xenia.repository.analytics.OrganizationAnalyticsRepository;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.RuleStatus;
 import com.cloudofgoods.xenia.util.Utils;
@@ -41,6 +43,7 @@ public class RuleServiceImpl implements RuleService {
     private final ChannelRepository channelRepository;
     private final SegmentTemplateRepository segmentTemplateRepository;
     private final AudienceRepository audienceRepository;
+    private final OrganizationAnalyticsRepository organizationAnalyticsRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
     @Value("${knowledge.package.name}")
@@ -151,28 +154,23 @@ public class RuleServiceImpl implements RuleService {
         ruleRequestRootModel.getChannels().forEach(ruleChannelObject -> {
             ruleChannelObject.getAudienceObjects().forEach(audienceObject -> {
                 if (audienceObject.isTemplate()) {
-                    CompletableFuture.runAsync(() -> audienceSaveTemplate(
-                            audienceObject,
-                            ruleChannelObject.getChannelId(),
-                            ruleRequestRootModel.getCampaignId(),
-                            ruleRequestRootModel.getOrganizationId())
-                    );
+                    CompletableFuture.runAsync(() -> audienceSaveTemplate(audienceObject, ruleRequestRootModel.getOrganizationId()));
                 }
                 List<SegmentsObject> segmentsObjects = new ArrayList<>();
                 audienceObject.getSegments().forEach(segments -> {
                     segments.setSegmentRuleString(NotEmptyOrNullValidator.isNotNullOrEmpty(audienceObject.getAudienceRuleString()) ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
 
                     List<ExperiencesObject> experiencesObjects = new ArrayList<>();
-                    for (ExperiencesObject experiencesObject : segments.getExperiences()) {
+                    segments.getExperiences().forEach(experiencesObject -> {
                         List<ChannelContentObject> channelContentObjects = new ArrayList<>();
-                        for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                        experiencesObject.getEntryVariantMapping().forEach(channelContentObject -> {
                             String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
                             channelContentObject.setFullRuleString(imports + "\n" + drlString);
                             channelContentObjects.add(channelContentObject);
-                        }
+                        });
                         experiencesObject.setEntryVariantMapping(channelContentObjects);
                         experiencesObjects.add(experiencesObject);
-                    }
+                    });
                     segments.setExperiences(experiencesObjects);
                     segmentsObjects.add(segments);// Add To List
                 });
@@ -183,10 +181,11 @@ public class RuleServiceImpl implements RuleService {
         rootRules.setChannels(ruleChannelObjectList);
         log.info("LOG:: RuleServiceImpl saveOrUpdateRuleManyRules() before return ");
         droolService.feedKnowledgeBuilderWhenUpdate(rootRules, pastRootRule);
+        CompletableFuture.runAsync(() -> campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel));
         return rootRuleRepository.save(rootRules); // Return Updated RuleRequestRootEntity object
     }
 
-    private void audienceSaveTemplate(AudienceObject audienceObject, String channelId, String campaignId, String organizationId) {
+    private void audienceSaveTemplate(AudienceObject audienceObject, String organizationId) {
         AudienceEntity audienceEntity = new AudienceEntity();
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         UUID firstUUID = timeBasedGenerator.generate();
@@ -221,20 +220,15 @@ public class RuleServiceImpl implements RuleService {
                         segments.setPriority(segments.getPriority() == 0 ? 999999999 : (ruleRequestRootModel.getPriority() * 100000) + segments.getPriority());
                         segments.setSegmentRuleString(NotEmptyOrNullValidator.isNotNullOrEmpty(audienceObject.getAudienceRuleString()) ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
 
-                        List<ExperiencesObject> experiencesObjects = segments.getExperiences().parallelStream()
-                                .peek(experiencesObject -> {
-                                    List<ChannelContentObject> channelContentObjects = experiencesObject.getEntryVariantMapping().parallelStream()
-                                            .peek(channelContentObject -> {
-                                                String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
-                                                channelContentObject.setFullRuleString(imports + "\n" + drlString);
-                                            })
-                                            .collect(Collectors.toList());
-                                    experiencesObject.setEntryVariantMapping(channelContentObjects);
-                                })
-                                .collect(Collectors.toList());
+                        List<ExperiencesObject> experiencesObjects = segments.getExperiences().parallelStream().peek(experiencesObject -> {
+                            List<ChannelContentObject> channelContentObjects = experiencesObject.getEntryVariantMapping().parallelStream().peek(channelContentObject -> {
+                                String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
+                                channelContentObject.setFullRuleString(imports + "\n" + drlString);
+                            }).collect(Collectors.toList());
+                            experiencesObject.setEntryVariantMapping(channelContentObjects);
+                        }).collect(Collectors.toList());
                         segments.setExperiences(experiencesObjects);
                         segmentsObjectsList.add(segments);// Add To List
-
                     });
                     audienceObject.setSegments(segmentsObjectsList);
                     audiencesList.add(audienceObject);
@@ -245,10 +239,37 @@ public class RuleServiceImpl implements RuleService {
             rootRules.setChannels(ruleChannelObjectList);
             log.info("LOG:: RuleServiceImpl saveRootRuleRepository() Save SegmentsObject stringBuilder ");
             droolService.feedKnowledge(rootRules);
+            CompletableFuture.runAsync(() -> campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel));
             return rootRuleRepository.save(rootRules);
         }
         return null;
     }
+
+    private void campaignsWithOrganizationWithSaveOrUpdate(RuleRequestRootDTO ruleRequestRootModel) {
+        OrganizationAnalyticsEntity organizationAnalyticsEntity = new OrganizationAnalyticsEntity();
+        List<CampaignsObjects> campaignsObjects = new ArrayList<>();
+        Optional<OrganizationAnalyticsEntity> byId = organizationAnalyticsRepository.findById(ruleRequestRootModel.getOrganizationId());
+        if (byId.isPresent()) {
+            organizationAnalyticsEntity = byId.get();
+            campaignsObjects = byId.get().getAllCampaign();
+            organizationAnalyticsEntity.setActiveCampaignCount(byId.get().getActiveCampaignCount() + 1);
+            organizationAnalyticsEntity.setOrganizationTotalRequestCount(byId.get().getOrganizationTotalRequestCount());
+            organizationAnalyticsEntity.setOrganizationTotalResponseCount(byId.get().getOrganizationTotalResponseCount());
+            organizationAnalyticsEntity.setOrganizationMatchResponses(byId.get().getOrganizationMatchResponses());
+        }
+        CampaignsObjects campaignsObjects1 = new CampaignsObjects();
+        campaignsObjects1.setCampaignId(ruleRequestRootModel.getCampaignId());
+        campaignsObjects1.setCampaignName(ruleRequestRootModel.getCampaignName());
+        campaignsObjects1.setCampaignDescription(ruleRequestRootModel.getCampaignDescription());
+        campaignsObjects1.setStatus(ruleRequestRootModel.getStatus());
+        campaignsObjects1.setCreatedDate(ruleRequestRootModel.getStartDateTime());
+        campaignsObjects1.setEndDate(ruleRequestRootModel.getEndDateTime());
+        campaignsObjects.add(campaignsObjects1);
+        organizationAnalyticsEntity.setName(ruleRequestRootModel.getOrganizationId());
+        organizationAnalyticsEntity.setAllCampaign(campaignsObjects);
+        organizationAnalyticsRepository.save(organizationAnalyticsEntity);
+    }
+
 
     //Find Root SegmentsObject With Multiple Child Rules From SegmentsObject ID
     public RuleRequestRootEntity findRootRuleById(String ruleId) {
@@ -267,16 +288,14 @@ public class RuleServiceImpl implements RuleService {
             serviceResponseDTO.setDescription("removeRuleFromKBAndDatabase Success");
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
-            serviceResponseDTO.setHttpStatus(STATUS_OK);
-            return serviceResponseDTO;
         } catch (Exception exception) {
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("CampaignTemplateServiceImpl saveTemplate() exception " + exception.getMessage());
             serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
-            serviceResponseDTO.setHttpStatus(STATUS_OK);
-            return serviceResponseDTO;
         }
+        serviceResponseDTO.setHttpStatus(STATUS_OK);
+        return serviceResponseDTO;
     }
 
     @Override
@@ -404,8 +423,7 @@ public class RuleServiceImpl implements RuleService {
                         Optional.ofNullable(segmentsObject.getSegmentName()).ifPresent(name -> segmentsObject.setSegmentName(saveSegmentNameGenerator(name)));
                         String[] segments = segmentsObject.getSegmentName().split("##\\$\\$\\$##");
                         String segmentName = segments[0];
-                        pkgDescBuilder.newRule().name(segmentsObject.getSegmentName()).attribute("salience", priority + "").attribute("agenda-group", "\"" + ruleRequestRootModel.getOrganizationId().toUpperCase() + "\"").lhs().pattern("$user : User").constraint(fact + "").end().pattern("$meta : MetaData").constraint(metaString).end().end().rhs(
-                                "response.addToResponse(" + "\"" + segmentName + "\",\"" + experiencesObject.getAbTestEnable() + "\"," + experiencesObject.getAbTestPercentage() + ",\"" + experiencesObject.getAbTestStartDate() + "\",\"" + experiencesObject.getAbTestEndDateTime() + "\"," + segmentsObject.getPriority() + ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" + channelContentObject.getVariantId() + "\");").end();
+                        pkgDescBuilder.newRule().name(segmentsObject.getSegmentName()).attribute("salience", priority + "").attribute("agenda-group", "\"" + ruleRequestRootModel.getOrganizationId().toUpperCase() + "\"").lhs().pattern("$user : User").constraint(fact + "").end().pattern("$meta : MetaData").constraint(metaString).end().end().rhs("response.addToResponse(" + "\"" + segmentName + "\",\"" + experiencesObject.getAbTestEnable() + "\"," + experiencesObject.getAbTestPercentage() + ",\"" + experiencesObject.getAbTestStartDate() + "\",\"" + experiencesObject.getAbTestEndDateTime() + "\"," + segmentsObject.getPriority() + ",\"" + channelContentObject.getEntryId().toUpperCase() + "\",\"" + channelContentObject.getVariantId() + "\");").end();
 
                         PackageDescr packageDescr = pkgDescBuilder.getDescr();
                         DrlDumper dumper = new DrlDumper();
@@ -437,14 +455,11 @@ public class RuleServiceImpl implements RuleService {
         segmentTemplateEntity.setFact(fact);
         SegmentTemplateEntity save = segmentTemplateRepository.save(segmentTemplateEntity);
     }
+
     // Return Imports In Drool String
     public String getDroolImports() {
         log.info("LOG:: DroolServiceImpl createImports");
-        PackageDescr pkg = DescrFactory.newPackage().name("com.cloudofgoods.xenia")
-                .newImport().target("com.cloudofgoods.xenia.dto.caution.User").end()
-                .newImport().target("org.springframework.util.CollectionUtils").end()
-                .newImport().target("com.cloudofgoods.xenia.dto.caution.MetaData").end()
-                .newGlobal().type("com.cloudofgoods.xenia.dto.D6nResponseModelDTO").identifier("response").end().getDescr();
+        PackageDescr pkg = DescrFactory.newPackage().name("com.cloudofgoods.xenia").newImport().target("com.cloudofgoods.xenia.dto.caution.User").end().newImport().target("org.springframework.util.CollectionUtils").end().newImport().target("com.cloudofgoods.xenia.dto.caution.MetaData").end().newGlobal().type("com.cloudofgoods.xenia.dto.D6nResponseModelDTO").identifier("response").end().getDescr();
         DrlDumper dumper = new DrlDumper();
         return dumper.dump(pkg);
     }

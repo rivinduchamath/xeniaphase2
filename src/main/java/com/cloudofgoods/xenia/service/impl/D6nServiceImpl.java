@@ -91,41 +91,42 @@ public class D6nServiceImpl implements D6nService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy");
             LocalDateTime startDate = LocalDateTime.parse(d6nResponse.getAbTestStartDate(), formatter);
             LocalDateTime endDate = LocalDateTime.parse(d6nResponse.getAbTestEndDateTime(), formatter);
+            if (ruleCount > 0){
+                if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
 
-            if (currentDate.isAfter(startDate) && currentDate.isBefore(endDate)) {
-
-                Double storedValue = VARIABLES_MAP.getOrDefault(d6nResponse.getSegmentName(), 0.0);
-                double percentage = d6nResponse.getAbTestPercentage();
-                if (percentage == 0) {
-                    return d6nResponse;
-                }
-                if (percentage > 50 && 100 >= percentage) {
-                    double defaultVal = (100 - percentage) / percentage;
-                    if (storedValue >= 1) {
-                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
-                        d6nResponse.setVariant("null");
-                        d6nResponse.setPriority(0.0);
-                        d6nResponse.setTotalCount(0);
-                        return d6nResponse; // default Banner
-                    } else {
-                        storedValue += defaultVal;
-                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
-                    }
-                } else if (percentage <= 50 && 0.0 < percentage) {
-                    double actualVal = percentage / (100 - percentage);
-                    if (storedValue >= 1) {
-                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
-                        return d6nResponse; // actual Banner
-                    } else {
-                        storedValue += actualVal;
-                        VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
-                        d6nResponse.setVariant("null");
-                        d6nResponse.setPriority(0.0);
-                        d6nResponse.setTotalCount(0);
+                    Double storedValue = VARIABLES_MAP.getOrDefault(d6nResponse.getSegmentName(), 0.0);
+                    double percentage = d6nResponse.getAbTestPercentage();
+                    if (percentage == 0) {
                         return d6nResponse;
                     }
+                    if (percentage > 50 && 100 >= percentage) {
+                        double defaultVal = (100 - percentage) / percentage;
+                        if (storedValue >= 1) {
+                            VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
+                            d6nResponse.setVariant("null");
+                            d6nResponse.setPriority(0.0);
+                            d6nResponse.setTotalCount(0);
+                            return d6nResponse; // default Banner
+                        } else {
+                            storedValue += defaultVal;
+                            VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
+                        }
+                    } else if (percentage <= 50 && 0.0 < percentage) {
+                        double actualVal = percentage / (100 - percentage);
+                        if (storedValue >= 1) {
+                            VARIABLES_MAP.put(d6nResponse.getSegmentName(), 0.0);
+                            return d6nResponse; // actual Banner
+                        } else {
+                            storedValue += actualVal;
+                            VARIABLES_MAP.put(d6nResponse.getSegmentName(), storedValue);
+                            d6nResponse.setVariant("null");
+                            d6nResponse.setPriority(0.0);
+                            d6nResponse.setTotalCount(0);
+                            return d6nResponse;
+                        }
+                    }
                 }
-            }
+        }
         }catch (Exception e){
             return d6nResponse;
         }

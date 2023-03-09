@@ -32,19 +32,22 @@ public class D6nController {
         log.info("LOG:: D6nController makeDecision calling " + " user " + d6nDTO.getUserEmail() + "OrganizationEntity" + d6nDTO.getOrganization() + " channels " + d6nDTO.getChannels().toString() + " slot " + d6nDTO.getSlot().toString());
         AuthUser user = null;
         User userDTO = new User();
-
-        if (d6nDTO.getUserEmail() != null) {
+        if (d6nDTO.getUserData() == null) {
+            if (d6nDTO.getUserEmail() != null) {
 //            user = this.users.findByUsername(d6nDTO.getUserEmail());
-            LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<String, Object>();
-            linkedHashMap.put("age", "33");
+                LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<String, Object>();
+                linkedHashMap.put("age", "33");
 //            linkedHashMap.put("hobby", user.getHobby());
 //            linkedHashMap.put("roles", user.getRoles());
-            linkedHashMap.put("country", "USA");
+                linkedHashMap.put("country", "USA");
 //            linkedHashMap.put("religion", user.getReligion());
 //            linkedHashMap.put("maritalStatus", user.getMaritalStatus());
-            userDTO.setUserData(linkedHashMap);
-        } else {
+                userDTO.setUserData(linkedHashMap);
+            } else {
 
+            }
+        }else {
+            userDTO.setUserData(d6nDTO.getUserData());
         }
         return d6nService.makeDecision(d6nDTO.getNumberOfResponseFrom(), d6nDTO.getNumberOfResponse(), d6nDTO.getUserEmail(), userDTO, d6nDTO.getChannels(), d6nDTO.getSlot(), d6nDTO.getOrganization());
 

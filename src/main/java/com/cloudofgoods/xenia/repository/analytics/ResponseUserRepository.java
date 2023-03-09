@@ -1,4 +1,4 @@
-package com.cloudofgoods.xenia.repository.redis;
+package com.cloudofgoods.xenia.repository.analytics;
 
 import com.cloudofgoods.xenia.entity.xenia.UserAnalyticsEntity;
 import org.springframework.data.repository.CrudRepository;

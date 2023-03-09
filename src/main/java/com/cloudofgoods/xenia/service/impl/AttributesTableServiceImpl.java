@@ -120,6 +120,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         try {
             attributeTableRepository.findByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameEquals(attributeRequestDTO.getOrganizationUuid(), attributeRequestDTO.getAttributeTableName().toLowerCase()).ifPresentOrElse(attributeTableEntity -> {
                 serviceGetResponseDTO.setData(attributeTableEntity);
+                serviceGetResponseDTO.setMessage(STATUS_SUCCESS);
                 serviceGetResponseDTO.setDescription("Get Attribute Table Success");
             }, () -> serviceGetResponseDTO.setDescription("Cannot Find Attribute Table Under Organization"));
             serviceGetResponseDTO.setCode(STATUS_2000);

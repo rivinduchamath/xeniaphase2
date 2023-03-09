@@ -24,5 +24,4 @@ public class Utils {
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         return timeBasedGenerator.generate().toString();
     }
-
 }

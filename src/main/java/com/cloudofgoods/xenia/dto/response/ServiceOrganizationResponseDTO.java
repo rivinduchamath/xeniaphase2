@@ -19,8 +19,6 @@ public class ServiceOrganizationResponseDTO implements Serializable {
     long expiredCampaignsDataCount;
     long allRequestCount;
     long successRequestCount;
-
-
     Object error;
     Object message;
     String code;

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
@@ -71,12 +72,12 @@ public class TagsServiceImpl implements TagsService {
         log.info("LOG:: TagsServiceImpl getTags Service Layer");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
+            CompletableFuture.runAsync(() ->   serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName().toUpperCase(), true)));
             List<TagsEntity> tagsEntities = Optional.of(getRequestTagsDTO)
                     .map(dto -> dto.isPagination()
-                            ? tagsRepository.findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(dto.getOrganizationUuid(), dto.getTagsName().toUpperCase(), PageRequest.of(dto.getPage(), dto.getSize()))
-                            : tagsRepository.findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameStartsWith(dto.getOrganizationUuid(), dto.getTagsName().toUpperCase()))
+                            ? tagsRepository.findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(dto.getOrganizationUuid(), dto.getTagsName().toUpperCase(), true,PageRequest.of(dto.getPage(), dto.getSize()))
+                            : tagsRepository.findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(dto.getOrganizationUuid(), dto.getTagsName().toUpperCase(), true))
                     .orElse(null);
-            serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName().toUpperCase()));
             List<TagsResponseDTO> tagsResponseDTOS = tagsEntities.stream()
                     .map(this::tagsResponseDTO)
                     .collect(Collectors.toList());
@@ -90,7 +91,6 @@ public class TagsServiceImpl implements TagsService {
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl getTags() exception: " + exception.getMessage());
             serviceGetResponseDTO.setError(exception.getStackTrace());
-            exception.printStackTrace();
             serviceGetResponseDTO.setDescription("TagsServiceImpl getTags() exception " + exception.getMessage());
             serviceGetResponseDTO.setMessage(STATUS_FAIL);
             serviceGetResponseDTO.setCode(STATUS_5000);
