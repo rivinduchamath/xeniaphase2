@@ -4,11 +4,13 @@ import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullV
 import com.cloudofgoods.xenia.dto.RuleRequestRootDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.*;
+import com.cloudofgoods.xenia.entity.xenia.analytics.OrganizationAnalyticsEntity;
 import com.cloudofgoods.xenia.models.*;
 import com.cloudofgoods.xenia.repository.AudienceRepository;
 import com.cloudofgoods.xenia.repository.ChannelRepository;
 import com.cloudofgoods.xenia.repository.RootRuleRepository;
 import com.cloudofgoods.xenia.repository.SegmentTemplateRepository;
+import com.cloudofgoods.xenia.repository.analytics.OrganizationAnalyticsRepository;
 import com.cloudofgoods.xenia.service.RuleService;
 import com.cloudofgoods.xenia.util.RuleStatus;
 import com.cloudofgoods.xenia.util.Utils;
@@ -41,6 +43,7 @@ public class RuleServiceImpl implements RuleService {
     private final ChannelRepository channelRepository;
     private final SegmentTemplateRepository segmentTemplateRepository;
     private final AudienceRepository audienceRepository;
+    private final OrganizationAnalyticsRepository organizationAnalyticsRepository;
     @Autowired
     private InternalKnowledgeBase internalKnowledgeBase;
     @Value("${knowledge.package.name}")
@@ -153,8 +156,6 @@ public class RuleServiceImpl implements RuleService {
                 if (audienceObject.isTemplate()) {
                     CompletableFuture.runAsync(() -> audienceSaveTemplate(
                             audienceObject,
-                            ruleChannelObject.getChannelId(),
-                            ruleRequestRootModel.getCampaignId(),
                             ruleRequestRootModel.getOrganizationId())
                     );
                 }
@@ -163,16 +164,16 @@ public class RuleServiceImpl implements RuleService {
                     segments.setSegmentRuleString(NotEmptyOrNullValidator.isNotNullOrEmpty(audienceObject.getAudienceRuleString()) ? audienceObject.getAudienceRuleString() + " && " + segments.getSegmentRuleString() : segments.getSegmentRuleString());
 
                     List<ExperiencesObject> experiencesObjects = new ArrayList<>();
-                    for (ExperiencesObject experiencesObject : segments.getExperiences()) {
+                    segments.getExperiences().forEach(experiencesObject -> {
                         List<ChannelContentObject> channelContentObjects = new ArrayList<>();
-                        for (ChannelContentObject channelContentObject : experiencesObject.getEntryVariantMapping()) {
+                        experiencesObject.getEntryVariantMapping().forEach(channelContentObject -> {
                             String drlString = createDrlString(channelContentObject, segments, ruleRequestRootModel);
                             channelContentObject.setFullRuleString(imports + "\n" + drlString);
                             channelContentObjects.add(channelContentObject);
-                        }
+                        });
                         experiencesObject.setEntryVariantMapping(channelContentObjects);
                         experiencesObjects.add(experiencesObject);
-                    }
+                    });
                     segments.setExperiences(experiencesObjects);
                     segmentsObjects.add(segments);// Add To List
                 });
@@ -186,7 +187,7 @@ public class RuleServiceImpl implements RuleService {
         return rootRuleRepository.save(rootRules); // Return Updated RuleRequestRootEntity object
     }
 
-    private void audienceSaveTemplate(AudienceObject audienceObject, String channelId, String campaignId, String organizationId) {
+    private void audienceSaveTemplate(AudienceObject audienceObject, String organizationId) {
         AudienceEntity audienceEntity = new AudienceEntity();
         NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
         UUID firstUUID = timeBasedGenerator.generate();
@@ -234,7 +235,6 @@ public class RuleServiceImpl implements RuleService {
                                 .collect(Collectors.toList());
                         segments.setExperiences(experiencesObjects);
                         segmentsObjectsList.add(segments);// Add To List
-
                     });
                     audienceObject.setSegments(segmentsObjectsList);
                     audiencesList.add(audienceObject);
@@ -245,10 +245,39 @@ public class RuleServiceImpl implements RuleService {
             rootRules.setChannels(ruleChannelObjectList);
             log.info("LOG:: RuleServiceImpl saveRootRuleRepository() Save SegmentsObject stringBuilder ");
             droolService.feedKnowledge(rootRules);
+            CompletableFuture.runAsync(() -> campaignsWithOrganizationWithSave(
+                    ruleRequestRootModel)
+            );
             return rootRuleRepository.save(rootRules);
         }
         return null;
     }
+
+    private void campaignsWithOrganizationWithSave(RuleRequestRootDTO ruleRequestRootModel) {
+        OrganizationAnalyticsEntity organizationAnalyticsEntity = new OrganizationAnalyticsEntity();
+        List<CampaignsObjects> campaignsObjects = new ArrayList<>();
+        Optional<OrganizationAnalyticsEntity> byId = organizationAnalyticsRepository.findById(ruleRequestRootModel.getOrganizationId());
+        if(byId.isPresent()){
+            organizationAnalyticsEntity = byId.get();
+            campaignsObjects = byId.get().getAllCampaign();
+            organizationAnalyticsEntity.setActiveCampaignCount(byId.get().getActiveCampaignCount() + 1);
+            organizationAnalyticsEntity.setOrganizationTotalRequestCount(byId.get().getOrganizationTotalRequestCount());
+            organizationAnalyticsEntity.setOrganizationTotalResponseCount(byId.get().getOrganizationTotalResponseCount());
+            organizationAnalyticsEntity.setOrganizationMatchResponses(byId.get().getOrganizationMatchResponses());
+        }
+        CampaignsObjects campaignsObjects1 = new CampaignsObjects();
+        campaignsObjects1.setCampaignId(ruleRequestRootModel.getCampaignId());
+        campaignsObjects1.setCampaignName(ruleRequestRootModel.getCampaignName());
+        campaignsObjects1.setCampaignDescription(ruleRequestRootModel.getCampaignDescription());
+        campaignsObjects1.setStatus(ruleRequestRootModel.getStatus());
+        campaignsObjects1.setCreatedDate(ruleRequestRootModel.getStartDateTime());
+        campaignsObjects1.setEndDate(ruleRequestRootModel.getEndDateTime());
+        campaignsObjects.add(campaignsObjects1);
+        organizationAnalyticsEntity.setName(ruleRequestRootModel.getOrganizationId());
+        organizationAnalyticsEntity.setAllCampaign(campaignsObjects);
+        organizationAnalyticsRepository.save(organizationAnalyticsEntity);
+    }
+
 
     //Find Root SegmentsObject With Multiple Child Rules From SegmentsObject ID
     public RuleRequestRootEntity findRootRuleById(String ruleId) {

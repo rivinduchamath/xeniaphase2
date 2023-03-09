@@ -13,16 +13,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "campaign_entity")
+@Document(collection = "organization_analytics_entity")
 public class OrganizationAnalyticsEntity {
     @Id
-    private String id;
-    @Indexed(unique = true)
     private String name;
     private List<CampaignsObjects> allCampaign;
     private long activeCampaignCount;
-    private long scheduledCampaignCount;
-    private long expiredOneWeekCount;
     private long organizationTotalRequestCount;
     private long organizationTotalResponseCount;
     private long organizationMatchResponses;

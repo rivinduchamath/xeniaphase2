@@ -58,8 +58,8 @@ public class DashboardServiceImpl implements DashboardService {
                 campaignsObject.setCampaignName(ruleRequestRoot.getCampaignName());
                 campaignsObject.setCampaignDescription(ruleRequestRoot.getCampaignDescription());
                 campaignsObject.setCampaignId(ruleRequestRoot.getCampaignId());
-                campaignsObject.setEndDate(String.valueOf(ruleRequestRoot.getEndDateTime()));
-                campaignsObject.setCreatedDate(String.valueOf(ruleRequestRoot.getCreatedDate()));
+                campaignsObject.setEndDate(ruleRequestRoot.getEndDateTime());
+                campaignsObject.setCreatedDate(ruleRequestRoot.getCreatedDate());
                 campaignsObject.setStatus(ruleRequestRoot.getStatusEnum());
                 allCampaignsObjectsList.add(campaignsObject);
                 if (ruleRequestRoot.getStatusEnum().equals(RuleStatus.ACTIVE)) {
