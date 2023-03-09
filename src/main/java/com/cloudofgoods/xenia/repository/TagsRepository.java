@@ -10,17 +10,11 @@ import java.util.Optional;
 
 public interface TagsRepository extends MongoRepository<TagsEntity, TagsId> {
 
-    Optional<TagsEntity> findByTagsIdTagsNameEqualsAndTagsIdOrganizationUuidEquals(String tagsName, String organizationUuid);
-
-    List<TagsEntity> findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(String organizationUuid, String tagsName, PageRequest of);
-
-    long countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWith(String organizationUuid, String tagsName);
-
-    List<TagsEntity> findAllByTagsIdOrganizationUuidEquals(String organizationUuid, PageRequest of);
-
-    long countByTagsIdOrganizationUuidEquals(String organizationUuid);
-
-    List<TagsEntity> findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameStartsWith(String organizationUuid, String tagsName);
-
     Optional<TagsEntity> findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameEquals(String organizationUuid, String tagsName);
+
+    List<TagsEntity> findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean b, PageRequest of);
+
+    List<TagsEntity> findAllByTagsId_OrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean b);
+
+    long countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(String organizationUuid, String toUpperCase, boolean b);
 }

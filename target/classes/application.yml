@@ -78,8 +78,8 @@ spring:
 #        max-active: 8
   data:
     mongodb:
-#      uri: mongodb+srv://user1:user1234@xenia.jdzwovi.mongodb.net/phaseTwoDatabase2?retryWrites=true&w=majority&ssl=true
-      uri: mongodb://localhost:27017/d6nrule?authSource=admin
+      uri: mongodb+srv://user1:user1234@xenia.jdzwovi.mongodb.net/phaseTwoDatabase2?retryWrites=true&w=majority&ssl=true
+#      uri: mongodb://localhost:27017/d6nrule?authSource=admin
       auto-index-creation: true
   application:
     name: XENIA-SERVICE
