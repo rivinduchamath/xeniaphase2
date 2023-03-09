@@ -169,14 +169,12 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
             serviceResponseDTO.setDescription("Get Template Success");
-            return serviceResponseDTO;
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getAllTemplatePagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplatePagination() exception " + exception.getMessage());
             serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
-
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
         return serviceResponseDTO;
