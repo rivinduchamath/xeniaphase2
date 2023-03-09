@@ -11,7 +11,7 @@ public interface ChannelService {
 
     ServiceGetResponseDTO getChannels(GetRequestChannelsDTO getRequestChannelsDTO);
 
-    ServiceResponseDTO deleteChannels(String channelUuid, String organizationUuid, boolean status);
+    ServiceResponseDTO activeOrInActiveChannels(String channelUuid, String organizationUuid, boolean status);
 
     ServiceGetResponseDTO getSingleChannelTable(ChannelsGetSingleDTO channelsGetSingleDTO);
 }

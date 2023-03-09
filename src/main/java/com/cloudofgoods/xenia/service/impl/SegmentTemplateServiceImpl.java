@@ -1,7 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
-import com.cloudofgoods.xenia.entity.xenia.OrganizationEntity;
 import com.cloudofgoods.xenia.models.TemplateCustomObject;
 import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
 import com.cloudofgoods.xenia.repository.OrganizationRepository;
@@ -36,13 +35,13 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             List<SegmentTemplateEntity> all = segmentTemplateRepository.findAll();
             serviceResponseDTO.setData(all);
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplate Success");
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getAllTemplate() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplate() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -60,13 +59,13 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             } else {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName Success :: NO DATA");
             }
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TemplateServiceImpl getTemplateByName() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateByName() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -81,7 +80,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             serviceResponseDTO.setData(template);
             if (template.isPresent()) {
                 serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateById Success");
-                serviceResponseDTO.setMessage(SUCCESS);
+                serviceResponseDTO.setMessage(STATUS_SUCCESS);
                 serviceResponseDTO.setCode(STATUS_2000);
             } else {
                 serviceResponseDTO.setMessage("TemplateServiceImpl getTemplateById Success :: NO DATA");
@@ -90,7 +89,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             log.info("LOG :: TemplateServiceImpl getTemplateById() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getTemplateById() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -108,7 +107,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             log.info("LOG :: TemplateServiceImpl deleteTemplateById() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl deleteTemplateById() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
             serviceResponseDTO.setHttpStatus(STATUS_OK);
             return serviceResponseDTO;
@@ -132,14 +131,14 @@ public class SegmentTemplateServiceImpl implements TemplateService {
                             serviceResponseDTO.setDescription("Save Template Success");
                             serviceResponseDTO.setData(save);
                         }
-                        serviceResponseDTO.setMessage(SUCCESS);
+                        serviceResponseDTO.setMessage(STATUS_SUCCESS);
                         serviceResponseDTO.setCode(STATUS_2000);
 
                     } catch (Exception exception) {
                         log.info("LOG :: TemplateServiceImpl saveTemplate() exception: " + exception.getMessage());
                         serviceResponseDTO.setError(exception.getStackTrace());
                         serviceResponseDTO.setDescription("TemplateServiceImpl saveTemplate() exception " + exception.getMessage());
-                        serviceResponseDTO.setMessage(FAIL);
+                        serviceResponseDTO.setMessage(STATUS_FAIL);
                         serviceResponseDTO.setCode(STATUS_5000);
                     }
                 }, ()->   serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND)
@@ -167,7 +166,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             templateCustomDTO.setTemplateEntities(templateEntities);
             templateCustomDTO.setTotal(count);
             serviceResponseDTO.setData(templateCustomDTO);
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
             serviceResponseDTO.setDescription("Get Template Success");
             return serviceResponseDTO;
@@ -175,7 +174,7 @@ public class SegmentTemplateServiceImpl implements TemplateService {
             log.info("LOG :: TemplateServiceImpl getAllTemplatePagination() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TemplateServiceImpl getAllTemplatePagination() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
 
         }

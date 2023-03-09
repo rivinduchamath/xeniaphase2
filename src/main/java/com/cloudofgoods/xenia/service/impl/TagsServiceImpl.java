@@ -45,13 +45,13 @@ public class TagsServiceImpl implements TagsService {
                         serviceResponseDTO.setDescription("Save/Update Tags Success");
                     }, () ->
                             serviceResponseDTO.setDescription(ORGANIZATION_NOT_FOUND));
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl saveOrUpdateTags() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             serviceResponseDTO.setDescription("TagsServiceImpl saveOrUpdateTags() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -84,7 +84,7 @@ public class TagsServiceImpl implements TagsService {
                 serviceGetResponseDTO.setData(tagsResponseDTOS);
             }
             serviceGetResponseDTO.setDescription("Get Tags Success");
-            serviceGetResponseDTO.setMessage(SUCCESS);
+            serviceGetResponseDTO.setMessage(STATUS_SUCCESS);
             serviceGetResponseDTO.setCode(STATUS_2000);
 
         } catch (Exception exception) {
@@ -92,7 +92,7 @@ public class TagsServiceImpl implements TagsService {
             serviceGetResponseDTO.setError(exception.getStackTrace());
             exception.printStackTrace();
             serviceGetResponseDTO.setDescription("TagsServiceImpl getTags() exception " + exception.getMessage());
-            serviceGetResponseDTO.setMessage(FAIL);
+            serviceGetResponseDTO.setMessage(STATUS_FAIL);
             serviceGetResponseDTO.setCode(STATUS_5000);
         }
         serviceGetResponseDTO.setHttpStatus(STATUS_OK);
@@ -118,14 +118,14 @@ public class TagsServiceImpl implements TagsService {
             if (!NotEmptyOrNullValidator.isNotNullOrEmpty(serviceResponseDTO.getDescription())) {
                 serviceResponseDTO.setDescription("TagsServiceImpl activeInactiveTags() Organization Not Found");
             }
-            serviceResponseDTO.setMessage(SUCCESS);
+            serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl activeInactiveTags() exception: " + exception.getMessage());
             serviceResponseDTO.setError(exception.getStackTrace());
             exception.printStackTrace();
             serviceResponseDTO.setDescription("TagsServiceImpl activeInactiveTags() exception " + exception.getMessage());
-            serviceResponseDTO.setMessage(FAIL);
+            serviceResponseDTO.setMessage(STATUS_FAIL);
             serviceResponseDTO.setCode(STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus(STATUS_OK);
@@ -146,13 +146,13 @@ public class TagsServiceImpl implements TagsService {
             if (!NotEmptyOrNullValidator.isNotNullOrEmpty(serviceGetResponseDTO.getDescription())) {
                 serviceGetResponseDTO.setDescription("Cannot Find Data");
             }
-            serviceGetResponseDTO.setMessage(SUCCESS);
+            serviceGetResponseDTO.setMessage(STATUS_SUCCESS);
             serviceGetResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: TagsServiceImpl getSingleTags() exception: " + exception.getMessage());
             serviceGetResponseDTO.setError(exception.getStackTrace());
             serviceGetResponseDTO.setDescription("TagsServiceImpl getSingleTags() exception " + exception.getMessage());
-            serviceGetResponseDTO.setMessage(FAIL);
+            serviceGetResponseDTO.setMessage(STATUS_FAIL);
             serviceGetResponseDTO.setCode(STATUS_5000);
         }
         serviceGetResponseDTO.setHttpStatus(STATUS_OK);

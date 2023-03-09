@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface AudienceRepository extends MongoRepository<AudienceEntity, String> {
 
-    long countAllByOrganizationUuidEquals(String organizationUuid );
+    long countAllByOrganizationUuidEqualsAndStatusEquals(String organizationUuid  , boolean bool);
 
     Optional<AudienceEntity> findByAudienceUuidEqualsAndOrganizationUuidEquals(String audienceUuid, String organizationUuid);
 
-    List<AudienceEntity> findAllByOrganizationUuidEqualsAndAudienceNameStartingWith(String organizationId, String audienceName, PageRequest of);
+    List<AudienceEntity> findAllByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(String organizationId, String audienceName, boolean bool, PageRequest of);
 
-    List<AudienceEntity> findByOrganizationUuidEqualsAndAudienceNameStartingWith(String organizationId, String audienceName);
+    List<AudienceEntity> findByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(String organizationId, String audienceName, boolean bool);
 }

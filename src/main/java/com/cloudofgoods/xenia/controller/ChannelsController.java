@@ -1,7 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.ChannelDTO;
-import com.cloudofgoods.xenia.dto.request.AttributeTableGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.ChannelsGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.GetRequestChannelsDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
@@ -43,7 +42,7 @@ public class ChannelsController {
     @Description("Delete ChannelsEntity")
     public ServiceResponseDTO deleteChannels(@RequestParam @NonNull String channelUuid, @RequestParam @NonNull String organizationUuid, @RequestParam boolean status) {
         log.info ("LOG::Inside the ChannelsController deleteChannels ");
-        return channelService.deleteChannels (channelUuid,organizationUuid, status);
+        return channelService.activeOrInActiveChannels(channelUuid,organizationUuid, status);
     }
 
     @PostMapping(value = "${server.servlet.getSingleChannelTable}")

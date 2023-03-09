@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.models;
 
+import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,6 +21,7 @@ import java.util.List;
 public class ExperiencesObject {
     private boolean primary;
     private double abTestPercentage;
+    @NotEmptyOrNull
     private String abTestEnable;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy HH:mm:ss", timezone = "UTC")
     private Date abTestStartDate;

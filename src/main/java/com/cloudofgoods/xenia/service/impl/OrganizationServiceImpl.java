@@ -30,7 +30,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         .ifPresentOrElse(
                                 organizationEntity -> {
                                     log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Update");
-                                    organizationEntity.setName(organizationDTO.getName());
+                                    organizationEntity.setName(organizationDTO.getName().toUpperCase());
                                     organizationEntity.setPassword(organizationDTO.getPassword());
                                     OrganizationEntity save = organizationRepository.save(organizationEntity);
                                     serviceResponseDTO.setData(save);
@@ -42,7 +42,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             } else {
                 OrganizationEntity organizationEntity = new OrganizationEntity();
                 log.info("LOG:: OrganizationServiceImpl saveOrUpdateOrganization Save");
-                organizationEntity.setName(organizationDTO.getName());
+                organizationEntity.setName(organizationDTO.getName().toUpperCase());
                 NoArgGenerator timeBasedGenerator = Generators.timeBasedGenerator();
                 UUID firstUUID = timeBasedGenerator.generate();
                 organizationEntity.setUuid(firstUUID + "");

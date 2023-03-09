@@ -65,14 +65,14 @@ public class UserServiceImpl implements UserService {
 //            customerObject.setTotal (count);
             serviceResponseDTO.setData (customerObject);
             serviceResponseDTO.setMessage ("InitialPageServiceImpl getCampaignForInitialPage Success");
-            serviceResponseDTO.setMessage (SUCCESS);
+            serviceResponseDTO.setMessage (STATUS_SUCCESS);
             serviceResponseDTO.setCode (STATUS_2000);
 
         } catch (Exception exception) {
             log.info ("LOG :: InitialPageServiceImpl getCampaignForInitialPage() exception: " + exception.getMessage ());
             serviceResponseDTO.setError (exception.getStackTrace ());
             serviceResponseDTO.setMessage ("InitialPageServiceImpl getCampaignForInitialPage() exception " + exception.getMessage ());
-            serviceResponseDTO.setMessage (FAIL);
+            serviceResponseDTO.setMessage (STATUS_FAIL);
             serviceResponseDTO.setCode (STATUS_5000);
         }
         serviceResponseDTO.setHttpStatus (STATUS_OK);

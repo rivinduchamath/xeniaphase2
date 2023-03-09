@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.models;
 
+import com.cloudofgoods.xenia.config.customAnnotations.NotEmptyOrNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AudienceObject implements Serializable {
-
+    @NotEmptyOrNull
     private String audienceName;
     @TextIndexed
     private String audienceDescription;
