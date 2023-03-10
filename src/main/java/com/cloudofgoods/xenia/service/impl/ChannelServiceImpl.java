@@ -89,8 +89,8 @@ public class ChannelServiceImpl implements ChannelService {
         log.info("LOG:: ChannelServiceImpl getChannels");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(
-                    channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),true)));
+            serviceGetResponseDTO.setCount(
+                    channelRepository.countByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),true));
             List<ChannelEntity> channels = requestChannelsDTO.isPagination() ?
                     channelRepository.findByChannelsIdOrganizationUuidEqualsAndChannelsIdChannelsNameStartingWithAndStatusEquals(
                             requestChannelsDTO.getOrganizationUuid(), requestChannelsDTO.getChannelName().toUpperCase(),true,

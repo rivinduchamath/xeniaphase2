@@ -2,6 +2,7 @@ package com.cloudofgoods.xenia.service.impl;
 
 import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullValidator;
 import com.cloudofgoods.xenia.dto.CampaignTemplateDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.CampaignTemplateEntity;
 import com.cloudofgoods.xenia.models.CampaignTemplateCustomObject;
@@ -74,14 +75,14 @@ public class CampaignTemplateServiceImpl implements CampaignTemplateService {
     }
 
     @Override
-    public ServiceResponseDTO getAllCampTemplatePagination(int page, int size) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+    public ServiceGetResponseDTO getAllCampTemplatePagination(int page, int size) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         log.info("LOG:: CampaignTemplateServiceImpl getAllCampTemplatePagination()");
         try {
             CampaignTemplateCustomObject campaignTemplateCustomObject = new CampaignTemplateCustomObject();
-            CompletableFuture.runAsync(() -> campaignTemplateCustomObject.setTotal(campaignTemplateRepository.count()));
             Page<CampaignTemplateEntity> campaignTemplateEntities = campaignTemplateRepository.findAll(PageRequest.of(page, size));
-            campaignTemplateCustomObject.setCampaignTemplateDTOS(campaignTemplateEntities);
+            campaignTemplateCustomObject.setCampaignTemplateDTOS(campaignTemplateEntities.getContent());
+            serviceResponseDTO.setCount(campaignTemplateEntities.getTotalElements());
             serviceResponseDTO.setDescription("Get AllCamp Template With Pagination Success");
             serviceResponseDTO.setData(campaignTemplateCustomObject);
             serviceResponseDTO.setMessage(STATUS_SUCCESS);

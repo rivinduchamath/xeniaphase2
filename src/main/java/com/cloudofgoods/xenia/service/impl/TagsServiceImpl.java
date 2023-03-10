@@ -72,7 +72,7 @@ public class TagsServiceImpl implements TagsService {
         log.info("LOG:: TagsServiceImpl getTags Service Layer");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            CompletableFuture.runAsync(() ->   serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName().toUpperCase(), true)));
+               serviceGetResponseDTO.setCount(tagsRepository.countByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(getRequestTagsDTO.getOrganizationUuid(), getRequestTagsDTO.getTagsName().toUpperCase(), true));
             List<TagsEntity> tagsEntities = Optional.of(getRequestTagsDTO)
                     .map(dto -> dto.isPagination()
                             ? tagsRepository.findAllByTagsIdOrganizationUuidEqualsAndTagsIdTagsNameStartsWithAndStatusEquals(dto.getOrganizationUuid(), dto.getTagsName().toUpperCase(), true,PageRequest.of(dto.getPage(), dto.getSize()))

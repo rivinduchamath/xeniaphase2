@@ -1,6 +1,7 @@
 package com.cloudofgoods.xenia.controller;
 
 import com.cloudofgoods.xenia.dto.CampaignTemplateDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.CampaignTemplateService;
 import jdk.jfr.Description;
@@ -29,7 +30,7 @@ public class CampaignTemplateController {
         return templateService.saveOrUpdateTemplate(ruleRootModelDTO);
     }
     @GetMapping(value = "${server.servlet.getPagination}")
-    public ServiceResponseDTO getAllTemplateWithPagination(@RequestParam @NonNegative int page, @RequestParam @NonNegative int size) {
+    public ServiceGetResponseDTO getAllTemplateWithPagination(@RequestParam @NonNegative int page, @RequestParam @NonNegative int size) {
         log.info ("LOG:: CampaignTemplateController getAllTemplatePagination");
         return templateService.getAllCampTemplatePagination (page, size);
     }

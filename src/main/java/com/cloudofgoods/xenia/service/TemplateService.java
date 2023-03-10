@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service;
 
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
 
@@ -12,7 +13,7 @@ public interface TemplateService {
 
     ServiceResponseDTO deleteTemplateById(String templateId) throws ExecutionException, InterruptedException;
 
-    ServiceResponseDTO getAllTemplatePagination(int page, int size);
+    ServiceGetResponseDTO getAllTemplatePagination(int page, int size);
 
     ServiceResponseDTO  saveTemplate(SegmentTemplateEntity ruleRootModel);
 

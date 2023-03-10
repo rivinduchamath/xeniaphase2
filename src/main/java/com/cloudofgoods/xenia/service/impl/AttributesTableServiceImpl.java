@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
 
@@ -64,15 +63,15 @@ public class AttributesTableServiceImpl implements AttributesTableService {
 
     @Override
     @Transactional(readOnly = true)
-    public ServiceResponseDTO getAttributesTables(AttributeTableRequestDTO attributeTableDTO) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+    public ServiceGetResponseDTO getAttributesTables(AttributeTableRequestDTO attributeTableDTO) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         log.info("LOG:: AttributesTableServiceImpl getAttributesTables()");
         try {
             AttributeTableResponseDTO attributeTableResponseDTO = new AttributeTableResponseDTO();
-            CompletableFuture.runAsync(() -> attributeTableResponseDTO.setCount(attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(), true)));
+            serviceResponseDTO.setCount(attributeTableRepository.countByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableId_OrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(), true));
             List<AttributeTableEntity> stream = attributeTableDTO.isPagination() ?
-                    attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWithAndStatusEquals(attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(),true, PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize())) :
-                    attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(),true);
+                    attributeTableRepository.findAllByAttributeTableId_OrganizationUuidEqualsAndAttributeTableId_AttributeTableNameStartingWithAndStatusEquals(attributeTableDTO.getOrganizationUuid(), attributeTableDTO.getName().toLowerCase(), true, PageRequest.of(attributeTableDTO.getPage(), attributeTableDTO.getSize())) :
+                    attributeTableRepository.findAllByAttributeTableId_AttributeTableNameStartingWithAndAttributeTableIdOrganizationUuidEqualsAndStatusEquals(attributeTableDTO.getName().toLowerCase(), attributeTableDTO.getOrganizationUuid(), true);
             serviceResponseDTO.setMessage("AttributesTableServiceImpl Get Attributes " + (attributeTableDTO.isPagination() ? "With Pagination" : "Without Pagination") + " Success");
             attributeTableResponseDTO.setAttributeTableEntities(stream);
             serviceResponseDTO.setData(attributeTableResponseDTO);
@@ -134,6 +133,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         serviceGetResponseDTO.setHttpStatus(STATUS_OK);
         return serviceGetResponseDTO;
     }
+
     private AttributeTableEntity attributeTableEntityCreate(AttributeTableEntity attributeTableEntity, AttributeTableDTO attributeTableDTO) {
         attributeTableEntity.setAttributeTableId(new AttributeTableId(attributeTableDTO.getTableName().toLowerCase(), attributeTableDTO.getOrganizationUuid()));
         attributeTableEntity.setDisplayName(NotEmptyOrNullValidator.isNotNullOrEmpty(attributeTableDTO.getDisplayName()) ? attributeTableDTO.getDisplayName() :
@@ -141,6 +141,7 @@ public class AttributesTableServiceImpl implements AttributesTableService {
         attributeTableEntity.setStatus(attributeTableDTO.isStatus());
         return attributeTableEntity;
     }
+
     private AttributeTableSaveUpdateResponseDTO setSaveOrUpdateResponse(AttributeTableEntity attributeTableEntity) {
         AttributeTableSaveUpdateResponseDTO attributeTableSaveUpdateResponseDTO = new AttributeTableSaveUpdateResponseDTO();
         attributeTableSaveUpdateResponseDTO.setTableName(attributeTableEntity.getAttributeTableId().getAttributeTableName());

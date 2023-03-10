@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
@@ -99,7 +98,7 @@ public class AttributesServiceImpl implements AttributesService {
         log.info("LOG:: AttributesServiceImpl getAttribute Service Layer");
         ServiceGetResponseDTO serviceGetResponseDTO = new ServiceGetResponseDTO();
         try {
-            CompletableFuture.runAsync(() ->  serviceGetResponseDTO.setCount(attributeRepository.countByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeInAndStatusEquals(true,requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(), true)));
+            serviceGetResponseDTO.setCount(attributeRepository.countByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrAttributesIdOrganizationUuidEqualsAndTypeInAndStatusEquals(true,requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(),requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(), true));
             List<AttributeEntity> attributeEntities = requestAttributeDTO.isPagination()
                     ? attributeRepository.findAllByStatusEqualsAndAttributesIdOrganizationUuidEqualsAndAttributesIdAttributeNameStartingWithOrStatusEqualsAndAttributesIdOrganizationUuidEqualsAndTypeIn(true,
                     requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getAttributeName(), true, requestAttributeDTO.getOrganizationUuid(), requestAttributeDTO.getType(),

@@ -13,6 +13,6 @@ import java.util.List;
 public class TemplateCustomObject {
 
     private List <SegmentTemplateEntity> templateEntities;
-    private long total;
+
 
 }

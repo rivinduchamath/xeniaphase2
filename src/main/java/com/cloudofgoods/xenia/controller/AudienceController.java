@@ -3,6 +3,7 @@ package com.cloudofgoods.xenia.controller;
 import com.cloudofgoods.xenia.dto.AudienceDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceRequestDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.service.AudienceService;
 import jdk.jfr.Description;
@@ -39,7 +40,7 @@ public class AudienceController {
     }
 
     @PostMapping(value = "${server.servlet.getAudienceWithPagination}") // Avg Response Time 15ms Local
-    public ServiceResponseDTO getAudienceWithPagination(@RequestBody @Valid AudienceRequestDTO audienceRequestDTO) {
+    public ServiceGetResponseDTO getAudienceWithPagination(@RequestBody @Valid AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceController getAudienceWithPagination ");
         return audienceService.getAudienceWithPagination(audienceRequestDTO);
     }

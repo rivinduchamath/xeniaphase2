@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.controller;
 
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
 import com.cloudofgoods.xenia.service.TemplateService;
@@ -30,7 +31,7 @@ public class TemplateController {
     }
 
     @GetMapping(value = "${server.servlet.getAllTemplateWithPagination}")
-    public ServiceResponseDTO getAllTemplateWithPagination(@RequestParam @NonNegative int page, @RequestParam @NonNegative int size) {
+    public ServiceGetResponseDTO getAllTemplateWithPagination(@RequestParam @NonNegative int page, @RequestParam @NonNegative int size) {
         log.info("LOG::Inside the TemplateController getAllTemplateWithPagination");
         return templateService.getAllTemplatePagination(page, size);
     }

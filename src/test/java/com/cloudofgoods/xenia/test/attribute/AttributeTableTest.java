@@ -56,7 +56,7 @@ public class AttributeTableTest extends ApplicationTest {
         attributeTableRequestDTO.setPage(0);
         attributeTableRequestDTO.setSize(10);
         attributeTableRequestDTO.setPagination(false);
-        ServiceResponseDTO attributesTables = attributesTableService.getAttributesTables(attributeTableRequestDTO);
+        ServiceGetResponseDTO attributesTables = attributesTableService.getAttributesTables(attributeTableRequestDTO);
         assertEquals(STATUS_SUCCESS, attributesTables.getMessage());
     }
 }
