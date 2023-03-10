@@ -12,5 +12,4 @@ import java.util.List;
 @NoArgsConstructor
 public class AttributeTableResponseDTO {
     private List<AttributeTableEntity> attributeTableEntities;
-    private long count;
 }

@@ -13,6 +13,5 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CampaignTemplateCustomObject {
 
-    private Page <CampaignTemplateEntity> campaignTemplateDTOS;
-    private long total;
+    private List <CampaignTemplateEntity> campaignTemplateDTOS;
 }

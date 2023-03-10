@@ -1,5 +1,6 @@
 package com.cloudofgoods.xenia.service.impl;
 
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.models.TemplateCustomObject;
 import com.cloudofgoods.xenia.entity.xenia.SegmentTemplateEntity;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -156,15 +158,22 @@ public class SegmentTemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public ServiceResponseDTO getAllTemplatePagination(int page, int size) {
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+    public ServiceGetResponseDTO getAllTemplatePagination(int page, int size) {
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
             log.info("LOG:: TemplateServiceImpl getAllTemplatePagination()");
             List<SegmentTemplateEntity> templateEntities = segmentTemplateRepository.findAllBySegmentNameNotNull(PageRequest.of(page, size));
             long count = segmentTemplateRepository.count();
+            List<SegmentTemplateEntity> templateEntities2 = new ArrayList<>();
+            for (SegmentTemplateEntity segmentTemplateEntity  :templateEntities){
+                String[] segments = segmentTemplateEntity.getSegmentName().split("##\\$\\$\\$##");
+                String segmentName = segments[0];
+                segmentTemplateEntity.setSegmentName(segmentName);
+                templateEntities2.add(segmentTemplateEntity);
+            }
             TemplateCustomObject templateCustomDTO = new TemplateCustomObject();
-            templateCustomDTO.setTemplateEntities(templateEntities);
-            templateCustomDTO.setTotal(count);
+            templateCustomDTO.setTemplateEntities(templateEntities2);
+            serviceResponseDTO.setCount(count);
             serviceResponseDTO.setData(templateCustomDTO);
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
             serviceResponseDTO.setCode(STATUS_2000);

@@ -33,7 +33,7 @@ public class AttributeTableController {
 
     @PostMapping(value = "${server.servlet.getAttributesTable}")// Avg Response Time 15ms Local
     @Description("Get Attributes Table Object")
-    public ServiceResponseDTO getAttributesTable(@RequestBody @Valid AttributeTableRequestDTO attributeTableDTO) {
+    public ServiceGetResponseDTO getAttributesTable(@RequestBody @Valid AttributeTableRequestDTO attributeTableDTO) {
         log.info("LOG::Inside the AttributeTableController getAttributesTable ");
         return attributesTableService.getAttributesTables(attributeTableDTO);
     }

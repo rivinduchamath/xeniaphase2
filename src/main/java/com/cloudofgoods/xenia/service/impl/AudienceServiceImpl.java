@@ -4,6 +4,7 @@ import com.cloudofgoods.xenia.config.customAnnotations.validator.NotEmptyOrNullV
 import com.cloudofgoods.xenia.dto.AudienceDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceGetSingleDTO;
 import com.cloudofgoods.xenia.dto.request.AudienceRequestDTO;
+import com.cloudofgoods.xenia.dto.response.ServiceGetResponseDTO;
 import com.cloudofgoods.xenia.dto.response.ServiceResponseDTO;
 import com.cloudofgoods.xenia.entity.xenia.AudienceEntity;
 import com.cloudofgoods.xenia.models.responces.AudienceResponseObject;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
 
@@ -102,15 +102,15 @@ public class AudienceServiceImpl implements AudienceService {
 
     @Override
     @Transactional(readOnly = true)
-    public ServiceResponseDTO getAudienceWithPagination(AudienceRequestDTO audienceRequestDTO) {
+    public ServiceGetResponseDTO getAudienceWithPagination(AudienceRequestDTO audienceRequestDTO) {
         log.info("LOG:: AudienceServiceImpl getAudienceWithPagination()");
-        ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
+        ServiceGetResponseDTO serviceResponseDTO = new ServiceGetResponseDTO();
         try {
             AudienceResponseObject audienceResponseObject = new AudienceResponseObject();
-            CompletableFuture.runAsync(() ->  audienceResponseObject.setTotal(audienceRepository.countAllByOrganizationUuidEqualsAndStatusEquals(audienceRequestDTO.getOrganizationId() ,true)));
+            serviceResponseDTO.setCount(audienceRepository.countAllByOrganizationUuidEqualsAndStatusEquals(audienceRequestDTO.getOrganizationId(), true));
             audienceResponseObject.setAudienceEntities(audienceRequestDTO.isPagination()
-                    ? audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), true,PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()))
-                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(),true));
+                    ? audienceRepository.findAllByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), true, PageRequest.of(audienceRequestDTO.getPage(), audienceRequestDTO.getSize()))
+                    : audienceRepository.findByOrganizationUuidEqualsAndAudienceNameStartingWithAndStatusEquals(audienceRequestDTO.getOrganizationId(), audienceRequestDTO.getAudienceName(), true));
             serviceResponseDTO.setData(audienceResponseObject);
             serviceResponseDTO.setMessage("AudienceServiceImpl getAudienceWithPagination Success");
             serviceResponseDTO.setMessage(STATUS_SUCCESS);
@@ -131,15 +131,15 @@ public class AudienceServiceImpl implements AudienceService {
         log.info("LOG:: AudienceServiceImpl activeInactiveAudience");
         ServiceResponseDTO serviceResponseDTO = new ServiceResponseDTO();
         try {
-                audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid).ifPresentOrElse(entity -> {
-                    entity.setStatus(status);
-                    serviceResponseDTO.setData(audienceRepository.save(entity));
-                    serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
-                    serviceResponseDTO.setMessage(STATUS_SUCCESS);
-                }, () -> {
-                    serviceResponseDTO.setDescription("Attribute Or Organization may Not Found");
-                    serviceResponseDTO.setMessage(STATUS_FAIL);
-                });
+            audienceRepository.findByAudienceUuidEqualsAndOrganizationUuidEquals(audienceUuid, organizationUuid).ifPresentOrElse(entity -> {
+                entity.setStatus(status);
+                serviceResponseDTO.setData(audienceRepository.save(entity));
+                serviceResponseDTO.setDescription("AudienceServiceImpl activeInactiveAudience() Success");
+                serviceResponseDTO.setMessage(STATUS_SUCCESS);
+            }, () -> {
+                serviceResponseDTO.setDescription("Attribute Or Organization may Not Found");
+                serviceResponseDTO.setMessage(STATUS_FAIL);
+            });
             serviceResponseDTO.setCode(STATUS_2000);
         } catch (Exception exception) {
             log.info("LOG :: AudienceServiceImpl activeInactiveAudience() exception: " + exception.getMessage());

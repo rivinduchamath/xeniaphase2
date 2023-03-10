@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.cloudofgoods.xenia.util.Utils.*;
@@ -154,7 +153,7 @@ public class RuleServiceImpl implements RuleService {
         ruleRequestRootModel.getChannels().forEach(ruleChannelObject -> {
             ruleChannelObject.getAudienceObjects().forEach(audienceObject -> {
                 if (audienceObject.isTemplate()) {
-                    CompletableFuture.runAsync(() -> audienceSaveTemplate(audienceObject, ruleRequestRootModel.getOrganizationId()));
+                 audienceSaveTemplate(audienceObject, ruleRequestRootModel.getOrganizationId());
                 }
                 List<SegmentsObject> segmentsObjects = new ArrayList<>();
                 audienceObject.getSegments().forEach(segments -> {
@@ -181,7 +180,7 @@ public class RuleServiceImpl implements RuleService {
         rootRules.setChannels(ruleChannelObjectList);
         log.info("LOG:: RuleServiceImpl saveOrUpdateRuleManyRules() before return ");
         droolService.feedKnowledgeBuilderWhenUpdate(rootRules, pastRootRule);
-        CompletableFuture.runAsync(() -> campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel));
+         campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel);
         return rootRuleRepository.save(rootRules); // Return Updated RuleRequestRootEntity object
     }
 
@@ -239,7 +238,7 @@ public class RuleServiceImpl implements RuleService {
             rootRules.setChannels(ruleChannelObjectList);
             log.info("LOG:: RuleServiceImpl saveRootRuleRepository() Save SegmentsObject stringBuilder ");
             droolService.feedKnowledge(rootRules);
-            CompletableFuture.runAsync(() -> campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel));
+            campaignsWithOrganizationWithSaveOrUpdate(ruleRequestRootModel);
             return rootRuleRepository.save(rootRules);
         }
         return null;

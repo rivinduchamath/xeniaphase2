@@ -46,7 +46,6 @@ public class D6nServiceImpl implements D6nService {
                 if (d6nResponseModelDTO1.getSlotId() == null) d6nResponseModelDTO1.setSlotId(value);
                 d6nResponseModelDTO.add(d6nResponseModelDTO1);
             });
-//            CompletableFuture.runAsync(() -> databaseAnalytics(d6nResponseModelDTO, userEmail, organization));
             serviceResponseDTO.setData(d6nResponseModelDTO);
             serviceResponseDTO.setDescription("makeDecision Success");
             serviceResponseDTO.setMessage(STATUS_SUCCESS);

@@ -12,5 +12,4 @@ import java.util.List;
 @NoArgsConstructor
 public class AudienceResponseObject {
     private List<AudienceEntity> audienceEntities;
-    private long total;
 }
